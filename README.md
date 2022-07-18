@@ -1,7 +1,7 @@
 # quax
 
 Represent a (parameterised) quantum circuit as a pure [JAX](https://github.com/google/jax) function that
-takes as input any parameters of the circuit and outputs a _statetensor_. The statetensor can then be used
+takes as input any parameters of the circuit and outputs a _statetensor_. The statetensor encodes all $2^N$ amplitudes of the quantum state and can then be used
 downstream for exact expectations, gradients or sampling.
 
 A [JAX](https://github.com/google/jax) implementation of a quantum circuit is useful
