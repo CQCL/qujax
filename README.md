@@ -11,35 +11,52 @@ A JAX implementation of a quantum circuit is useful for runtime speedups, automa
 pip install quax
 ```
 
-## Run
+## Parameterised quantum circuits with JAX
 ```python
 from jax import numpy as jnp
 import quax
 
-circuit_gates = ['H', 'Rz', 'CX']
+circuit_gates = ['H', 'Ry', 'CZ']
 circuit_qubit_inds = [[0], [0], [0, 1]]
 circuit_params_inds = [[], [0], []]
 
-params_to_st = quax.get_params_to_statetensor_func(circuit_gates,
+param_to_st = quax.get_params_to_statetensor_func(circuit_gates,
                                                    circuit_qubit_inds,
                                                    circuit_params_inds)
 ```
 
 We now have a pure JAX function that generates the statetensor for given parameters
 ```python
-params_to_st(jnp.array([1.3]))
-# DeviceArray([[-0.32101968-0.6300368j,  0.        +0.j       ],
-#              [ 0.        +0.j       , -0.32101968+0.6300368j]],            dtype=complex64)
+param_to_st(jnp.array([0.1]))
+# DeviceArray([[0.58778524+0.j, 0.        +0.j],
+#              [0.80901706+0.j, 0.        +0.j]], dtype=complex64)
 ```
 
 The statevector can be obtained from the statetensor via ```.flatten()```.
 ```python
-params_to_st(jnp.array([1.3])).flatten()
-# DeviceArray([-0.32101976-0.63003676j,   0.+0.j,  0.+0.j,    -0.32101976+0.63003676j],            dtype=complex64)
+param_to_st(jnp.array([0.1])).flatten()
+# DeviceArray([0.58778524+0.j, 0.+0.j, 0.80901706+0.j, 0.+0.j], dtype=complex64)
 ```
 
+We can also use quax to map the statetensor to an expected value
+```python
+st_to_expectation = quax.get_statetensor_to_expectation_func([['Z']], [[0]], [1.])
+```
+
+Combining the two gives us a parameter to expectation function that can be differentiated seamlessly and exactly with JAX
+```python
+from jax import value_and_grad
+
+param_to_expectation = lambda param: st_to_expectation(param_to_st(param))
+expectation_and_grad = value_and_grad(param_to_expectation)
+expectation_and_grad(jnp.array([0.1]))
+# (DeviceArray(-0.3090171, dtype=float32),
+#    DeviceArray([-2.987832], dtype=float32))
+```
+
+
+
 ## Notes
-+ We can then apply a cost function (that maps the statetensor to a scalar variable) and use ```jax.grad``` to obtain exact gradients.
 + We use the convention where parameters are given in units of π (i.e. in [0,2] rather than [0, 2π]).
 + By default the parameter to statetensor function initiates in the all 0 state, however there is an optional ```statetensor_in``` argument to initiate in an arbitrary state.
 
