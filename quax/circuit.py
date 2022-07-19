@@ -2,7 +2,7 @@ from typing import Sequence, Protocol, Union, Callable
 
 from jax import numpy as jnp, random
 
-from tket2jax import gates
+from quax import gates
 
 
 class CallableOptionalArrayArg(Protocol):
@@ -56,7 +56,7 @@ def get_params_to_statetensor_func(gate_seq: Sequence[Union[str, Callable[[Union
 
     Args:
         gate_seq: Sequence of gates.
-            Each element is either a string matching a function in tket2jax.gates
+            Each element is either a string matching a function in quax.gates
             or a function taking parameters (can be empty) and returning gate unitary in tensor form.
         qubit_inds_seq: Sequences of qubits (ints) that gates are acting on.
         param_inds_seq: Sequence of parameter indices that gates are using, ie gate 3 uses 1st and 666th parameter.

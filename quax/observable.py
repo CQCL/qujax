@@ -2,7 +2,7 @@ from typing import Sequence, Callable, Union
 
 import jax.numpy as jnp
 
-from tket2jax import gates
+from quax import gates
 
 
 def _statetensor_to_single_expectation_func(gate_tensor: jnp.ndarray,
@@ -45,7 +45,7 @@ def get_statetensor_to_expectation_func(gate_seq_seq: Sequence[Sequence[Union[st
 
     Args:
         gate_seq_seq: Sequence of sequences of gates.
-            Each gate is either or tensor (jnp.ndarray) or a string corresponding to gates in tket2jax.gates.
+            Each gate is either or tensor (jnp.ndarray) or a string corresponding to gates in quax.gates.
             E.g. [['Z', 'Z'], ['X']]
         qubits_seq_seq: Sequence of sequences of integer qubit indices.
             E.g. [[0,1], [2]]
