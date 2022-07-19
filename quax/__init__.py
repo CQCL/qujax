@@ -8,5 +8,9 @@ from quax.circuit import sample_bitstrings
 
 from quax.observable import get_statetensor_to_expectation_func
 
-from quax import tket
+
+import importlib.util
+
+if importlib.util.find_spec('pytket') is not None:
+    from quax import tket
 
