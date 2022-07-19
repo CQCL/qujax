@@ -6,7 +6,7 @@ import pytket
 from quax.circuit import CallableOptionalArrayArg, get_params_to_statetensor_func
 
 
-def _tket_qubits_to_inds(tk_qubits: Sequence[pytket.Qubit]) -> Tuple[int, ...]:
+def _tk_qubits_to_inds(tk_qubits: Sequence[pytket.Qubit]) -> Tuple[int, ...]:
     """
     Convert Sequence of tket qubits objects to Tuple of integers qubit indices.
 
@@ -42,7 +42,7 @@ def tk_to_quax(circuit: pytket.Circuit) -> CallableOptionalArrayArg:
         if gate_name == 'Barrier':
             continue
         gate_name_seq.append(gate_name)
-        qubit_inds_seq.append(_tket_qubits_to_inds(c.qubits))
+        qubit_inds_seq.append(_tk_qubits_to_inds(c.qubits))
         n_params = len(c.op.params)
         param_inds_seq.append(jnp.arange(param_index, param_index + n_params))
         param_index += n_params
@@ -85,7 +85,7 @@ def tk_to_quax_symbolic(circuit: pytket.Circuit,
         if gate_name == 'Barrier':
             continue
         gate_name_seq.append(gate_name)
-        qubit_inds_seq.append(_tket_qubits_to_inds(c.qubits))
+        qubit_inds_seq.append(_tk_qubits_to_inds(c.qubits))
         param_inds_seq.append(jnp.array([symbol_map[symbol] for symbol in c.op.free_symbols()]))
 
     return get_params_to_statetensor_func(gate_name_seq, qubit_inds_seq, param_inds_seq, circuit.n_qubits)
