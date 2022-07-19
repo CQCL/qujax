@@ -42,3 +42,18 @@ params_to_st(jnp.array([1.3])).flatten()
 + We can then apply a cost function (that maps the statetensor to a scalar variable) and use ```jax.grad``` to obtain exact gradients.
 + We use the convention where parameters are given in units of π (i.e. in [0,2] rather than [0, 2π]).
 
+
+## quax.tket
+You can also generate the parameter to statetensor function from a [pytket](https://cqcl.github.io/tket/pytket/api/) circuit
+```python
+import pytket
+import quax
+
+circuit = pytket.Circuit(2)
+circuit.H(0)
+circuit.Rz(1.3, 0)
+circuit.CX(0, 1)
+
+params_to_st = quax.tket.tk_to_quax(circuit)
+```
+
