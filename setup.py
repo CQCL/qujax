@@ -10,7 +10,7 @@ setup(
     long_description_content_type="text/markdown",
     license="Apache 2",
     packages=find_packages(),
-    python_requires=">=3.7",
+    python_requires=">=3.8",
     install_requires=[
         "jax",
         "jaxlib"
