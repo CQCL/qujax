@@ -41,6 +41,8 @@ params_to_st(jnp.array([1.3])).flatten()
 ## Notes
 + We can then apply a cost function (that maps the statetensor to a scalar variable) and use ```jax.grad``` to obtain exact gradients.
 + We use the convention where parameters are given in units of π (i.e. in [0,2] rather than [0, 2π]).
++ By default the parameter to statetensor function initiates in the all 0 state, however there is an optional ```statetensor_in``` argument to initiate in an arbitrary state.
+
 
 
 ## quax.tket
