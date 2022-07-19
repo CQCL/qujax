@@ -4,8 +4,7 @@ Represent a (parameterised) quantum circuit as a pure [JAX](https://github.com/g
 takes as input any parameters of the circuit and outputs a _statetensor_. The statetensor encodes all $2^N$ amplitudes of the quantum state and can then be used
 downstream for exact expectations, gradients or sampling.
 
-A [JAX](https://github.com/google/jax) implementation of a quantum circuit is useful
-for automatic differentiation and support for GPUs/TPUs.
+A JAX implementation of a quantum circuit is useful for runtime speedups, automatic differentiation and support for GPUs/TPUs.
 
 ## Install
 ```
