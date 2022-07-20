@@ -1,10 +1,10 @@
 from setuptools import setup, find_packages
 
 setup(
-    name="quax",
+    name="qujax",
     author="Sam Duffield",
     author_email="sam.duffield@cambridgequantum.com",
-    url="https://github.com/CQCL/quax",
+    url="https://github.com/CQCL/qujax",
     description="Simulating quantum circuits with JAX",
     long_description=open("README.md").read(),
     long_description_content_type="text/markdown",
@@ -26,5 +26,5 @@ setup(
     ],
     include_package_data=True,
     platforms="any",
-    version="0.1.1"
+    version="0.1.0"
 )

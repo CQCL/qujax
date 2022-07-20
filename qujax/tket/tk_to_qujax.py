@@ -3,7 +3,7 @@ from typing import Tuple, Sequence
 from jax import numpy as jnp
 import pytket
 
-from quax.circuit import CallableOptionalArrayArg, get_params_to_statetensor_func
+from qujax.circuit import CallableOptionalArrayArg, get_params_to_statetensor_func
 
 
 def _tk_qubits_to_inds(tk_qubits: Sequence[pytket.Qubit]) -> Tuple[int, ...]:
@@ -19,10 +19,10 @@ def _tk_qubits_to_inds(tk_qubits: Sequence[pytket.Qubit]) -> Tuple[int, ...]:
     return tuple(q.index[0] for q in tk_qubits)
 
 
-def tk_to_quax(circuit: pytket.Circuit) -> CallableOptionalArrayArg:
+def tk_to_qujax(circuit: pytket.Circuit) -> CallableOptionalArrayArg:
     """
     Converts a tket circuit into a function that maps circuit parameters to a statetensor.
-    Assumes all circuit gates can be found in quax.gates.
+    Assumes all circuit gates can be found in qujax.gates.
     Input parameter to created function will be ordered as in circuit.get_commands()
         (pytket automatically reorders some gates, consider using Barriers).
 
@@ -50,12 +50,12 @@ def tk_to_quax(circuit: pytket.Circuit) -> CallableOptionalArrayArg:
     return get_params_to_statetensor_func(gate_name_seq, qubit_inds_seq, param_inds_seq, circuit.n_qubits)
 
 
-def tk_to_quax_symbolic(circuit: pytket.Circuit,
+def tk_to_qujax_symbolic(circuit: pytket.Circuit,
                         symbol_map: dict = None) -> CallableOptionalArrayArg:
     """
     Converts a tket circuit with symbolics parameters and a symbolic parameter map
         into a function that maps circuit parameters to a statetensor.
-    Assumes all circuit gates can be found in quax.gates.
+    Assumes all circuit gates can be found in qujax.gates.
     Note that the behaviour of tk_to_jax_symbolic(circuit) is different to tk_to_jax(circuit),
         tk_to_jax_symbolic will look for parameters in circuit.free_symbols() and if there are none
         it will assume that none of the gates require parameters.

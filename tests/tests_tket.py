@@ -1,6 +1,6 @@
 from jax import numpy as jnp, jit, grad, random
 
-import quax
+import qujax
 
 from pytket.circuit import Circuit, Qubit
 from pytket.pauli import Pauli, QubitPauliString
@@ -10,7 +10,7 @@ from pytket.utils import QubitPauliOperator
 def _test_circuit(circuit, param):
     true_sv = circuit.get_statevector()
 
-    apply_circuit = quax.tket.tk_to_quax(circuit)
+    apply_circuit = qujax.tket.tk_to_qujax(circuit)
 
     test_st = apply_circuit(param)
     test_sv = test_st.flatten()
@@ -52,19 +52,19 @@ def test_CX_callable():
     param = jnp.array([0.25])
 
     def H():
-        return quax.gates._H
+        return qujax.gates._H
 
     def Rz(p):
-        return quax.gates.Rz(p)
+        return qujax.gates.Rz(p)
 
     def CX():
-        return quax.gates._CX
+        return qujax.gates._CX
 
     gate_seq = [H, Rz, CX]
     qubit_inds_seq = [[0], [0], [0, 1]]
     param_inds_seq = [[], [0], []]
 
-    apply_circuit = quax.get_params_to_statetensor_func(gate_seq,
+    apply_circuit = qujax.get_params_to_statetensor_func(gate_seq,
                                                         qubit_inds_seq,
                                                         param_inds_seq)
 
@@ -190,7 +190,7 @@ def test_HH():
     circuit = Circuit(3)
     circuit.H(0)
 
-    apply_circuit = quax.tket.tk_to_quax(circuit)
+    apply_circuit = qujax.tket.tk_to_qujax(circuit)
 
     st1 = apply_circuit(None)
     st2 = apply_circuit(None, st1)
@@ -213,7 +213,7 @@ def test_quantum_hamiltonian():
 
     gate_str_seq_seq = [['Z', 'Z']] * (n_qubits - 1) + [['X']] * n_qubits
     qubit_inds_seq = [[i, i + 1] for i in range(n_qubits - 1)] + [[i] for i in range(n_qubits)]
-    st_to_exp = quax.get_statetensor_to_expectation_func(gate_str_seq_seq,
+    st_to_exp = qujax.get_statetensor_to_expectation_func(gate_str_seq_seq,
                                                          qubit_inds_seq,
                                                          jnp.concatenate([coefs_zz, coefs_x]))
 

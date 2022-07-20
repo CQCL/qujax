@@ -4,7 +4,7 @@ from jax import numpy as jnp, jit, grad, random
 
 from pytket.circuit import Circuit
 
-import quax
+import qujax
 
 
 def _test_circuit(circuit, symbols):
@@ -16,7 +16,7 @@ def _test_circuit(circuit, symbols):
     circuit_inst.symbol_substitution(param_map)
     true_sv = circuit_inst.get_statevector()
 
-    apply_circuit = quax.tket.tk_to_quax_symbolic(circuit, symbol_map)
+    apply_circuit = qujax.tket.tk_to_qujax_symbolic(circuit, symbol_map)
 
     test_sv = apply_circuit(params).flatten()
     assert jnp.all(jnp.abs(test_sv - true_sv) < 1e-5)
@@ -156,7 +156,7 @@ def test_HH():
     circuit = Circuit(3)
     circuit.H(0)
 
-    apply_circuit = quax.tket.tk_to_quax_symbolic(circuit)
+    apply_circuit = qujax.tket.tk_to_qujax_symbolic(circuit)
 
     st1 = apply_circuit(None)
     st2 = apply_circuit(None, st1)
