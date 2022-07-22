@@ -1,4 +1,5 @@
 from typing import Sequence, Protocol, Union, Callable
+import collections.abc
 
 from jax import numpy as jnp, random
 
@@ -47,7 +48,8 @@ def _get_apply_gate(gate_func: Callable,
     return apply_gate
 
 
-def get_params_to_statetensor_func(gate_seq: Sequence[Union[str, Callable[[Union[None, jnp.ndarray]], jnp.ndarray]]],
+def get_params_to_statetensor_func(gate_seq: Sequence[Union[str, jnp.ndarray,
+                                                            Callable[[Union[None, jnp.ndarray]], jnp.ndarray]]],
                                    qubit_inds_seq: Sequence[Sequence[int]],
                                    param_inds_seq: Sequence[Sequence[int]],
                                    n_qubits: int = None) -> CallableOptionalArrayArg:
@@ -56,7 +58,8 @@ def get_params_to_statetensor_func(gate_seq: Sequence[Union[str, Callable[[Union
 
     Args:
         gate_seq: Sequence of gates.
-            Each element is either a string matching a function in qujax.gates
+            Each element is either a string matching a function in qujax.gates,
+            a unitary array (which will be reshaped into a tensor of shape e.g. (2,2,2,...) )
             or a function taking parameters (can be empty) and returning gate unitary in tensor form.
         qubit_inds_seq: Sequences of qubits (ints) that gates are acting on.
         param_inds_seq: Sequence of parameter indices that gates are using, ie gate 3 uses 1st and 666th parameter.
@@ -69,7 +72,32 @@ def get_params_to_statetensor_func(gate_seq: Sequence[Union[str, Callable[[Union
     if n_qubits is None:
         n_qubits = max([max(qi) for qi in qubit_inds_seq]) + 1
 
-    gate_func_seq = [gates.__dict__[gate] if isinstance(gate, str) else gate for gate in gate_seq]
+    if any([not isinstance(q, collections.abc.Sequence) for q in qubit_inds_seq]):
+        raise TypeError('qubit_inds_seq must be Sequence of Sequences e.g. [[0,1], [0], []]')
+
+    if any([not isinstance(p, collections.abc.Sequence) for p in param_inds_seq]):
+        raise TypeError('param_inds_seq must be Sequence of Sequences e.g. [[0,1], [0], []]')
+
+    gate_func_seq = []
+    for gate in gate_seq:
+        if isinstance(gate, str):
+            if gate in gates.__dict__:
+                gate_func = gates.__dict__[gate]
+            else:
+                raise KeyError('Gate string not found in qujax.gates - consider changing input to an array or callable')
+        elif callable(gate):
+            gate_func = gate
+        elif hasattr(gate, '__array__'):
+            gate_arr = jnp.array(gate)
+            gate_size = gate_arr.size
+            gate_arr = gate_arr.reshape((2,) * jnp.log2(gate_size).astype(int))
+            gate_func = lambda: gate_arr
+        else:
+            raise TypeError('Unsupported gate type'
+                            '- gate must be either a string in qujax.gates, an array or a callable')
+
+        gate_func_seq.append(gate_func)
+
     apply_gate_seq = [_get_apply_gate(g, q) for g, q in zip(gate_func_seq, qubit_inds_seq) if g != 'Barrier']
     param_inds_seq = [jnp.array(p).astype(int) if p != [None] else jnp.array([]) for p in param_inds_seq]
 
