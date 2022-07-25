@@ -67,12 +67,12 @@ def get_statetensor_to_expectation_func(gate_seq_seq: Sequence[Sequence[Union[st
 
         """
         single_gate_arrs = [gates.__dict__[gate]() if isinstance(gate, str) else gate for gate in gate_seq]
-        single_gate_arrs = [gate_arr.reshape((2,) * jnp.log2(gate_arr.size).astype(int))
+        single_gate_arrs = [gate_arr.reshape((2,) * int(jnp.log2(gate_arr.size)))
                             for gate_arr in single_gate_arrs]
         full_gate_mat = single_gate_arrs[0]
         for single_gate_matrix in single_gate_arrs[1:]:
             full_gate_mat = jnp.kron(full_gate_mat, single_gate_matrix)
-        full_gate_mat = full_gate_mat.reshape((2,) * (jnp.log2(full_gate_mat.size)).astype(int))
+        full_gate_mat = full_gate_mat.reshape((2,) * int(jnp.log2(full_gate_mat.size)))
         return full_gate_mat
 
     apply_gate_funcs = [_statetensor_to_single_expectation_func(get_gate_tensor(gns), qi)
