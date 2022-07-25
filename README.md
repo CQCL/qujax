@@ -62,17 +62,6 @@ expectation_and_grad(jnp.array([0.1]))
 
 
 
-## qujax.tket
-You can also generate the parameter to statetensor function from a [pytket](https://cqcl.github.io/tket/pytket/api/) circuit
-```python
-import pytket
-import qujax
-
-circuit = pytket.Circuit(2)
-circuit.H(0)
-circuit.Rz(1.3, 0)
-circuit.CX(0, 1)
-
-params_to_st = qujax.tket.tk_to_qujax(circuit)
-```
-
+## tk_to_qujax
+You can also generate the parameter to statetensor function from a [pytket](https://cqcl.github.io/tket/pytket/api/)
+circuit using the [extension](https://github.com/CQCL/pytket-qujax).
