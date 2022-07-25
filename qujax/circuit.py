@@ -80,10 +80,10 @@ def get_params_to_statetensor_func(gate_seq: Sequence[Union[str, jnp.ndarray,
     if n_qubits is None:
         n_qubits = max([max(qi) for qi in qubit_inds_seq]) + 1
 
-    if any([not isinstance(q, collections.abc.Sequence) for q in qubit_inds_seq]):
+    if any([not (isinstance(q, collections.abc.Sequence) or hasattr(q, '__array__')) for q in qubit_inds_seq]):
         raise TypeError('qubit_inds_seq must be Sequence of Sequences e.g. [[0,1], [0], []]')
 
-    if any([not isinstance(p, collections.abc.Sequence) for p in param_inds_seq]):
+    if any([not (isinstance(p, collections.abc.Sequence) or hasattr(p, '__array__')) for p in param_inds_seq]):
         raise TypeError('param_inds_seq must be Sequence of Sequences e.g. [[0,1], [0], []]')
 
     gate_func_seq = []
