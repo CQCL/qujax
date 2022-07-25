@@ -107,7 +107,8 @@ def get_params_to_statetensor_func(gate_seq: Sequence[Union[str, jnp.ndarray,
         gate_func_seq.append(gate_func)
 
     apply_gate_seq = [_get_apply_gate(g, q) for g, q in zip(gate_func_seq, qubit_inds_seq)]
-    param_inds_seq = [jnp.array(p).astype(int) if p != [None] else jnp.array([]) for p in param_inds_seq]
+    param_inds_seq = [jnp.array(p) for p in param_inds_seq]
+    param_inds_seq = [jnp.array([]) if jnp.any(jnp.isnan(p)) else p.astype(int) for p in param_inds_seq]
 
     def apply_circuit(params: jnp.ndarray,
                       statetensor_in: jnp.ndarray = None) -> jnp.ndarray:
