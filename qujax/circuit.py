@@ -6,9 +6,17 @@ from jax import numpy as jnp, random
 from qujax import gates
 
 
-class CallableOptionalArrayArg(Protocol):
-    def __call__(self, x: Union[None, jnp.ndarray], y: jnp.ndarray = ..., /) -> jnp.ndarray:
+class CallableArrayAndOptionalArray(Protocol):
+    def __call__(self, params: jnp.ndarray, statetensor_in: jnp.ndarray = None) -> jnp.ndarray:
         ...
+
+
+class CallableOptionalArray(Protocol):
+    def __call__(self, statetensor_in: jnp.ndarray = None) -> jnp.ndarray:
+        ...
+
+
+UnionCallableOptionalArray = Union[CallableArrayAndOptionalArray, CallableOptionalArray]
 
 
 def _get_apply_gate(gate_func: Callable,
@@ -52,7 +60,7 @@ def get_params_to_statetensor_func(gate_seq: Sequence[Union[str, jnp.ndarray,
                                                             Callable[[Union[None, jnp.ndarray]], jnp.ndarray]]],
                                    qubit_inds_seq: Sequence[Sequence[int]],
                                    param_inds_seq: Sequence[Sequence[int]],
-                                   n_qubits: int = None) -> CallableOptionalArrayArg:
+                                   n_qubits: int = None) -> UnionCallableOptionalArray:
     """
     Creates a function that maps circuit parameters to a statetensor.
 
@@ -94,17 +102,17 @@ def get_params_to_statetensor_func(gate_seq: Sequence[Union[str, jnp.ndarray,
             gate_func = lambda: gate_arr
         else:
             raise TypeError('Unsupported gate type'
-                            '- gate must be either a string in qujax.gates, an array or a callable')
+                            '- gate must be either a string in qujax.gates, an array or callable')
 
         gate_func_seq.append(gate_func)
 
-    apply_gate_seq = [_get_apply_gate(g, q) for g, q in zip(gate_func_seq, qubit_inds_seq) if g != 'Barrier']
+    apply_gate_seq = [_get_apply_gate(g, q) for g, q in zip(gate_func_seq, qubit_inds_seq)]
     param_inds_seq = [jnp.array(p).astype(int) if p != [None] else jnp.array([]) for p in param_inds_seq]
 
-    def apply_circuit(params: Union[None, jnp.ndarray],
+    def apply_circuit(params: jnp.ndarray,
                       statetensor_in: jnp.ndarray = None) -> jnp.ndarray:
         """
-        Applies circuit (series of gates) to an statetensor_in (default is |0>^N).
+        Applies parameterised circuit (series of gates) to a statetensor_in (default is |0>^N).
 
         Args:
             params: Parameters of the circuit.
@@ -125,6 +133,23 @@ def get_params_to_statetensor_func(gate_seq: Sequence[Union[str, jnp.ndarray,
             gate_params = jnp.take(params, param_inds_seq[gate_ind])
             statetensor = apply_gate(statetensor, gate_params)
         return statetensor
+
+    if all([pi.size == 0 for pi in param_inds_seq]):
+        def apply_circuit_no_params(statetensor_in: jnp.ndarray = None) -> jnp.ndarray:
+            """
+            Applies circuit (series of gates with no parameters) to a statetensor_in (default is |0>^N).
+
+            Args:
+                statetensor_in: Optional. Input statetensor.
+                    Defaults to |0>^N (tensor of size 2^n with all zeroes except one in [0]*N index).
+
+            Returns:
+                Updated statetensor.
+
+            """
+            return apply_circuit(jnp.array([]), statetensor_in)
+
+        return apply_circuit_no_params
 
     return apply_circuit
 

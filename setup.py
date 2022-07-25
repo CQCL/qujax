@@ -15,9 +15,6 @@ setup(
         "jax",
         "jaxlib"
     ],
-    extras_require={
-        "tket": ["pytket", "sympy"],
-    },
     classifiers=[
         "Programming Language :: Python",
         "Intended Audience :: Developers",

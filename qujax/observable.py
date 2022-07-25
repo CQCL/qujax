@@ -60,7 +60,7 @@ def get_statetensor_to_expectation_func(gate_seq_seq: Sequence[Sequence[Union[st
         Convert sequence of gate strings into single gate unitary (in tensor form).
 
         Args:
-            gate_str_seq: Sequence of gate strings.
+            gate_seq: Sequence of gate strings.
 
         Returns:
             Single gate unitary in tensor form (array).
