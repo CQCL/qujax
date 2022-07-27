@@ -23,8 +23,6 @@ def test_bitstring_expectation():
     n_params = n_qubits * 4
     params = random.uniform(random.PRNGKey(0), shape=(n_params,))
 
-    st = param_to_st(params)
-
     costs = random.normal(random.PRNGKey(1), shape=(2 ** n_qubits,))
 
     def st_to_expectation(statetensor):

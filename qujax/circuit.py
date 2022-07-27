@@ -110,8 +110,8 @@ def get_params_to_statetensor_func(gate_seq: Sequence[Union[str, jnp.ndarray,
     param_inds_seq = [jnp.array(p) for p in param_inds_seq]
     param_inds_seq = [jnp.array([]) if jnp.any(jnp.isnan(p)) else p.astype(int) for p in param_inds_seq]
 
-    def apply_circuit(params: jnp.ndarray,
-                      statetensor_in: jnp.ndarray = None) -> jnp.ndarray:
+    def params_to_statetensor_func(params: jnp.ndarray,
+                                   statetensor_in: jnp.ndarray = None) -> jnp.ndarray:
         """
         Applies parameterised circuit (series of gates) to a statetensor_in (default is |0>^N).
 
@@ -136,7 +136,7 @@ def get_params_to_statetensor_func(gate_seq: Sequence[Union[str, jnp.ndarray,
         return statetensor
 
     if all([pi.size == 0 for pi in param_inds_seq]):
-        def apply_circuit_no_params(statetensor_in: jnp.ndarray = None) -> jnp.ndarray:
+        def no_params_to_statetensor_func(statetensor_in: jnp.ndarray = None) -> jnp.ndarray:
             """
             Applies circuit (series of gates with no parameters) to a statetensor_in (default is |0>^N).
 
@@ -148,11 +148,11 @@ def get_params_to_statetensor_func(gate_seq: Sequence[Union[str, jnp.ndarray,
                 Updated statetensor.
 
             """
-            return apply_circuit(jnp.array([]), statetensor_in)
+            return params_to_statetensor_func(jnp.array([]), statetensor_in)
 
-        return apply_circuit_no_params
+        return no_params_to_statetensor_func
 
-    return apply_circuit
+    return params_to_statetensor_func
 
 
 def integers_to_bitstrings(integers: Union[int, jnp.ndarray],
