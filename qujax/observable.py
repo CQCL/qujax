@@ -55,18 +55,18 @@ def get_statetensor_to_expectation_func(gate_seq_seq: Sequence[Sequence[Union[st
         Function that takes statetensor and returns expected value (float).
     """
 
-    def get_gate_tensor(gate_seq: Sequence[str]) -> jnp.ndarray:
+    def get_gate_tensor(gate_seq: Sequence[Union[str, jnp.ndarray]]) -> jnp.ndarray:
         """
         Convert sequence of gate strings into single gate unitary (in tensor form).
 
         Args:
-            gate_seq: Sequence of gate strings.
+            gate_seq: Sequence of gate strings or arrays.
 
         Returns:
             Single gate unitary in tensor form (array).
 
         """
-        single_gate_arrs = [gates.__dict__[gate]() if isinstance(gate, str) else gate for gate in gate_seq]
+        single_gate_arrs = [gates.__dict__[gate] if isinstance(gate, str) else gate for gate in gate_seq]
         single_gate_arrs = [gate_arr.reshape((2,) * int(jnp.log2(gate_arr.size)))
                             for gate_arr in single_gate_arrs]
         full_gate_mat = single_gate_arrs[0]

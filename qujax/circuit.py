@@ -86,27 +86,31 @@ def get_params_to_statetensor_func(gate_seq: Sequence[Union[str, jnp.ndarray,
     if any([not (isinstance(p, collections.abc.Sequence) or hasattr(p, '__array__')) for p in param_inds_seq]):
         raise TypeError('param_inds_seq must be Sequence of Sequences e.g. [[0,1], [0], []]')
 
-    gate_func_seq = []
+    def _array_to_callable(arr: jnp.ndarray) -> Callable[[], jnp.ndarray]:
+        return lambda: arr
+
+    gate_seq_callable = []
     for gate in gate_seq:
         if isinstance(gate, str):
             if gate in gates.__dict__:
-                gate_func = gates.__dict__[gate]
+                gate = gates.__dict__[gate]
             else:
-                raise KeyError('Gate string not found in qujax.gates - consider changing input to an array or callable')
-        elif callable(gate):
+                raise KeyError(f'Gate string \'{gate}\' not found in qujax.gates '
+                               f'- consider changing input to an array or callable')
+
+        if callable(gate):
             gate_func = gate
         elif hasattr(gate, '__array__'):
             gate_arr = jnp.array(gate)
             gate_size = gate_arr.size
-            gate_arr = gate_arr.reshape((2,) * jnp.log2(gate_size).astype(int))
-            gate_func = lambda: gate_arr
+            gate = gate_arr.reshape((2,) * jnp.log2(gate_size).astype(int))
+            gate_func = _array_to_callable(gate)
         else:
             raise TypeError('Unsupported gate type'
                             '- gate must be either a string in qujax.gates, an array or callable')
+        gate_seq_callable.append(gate_func)
 
-        gate_func_seq.append(gate_func)
-
-    apply_gate_seq = [_get_apply_gate(g, q) for g, q in zip(gate_func_seq, qubit_inds_seq)]
+    apply_gate_seq = [_get_apply_gate(g, q) for g, q in zip(gate_seq_callable, qubit_inds_seq)]
     param_inds_seq = [jnp.array(p) for p in param_inds_seq]
     param_inds_seq = [jnp.array([]) if jnp.any(jnp.isnan(p)) else p.astype(int) for p in param_inds_seq]
 
