@@ -103,7 +103,7 @@ def get_params_to_statetensor_func(gate_seq: Sequence[Union[str, jnp.ndarray,
         elif hasattr(gate, '__array__'):
             gate_arr = jnp.array(gate)
             gate_size = gate_arr.size
-            gate = gate_arr.reshape((2,) * jnp.log2(gate_size).astype(int))
+            gate = gate_arr.reshape((2,) * int(jnp.log2(gate_size)))
             gate_func = _array_to_callable(gate)
         else:
             raise TypeError('Unsupported gate type'
