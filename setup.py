@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 setup(
     name="qujax",
     author="Sam Duffield",
-    author_email="sam.duffield@cambridgequantum.com",
+    author_email="sam.duffield@quantinuum.com",
     url="https://github.com/CQCL/qujax",
     description="Simulating quantum circuits with JAX",
     long_description=open("README.md").read(),
