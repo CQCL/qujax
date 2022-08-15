@@ -61,7 +61,10 @@ expectation_and_grad(jnp.array([0.1]))
 + By default the parameter to statetensor function initiates in the all 0 state, however there is an optional ```statetensor_in``` argument to initiate in an arbitrary state.
 
 
+## Examples
+A suite of notebooks demonstrating core features and implementation can be found in the [examples](examples) directory.
+
 
 ## tk_to_qujax
 You can also generate the parameter to statetensor function from a [pytket](https://cqcl.github.io/tket/pytket/api/)
-circuit using the [extension](https://github.com/CQCL/pytket-qujax).
+circuit using the [extension](https://github.com/CQCL/pytket-qujax).  An example notebook can be found [here](https://github.com/CQCL/pytket/blob/main/examples/pytket-qujax_heisenberg_vqe.ipynb).
