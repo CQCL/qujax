@@ -66,5 +66,7 @@ A suite of notebooks demonstrating core features and implementation can be found
 
 
 ## tk_to_qujax
-You can also generate the parameter to statetensor function from a [pytket](https://cqcl.github.io/tket/pytket/api/)
-circuit using the [extension](https://github.com/CQCL/pytket-qujax).  An example notebook can be found [here](https://github.com/CQCL/pytket/blob/main/examples/pytket-qujax_heisenberg_vqe.ipynb).
+You can also generate the parameter to statetensor function from a [`pytket`](https://cqcl.github.io/tket/pytket/api/)
+circuit using the [`pytket-qujax`](https://github.com/CQCL/pytket-qujax) extension. 
+An example notebook can be found at [`pytket-qujax_heisenberg_vqe.ipynb`](https://github.com/CQCL/pytket/blob/main/examples/pytket-qujax_heisenberg_vqe.ipynb).
+
