@@ -1,6 +1,7 @@
 from typing import Sequence, Callable, Union
 
 import jax.numpy as jnp
+from jax import numpy as jnp, random
 
 from qujax import gates
 
@@ -17,6 +18,7 @@ def _statetensor_to_single_expectation_func(gate_tensor: jnp.ndarray,
     Returns:
         Function that takes statetensor and returns expected value (float).
     """
+
     def statetensor_to_single_expectation(statetensor: jnp.ndarray) -> float:
         """
         Evaluates expected value of statetensor through gate.
@@ -38,7 +40,7 @@ def _statetensor_to_single_expectation_func(gate_tensor: jnp.ndarray,
 
 def get_statetensor_to_expectation_func(gate_seq_seq: Sequence[Sequence[Union[str, jnp.ndarray]]],
                                         qubits_seq_seq: Sequence[Sequence[int]],
-                                        coefficients: Union[Sequence[float], jnp.ndarray])\
+                                        coefficients: Union[Sequence[float], jnp.ndarray]) \
         -> Callable[[jnp.ndarray], float]:
     """
     Converts gate strings, qubit indices and coefficients into a function that converts statetensor into expected value.
@@ -95,3 +97,75 @@ def get_statetensor_to_expectation_func(gate_seq_seq: Sequence[Sequence[Union[st
         return out
 
     return statetensor_to_expectation_func
+
+
+def integers_to_bitstrings(integers: Union[int, jnp.ndarray],
+                           nbits: int = None) -> jnp.ndarray:
+    """
+    Convert integer or array of integers into their binary expansion(s).
+
+    Args:
+        integers: Integer or array of integer to be converted.
+        nbits: Length of output binary expansion.
+
+    Returns:
+        Array of binary expansion(s).
+    """
+    integers = jnp.atleast_1d(integers)
+    if nbits is None:
+        nbits = (jnp.ceil(jnp.log2(integers.max()) + 1e-5)).astype(int)
+
+    return jnp.squeeze(((integers[:, None] & (1 << jnp.arange(nbits - 1, -1, -1))) > 0).astype(int))
+
+
+def bitstrings_to_integers(bitstrings: jnp.ndarray) -> Union[int, jnp.ndarray]:
+    """
+    Convert binary expansion(s) into integers.
+
+    Args:
+        bitstrings: Array of bitstring arrays.
+
+    Returns:
+        Array of integers.
+    """
+    bitstrings = jnp.atleast_2d(bitstrings)
+    convarr = 2 ** jnp.arange(bitstrings.shape[-1] - 1, -1, -1)
+    return jnp.squeeze(bitstrings.dot(convarr))
+
+
+def sample_integers(random_key: random.PRNGKeyArray,
+                    statetensor: jnp.ndarray,
+                    n_samps: int = 1) -> jnp.ndarray:
+    """
+    Generate random integer samples according to statetensor.
+
+    Args:
+        random_key: JAX random key to seed samples.
+        statetensor: Statetensor encoding sampling probabilities (in the form of amplitudes).
+        n_samps: Number of samples to generate. Defaults to 1.
+
+    Returns:
+        Array with sampled integers, shape=(n_samps,).
+
+    """
+    sv_probs = jnp.square(jnp.abs(statetensor.flatten()))
+    sampled_inds = random.choice(random_key, a=jnp.arange(statetensor.size), shape=(n_samps,), p=sv_probs)
+    return sampled_inds
+
+
+def sample_bitstrings(random_key: random.PRNGKeyArray,
+                      statetensor: jnp.ndarray,
+                      n_samps: int = 1) -> jnp.ndarray:
+    """
+    Generate random bitstring samples according to statetensor.
+
+    Args:
+        random_key: JAX random key to seed samples.
+        statetensor: Statetensor encoding sampling probabilities (in the form of amplitudes).
+        n_samps: Number of samples to generate. Defaults to 1.
+
+    Returns:
+        Array with sampled bitstrings, shape=(n_samps, statetensor.ndim).
+
+    """
+    return integers_to_bitstrings(sample_integers(random_key, statetensor, n_samps), statetensor.ndim)
