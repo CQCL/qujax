@@ -1,9 +1,9 @@
-from typing import Sequence, Protocol, Union, Callable, Optional
-import collections.abc
+from typing import Sequence, Union, Callable, Optional
 
-from jax import numpy as jnp, random
+from jax import numpy as jnp
 
 from qujax import gates
+from qujax.circuit_tools import check_circuit
 
 UnionCallableOptionalArray = Union[Callable[[jnp.ndarray, Optional[jnp.ndarray]], jnp.ndarray],
                                    Callable[[Optional[jnp.ndarray]], jnp.ndarray]]
@@ -69,14 +69,11 @@ def get_params_to_statetensor_func(gate_seq: Sequence[Union[str,
         Function which maps parameters (and optional statetensor_in) to a statetensor.
 
     """
+
+    check_circuit(gate_seq, qubit_inds_seq, param_inds_seq, n_qubits)
+
     if n_qubits is None:
         n_qubits = max([max(qi) for qi in qubit_inds_seq]) + 1
-
-    if any([not (isinstance(q, collections.abc.Sequence) or hasattr(q, '__array__')) for q in qubit_inds_seq]):
-        raise TypeError('qubit_inds_seq must be Sequence of Sequences e.g. [[0,1], [0], []]')
-
-    if any([not (isinstance(p, collections.abc.Sequence) or hasattr(p, '__array__')) for p in param_inds_seq]):
-        raise TypeError('param_inds_seq must be Sequence of Sequences e.g. [[0,1], [0], []]')
 
     def _array_to_callable(arr: jnp.ndarray) -> Callable[[], jnp.ndarray]:
         return lambda: arr
@@ -150,74 +147,3 @@ def get_params_to_statetensor_func(gate_seq: Sequence[Union[str,
 
     return params_to_statetensor_func
 
-
-def integers_to_bitstrings(integers: Union[int, jnp.ndarray],
-                           nbits: int = None) -> jnp.ndarray:
-    """
-    Convert integer or array of integers into their binary expansion(s).
-
-    Args:
-        integers: Integer or array of integer to be converted.
-        nbits: Length of output binary expansion.
-
-    Returns:
-        Array of binary expansion(s).
-    """
-    integers = jnp.atleast_1d(integers)
-    if nbits is None:
-        nbits = (jnp.ceil(jnp.log2(integers.max()) + 1e-5)).astype(int)
-
-    return jnp.squeeze(((integers[:, None] & (1 << jnp.arange(nbits - 1, -1, -1))) > 0).astype(int))
-
-
-def bitstrings_to_integers(bitstrings: jnp.ndarray) -> Union[int, jnp.ndarray]:
-    """
-    Convert binary expansion(s) into integers.
-
-    Args:
-        bitstrings: Array of bitstring arrays.
-
-    Returns:
-        Array of integers.
-    """
-    bitstrings = jnp.atleast_2d(bitstrings)
-    convarr = 2 ** jnp.arange(bitstrings.shape[-1] - 1, -1, -1)
-    return jnp.squeeze(bitstrings.dot(convarr))
-
-
-def sample_integers(random_key: random.PRNGKeyArray,
-                    statetensor: jnp.ndarray,
-                    n_samps: int = 1) -> jnp.ndarray:
-    """
-    Generate random integer samples according to statetensor.
-
-    Args:
-        random_key: JAX random key to seed samples.
-        statetensor: Statetensor encoding sampling probabilities (in the form of amplitudes).
-        n_samps: Number of samples to generate. Defaults to 1.
-
-    Returns:
-        Array with sampled integers, shape=(n_samps,).
-
-    """
-    sv_probs = jnp.square(jnp.abs(statetensor.flatten()))
-    sampled_inds = random.choice(random_key, a=jnp.arange(statetensor.size), shape=(n_samps,), p=sv_probs)
-    return sampled_inds
-
-
-def sample_bitstrings(random_key: random.PRNGKeyArray,
-                      statetensor: jnp.ndarray,
-                      n_samps: int = 1) -> jnp.ndarray:
-    """
-    Generate random bitstring samples according to statetensor.
-
-    Args:
-        random_key: JAX random key to seed samples.
-        statetensor: Statetensor encoding sampling probabilities (in the form of amplitudes).
-        n_samps: Number of samples to generate. Defaults to 1.
-
-    Returns:
-        Array with sampled bitstrings, shape=(n_samps, statetensor.ndim).
-
-    """
-    return integers_to_bitstrings(sample_integers(random_key, statetensor, n_samps), statetensor.ndim)
