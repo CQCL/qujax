@@ -3,7 +3,7 @@ from typing import Sequence, Callable, Union
 import jax.numpy as jnp
 from jax import numpy as jnp, random
 
-from . import gates
+from qujax import gates
 
 
 def _statetensor_to_single_expectation_func(gate_tensor: jnp.ndarray,
