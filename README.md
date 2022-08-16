@@ -1,4 +1,4 @@
-# `qujax`
+# qujax
 
 Represent a (parameterised) quantum circuit as a pure [JAX](https://github.com/google/jax) function that
 takes as input any parameters of the circuit and outputs a _statetensor_. The statetensor encodes all $2^N$ amplitudes of the quantum state and can then be used
@@ -11,7 +11,7 @@ A JAX implementation of a quantum circuit is useful for runtime speedups, automa
 pip install qujax
 ```
 
-## Parameterised quantum circuits with `qujax`
+## Parameterised quantum circuits with qujax
 ```python
 from jax import numpy as jnp
 import qujax
