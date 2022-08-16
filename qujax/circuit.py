@@ -1,26 +1,16 @@
-from typing import Sequence, Protocol, Union, Callable
+from typing import Sequence, Protocol, Union, Callable, Optional
 import collections.abc
 
 from jax import numpy as jnp, random
 
 from qujax import gates
 
-
-class CallableArrayAndOptionalArray(Protocol):
-    def __call__(self, params: jnp.ndarray, statetensor_in: jnp.ndarray = None) -> jnp.ndarray:
-        ...
-
-
-class CallableOptionalArray(Protocol):
-    def __call__(self, statetensor_in: jnp.ndarray = None) -> jnp.ndarray:
-        ...
-
-
-UnionCallableOptionalArray = Union[CallableArrayAndOptionalArray, CallableOptionalArray]
+UnionCallableOptionalArray = Union[Callable[[jnp.ndarray, Optional[jnp.ndarray]], jnp.ndarray],
+                                   Callable[[Optional[jnp.ndarray]], jnp.ndarray]]
 
 
 def _get_apply_gate(gate_func: Callable,
-                    qubit_inds: Sequence[int]):
+                    qubit_inds: Sequence[int]) -> Callable[[jnp.ndarray, jnp.ndarray], jnp.ndarray]:
     """
     Creates a function that applies a given gate_func to given qubit_inds of a statetensor.
 
@@ -56,8 +46,10 @@ def _get_apply_gate(gate_func: Callable,
     return apply_gate
 
 
-def get_params_to_statetensor_func(gate_seq: Sequence[Union[str, jnp.ndarray,
-                                                            Callable[[Union[None, jnp.ndarray]], jnp.ndarray]]],
+def get_params_to_statetensor_func(gate_seq: Sequence[Union[str,
+                                                            jnp.ndarray,
+                                                            Callable[[jnp.ndarray], jnp.ndarray],
+                                                            Callable[[], jnp.ndarray]]],
                                    qubit_inds_seq: Sequence[Sequence[int]],
                                    param_inds_seq: Sequence[Sequence[int]],
                                    n_qubits: int = None) -> UnionCallableOptionalArray:
