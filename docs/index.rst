@@ -8,7 +8,7 @@ Source code can be found on `GitHub <https://github.com/CQCL/qujax>`_, including
 
 The `pytket-qujax <https://github.com/CQCL/pytket-qujax>`_, extension is useful for converting a `tket <https://github.com/CQCL/pytket>`_ circuit into ``qujax``.
 
-Note that ``qujax`` assumes parameters are giving in units of π (i.e. in [0,2] rather than [0, 2π]).
+Note that ``qujax`` assumes parameters are given in units of π (i.e. in [0,2] rather than [0, 2π]).
 
 Install
 =================================
