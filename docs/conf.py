@@ -1,6 +1,5 @@
 import os
 import sys
-from ..qujax.version import __version__
 
 sys.path.insert(0, os.path.abspath('..'))
 
@@ -10,7 +9,6 @@ sys.path.insert(0, os.path.abspath('..'))
 project = 'qujax'
 copyright = '2022, Sam Duffield'
 author = 'Sam Duffield'
-release = __version__
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
