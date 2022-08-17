@@ -23,5 +23,5 @@ setup(
     ],
     include_package_data=True,
     platforms="any",
-    version='0.1.8'
+    version='0.1.9'
 )
