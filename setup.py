@@ -1,7 +1,5 @@
 from setuptools import setup, find_packages
 
-from qujax import __version__
-
 setup(
     name="qujax",
     author="Sam Duffield",
@@ -25,5 +23,5 @@ setup(
     ],
     include_package_data=True,
     platforms="any",
-    version=__version__
+    version='0.1.8'
 )
