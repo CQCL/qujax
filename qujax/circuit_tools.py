@@ -16,11 +16,13 @@ def check_circuit(gate_seq: Sequence[Union[str,
 
     Args:
         gate_seq: Sequence of gates.
-            Each element is either a string matching a function in qujax.gates,
-            a unitary array (which will be reshaped into a tensor of shape e.g. (2,2,2,...) )
-            or a function taking parameters (can be empty) and returning gate unitary in tensor form.
+            Each element is either a string matching an array or function in qujax.gates,
+            a unitary array (which will be reshaped into a tensor of shape (2,2,2,...) )
+            or a function taking parameters and returning gate unitary in tensor form.
         qubit_inds_seq: Sequences of qubits (ints) that gates are acting on.
-        param_inds_seq: Sequence of parameter indices that gates are using, ie gate 3 uses 1st and 666th parameter.
+        param_inds_seq: Sequence of parameter indices that gates are using,
+            i.e. [[0], [], [5, 2]] tells qujax that the first gate uses the first parameter,
+            the second gate is not parameterised and the third gates used the fifth and second parameters.
         n_qubits: Number of qubits, if fixed.
 
     """
@@ -134,17 +136,19 @@ def print_circuit(gate_seq: Sequence[Union[str,
 
     Args:
         gate_seq: Sequence of gates.
-            Each element is either a string matching a function in qujax.gates,
-            a unitary array (which will be reshaped into a tensor of shape e.g. (2,2,2,...) )
-            or a function taking parameters (can be empty) and returning gate unitary in tensor form.
+            Each element is either a string matching an array or function in qujax.gates,
+            a unitary array (which will be reshaped into a tensor of shape (2,2,2,...) )
+            or a function taking parameters and returning gate unitary in tensor form.
         qubit_inds_seq: Sequences of qubits (ints) that gates are acting on.
-        param_inds_seq: Sequence of parameter indices that gates are using, ie gate 3 uses 1st and 666th parameter.
+        param_inds_seq: Sequence of parameter indices that gates are using,
+            i.e. [[0], [], [5, 2]] tells qujax that the first gate uses the first parameter,
+            the second gate is not parameterised and the third gates used the fifth and second parameters.
         n_qubits: Number of qubits, if fixed.
-        qubit_min: Index of first qubit to display
-        qubit_max: Index of final qubit to display
-        gate_ind_min: Index of gate to start circuit printing
-        gate_ind_max: Index of gate to stop circuit printing
-        sep_length: Number of dashes to separate gates
+        qubit_min: Index of first qubit to display.
+        qubit_max: Index of final qubit to display.
+        gate_ind_min: Index of gate to start circuit printing.
+        gate_ind_max: Index of gate to stop circuit printing.
+        sep_length: Number of dashes to separate gates.
 
     Returns:
         String representation of circuit

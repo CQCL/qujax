@@ -47,7 +47,7 @@ def get_statetensor_to_expectation_func(gate_seq_seq: Sequence[Sequence[Union[st
 
     Args:
         gate_seq_seq: Sequence of sequences of gates.
-            Each gate is either or tensor (jnp.ndarray) or a string corresponding to gates in qujax.gates.
+            Each gate is either a tensor (jnp.ndarray) or a string corresponding to a array in qujax.gates.
             E.g. [['Z', 'Z'], ['X']]
         qubits_seq_seq: Sequence of sequences of integer qubit indices.
             E.g. [[0,1], [2]]
@@ -105,7 +105,7 @@ def integers_to_bitstrings(integers: Union[int, jnp.ndarray],
     Convert integer or array of integers into their binary expansion(s).
 
     Args:
-        integers: Integer or array of integer to be converted.
+        integers: Integer or array of integers to be converted.
         nbits: Length of output binary expansion.
 
     Returns:
@@ -123,7 +123,7 @@ def bitstrings_to_integers(bitstrings: jnp.ndarray) -> Union[int, jnp.ndarray]:
     Convert binary expansion(s) into integers.
 
     Args:
-        bitstrings: Array of bitstring arrays.
+        bitstrings: Bitstring array or array of bitstring arrays.
 
     Returns:
         Array of integers.
