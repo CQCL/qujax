@@ -1,6 +1,8 @@
 from setuptools import setup, find_packages
 from qujax.version import __version__
 
+with open('requirements.txt') as f:
+    requirements = f.read().splitlines()
 
 setup(
     name="qujax",
@@ -13,10 +15,7 @@ setup(
     license="Apache 2",
     packages=find_packages(),
     python_requires=">=3.8",
-    install_requires=[
-        "jax",
-        "jaxlib"
-    ],
+    install_requires=requirements,
     classifiers=[
         "Programming Language :: Python",
         "Intended Audience :: Developers",
