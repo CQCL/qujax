@@ -5,6 +5,9 @@ from jax import numpy as jnp
 from qujax import gates
 from qujax.circuit_tools import check_circuit
 
+UnionCallableOptionalArray = Union[Callable[[jnp.ndarray, Optional[jnp.ndarray]], jnp.ndarray],
+                                   Callable[[Optional[jnp.ndarray]], jnp.ndarray]]
+
 
 def _get_apply_gate(gate_func: Callable,
                     qubit_inds: Sequence[int]) -> Callable[[jnp.ndarray, jnp.ndarray], jnp.ndarray]:
@@ -49,9 +52,7 @@ def get_params_to_statetensor_func(gate_seq: Sequence[Union[str,
                                                             Callable[[], jnp.ndarray]]],
                                    qubit_inds_seq: Sequence[Sequence[int]],
                                    param_inds_seq: Sequence[Sequence[int]],
-                                   n_qubits: int = None)\
-        -> Union[Callable[[jnp.ndarray, Optional[jnp.ndarray]], jnp.ndarray],
-                 Callable[[Optional[jnp.ndarray]], jnp.ndarray]]:
+                                   n_qubits: int = None) -> UnionCallableOptionalArray:
     """
     Creates a function that maps circuit parameters to a statetensor.
 
