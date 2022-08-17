@@ -1,12 +1,22 @@
-from typing import Sequence, Union, Callable, Optional
+from typing import Sequence, Union, Callable, Protocol
 
 from jax import numpy as jnp
 
 from qujax import gates
 from qujax.circuit_tools import check_circuit
 
-UnionCallableOptionalArray = Union[Callable[[jnp.ndarray, Optional[jnp.ndarray]], jnp.ndarray],
-                                   Callable[[Optional[jnp.ndarray]], jnp.ndarray]]
+
+class CallableArrayAndOptionalArray(Protocol):
+    def __call__(self, params: jnp.ndarray, statetensor_in: jnp.ndarray = None) -> jnp.ndarray:
+        ...
+
+
+class CallableOptionalArray(Protocol):
+    def __call__(self, statetensor_in: jnp.ndarray = None) -> jnp.ndarray:
+        ...
+
+
+UnionCallableOptionalArray = Union[CallableArrayAndOptionalArray, CallableOptionalArray]
 
 
 def _get_apply_gate(gate_func: Callable,
@@ -67,6 +77,7 @@ def get_params_to_statetensor_func(gate_seq: Sequence[Union[str,
 
     Returns:
         Function which maps parameters (and optional statetensor_in) to a statetensor.
+        If no parameters are found then the function only takes optional statetensor_in
 
     """
 
