@@ -1,6 +1,6 @@
 import os
 import sys
-from importlib.metadata import version
+from importlib.metadata import version as _version
 
 sys.path.insert(0, os.path.abspath('..'))
 
@@ -10,7 +10,7 @@ sys.path.insert(0, os.path.abspath('..'))
 project = 'qujax'
 copyright = '2022, Sam Duffield'
 author = 'Sam Duffield'
-release = version('qujax')
+release = _version('qujax')
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
