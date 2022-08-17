@@ -1,5 +1,6 @@
 import os
 import sys
+from importlib.metadata import version
 
 sys.path.insert(0, os.path.abspath('..'))
 
@@ -9,7 +10,7 @@ sys.path.insert(0, os.path.abspath('..'))
 project = 'qujax'
 copyright = '2022, Sam Duffield'
 author = 'Sam Duffield'
-release = '0.1.8'
+release = version('qujax')
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
@@ -18,7 +19,6 @@ extensions = ['sphinx.ext.autodoc', 'sphinx_rtd_theme', 'sphinx.ext.napoleon']
 
 templates_path = ['_templates']
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
-
 
 
 # -- Options for HTML output -------------------------------------------------

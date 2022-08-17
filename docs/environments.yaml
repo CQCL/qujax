@@ -1,0 +1,4 @@
+name: docs
+dependencies:
+  - pip:
+      - jax
