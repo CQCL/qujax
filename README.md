@@ -6,6 +6,11 @@ downstream for exact expectations, gradients or sampling.
 
 A JAX implementation of a quantum circuit is useful for runtime speedups, automatic differentiation and support for GPUs/TPUs.
 
+Some useful links:
+- [Documentation](https://qujax.readthedocs.io/en/latest/)
+- [PyPI](https://pypi.org/project/qujax/)
+- [examples](examples)
+
 ## Install
 ```
 pip install qujax
