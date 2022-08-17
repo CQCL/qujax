@@ -1,4 +1,6 @@
 from setuptools import setup, find_packages
+from qujax.version import __version__
+
 
 setup(
     name="qujax",
@@ -23,5 +25,5 @@ setup(
     ],
     include_package_data=True,
     platforms="any",
-    version='0.1.9'
+    version=__version__
 )
