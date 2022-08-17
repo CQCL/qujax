@@ -11,7 +11,7 @@ A JAX implementation of a quantum circuit is useful for runtime speedups, automa
 pip install qujax
 ```
 
-## Parameterised quantum circuits with JAX
+## Parameterised quantum circuits with qujax
 ```python
 from jax import numpy as jnp
 import qujax
@@ -20,6 +20,13 @@ circuit_gates = ['H', 'Ry', 'CZ']
 circuit_qubit_inds = [[0], [0], [0, 1]]
 circuit_params_inds = [[], [0], []]
 
+qujax.print_circuit(circuit_gates, circuit_qubit_inds, circuit_params_inds)
+# q0: -----H-----Ry[0]-----◯---
+#                          |   
+# q1: ---------------------CZ--
+```
+
+```python
 param_to_st = qujax.get_params_to_statetensor_func(circuit_gates,
                                                    circuit_qubit_inds,
                                                    circuit_params_inds)
