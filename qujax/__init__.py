@@ -1,7 +1,6 @@
 
 from qujax import gates
 
-from qujax.circuit import UnionCallableOptionalArray
 from qujax.circuit import get_params_to_statetensor_func
 
 from qujax.observable import get_statetensor_to_expectation_func
