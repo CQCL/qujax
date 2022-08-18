@@ -1,8 +1,9 @@
 from setuptools import setup, find_packages
-from qujax.version import __version__
 
 with open('requirements.txt') as f:
     requirements = f.read().splitlines()
+
+exec(open('qujax/version.py').read())
 
 setup(
     name="qujax",

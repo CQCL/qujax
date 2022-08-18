@@ -1,4 +1,4 @@
-from .version import __version__
+from qujax.version import __version__
 
 from qujax import gates
 
