@@ -1,0 +1,6 @@
+sphinx >= 3
+sphinx-autodoc-typehints
+sphinx-rtd-theme >= 1.0.0
+
+jax
+jaxlib
