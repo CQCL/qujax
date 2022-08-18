@@ -9,7 +9,9 @@ A JAX implementation of a quantum circuit is useful for runtime speedups, automa
 Some useful links:
 - [Documentation](https://qujax.readthedocs.io/en/latest/)
 - [PyPI](https://pypi.org/project/qujax/)
-- [examples](examples)
+- [Example notebooks](https://github.com/CQCL/qujax/tree/main/examples)
+- [pytket-qujax](https://github.com/CQCL/pytket-qujax)
+
 
 ## Install
 ```
@@ -67,18 +69,17 @@ expectation_and_grad(jnp.array([0.1]))
 ```
 
 
-
 ## Notes
 + We use the convention where parameters are given in units of π (i.e. in [0,2] rather than [0, 2π]).
 + By default the parameter to statetensor function initiates in the all 0 state, however there is an optional ```statetensor_in``` argument to initiate in an arbitrary state.
 
 
-## Examples
-A suite of notebooks demonstrating core features and implementation can be found in the [examples](examples) directory.
-
-
-## tk_to_qujax
+## pytket-qujax
 You can also generate the parameter to statetensor function from a [`pytket`](https://cqcl.github.io/tket/pytket/api/)
-circuit using the [`pytket-qujax`](https://github.com/CQCL/pytket-qujax) extension. 
+circuit using the [`pytket-qujax`](https://github.com/CQCL/pytket-qujax) extension.
+In particular, the
+[`tk_to_qujax`](https://cqcl.github.io/pytket-qujax/api/api.html#pytket.extensions.qujax.qujax_convert.tk_to_qujax) and
+[`tk_to_qujax_symbolic`](https://cqcl.github.io/pytket-qujax/api/api.html#pytket.extensions.qujax.qujax_convert.tk_to_qujax_symbolic)
+functions.
 An example notebook can be found at [`pytket-qujax_heisenberg_vqe.ipynb`](https://github.com/CQCL/pytket/blob/main/examples/pytket-qujax_heisenberg_vqe.ipynb).
 
