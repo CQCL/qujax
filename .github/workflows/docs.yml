@@ -9,7 +9,7 @@ on:
 jobs:
   docs:
     name: Build and publish docs
-    if: github.event_name == 'push' && contains(github.ref, 'refs/heads/main')
+    if: github.event_name == 'push'
     runs-on: ubuntu-20.04
     steps:
     - uses: actions/checkout@v3
