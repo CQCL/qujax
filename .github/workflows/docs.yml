@@ -32,7 +32,7 @@ jobs:
       run: |
         cd .github/workflows/docs
         mkdir build
-        sphinx-build ../../docs build -a
+        sphinx-build ../../../docs build -a
     - name: Configure git
       run: |
         git config --global user.email "qujax-bot@cambridgequantum.com"
