@@ -37,7 +37,7 @@ jobs:
           python -m pip install $w
           cp $w ${ARTIFACTSDIR}
         done
-        cd testes
+        cd tests
         pytest
     - uses: actions/upload-artifact@v3
       if: github.event_name == 'release'
