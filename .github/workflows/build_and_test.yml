@@ -28,16 +28,16 @@ jobs:
         python-version: '3.9'
     - name: Build and test
       run: |
-      ARTIFACTSDIR=${GITHUB_WORKSPACE}/wheelhouse
-      rm -rf ${ARTIFACTSDIR} && mkdir ${ARTIFACTSDIR}
-      python -m pip install --upgrade pip wheel build pytest
-      python -m build
-      for w in dist/*.whl ; do
-        python -m pip install $w
-        cp $w ${ARTIFACTSDIR}
-      done
-      cd testes
-      pytest
+        ARTIFACTSDIR=${GITHUB_WORKSPACE}/wheelhouse
+        rm -rf ${ARTIFACTSDIR} && mkdir ${ARTIFACTSDIR}
+        python -m pip install --upgrade pip wheel build pytest
+        python -m build
+        for w in dist/*.whl ; do
+          python -m pip install $w
+          cp $w ${ARTIFACTSDIR}
+        done
+        cd testes
+        pytest
     - uses: actions/upload-artifact@v3
       if: github.event_name == 'release'
       with:
