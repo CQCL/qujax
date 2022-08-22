@@ -8,6 +8,7 @@ on:
   push:
     branches:
       - develop
+      - main
   release:
     types:
       - created
@@ -36,7 +37,7 @@ jobs:
           python -m pip install $w
           cp $w ${ARTIFACTSDIR}
         done
-        cd testes
+        cd tests
         pytest
     - uses: actions/upload-artifact@v3
       if: github.event_name == 'release'
@@ -49,7 +50,7 @@ jobs:
   publish_to_pypi:
     name: Publish to pypi
     if: github.event_name == 'release'
-    needs: linux
+    needs: linux-checks
     runs-on: ubuntu-20.04
     steps:
     - name: Download all wheels
