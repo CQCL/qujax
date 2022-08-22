@@ -1,0 +1,69 @@
+name: Build and test
+
+on:
+  pull_request:
+    branches:
+      - main
+      - develop
+  push:
+    branches:
+      - develop
+  release:
+    types:
+      - created
+      - edited
+
+jobs:
+  linux-checks:
+    name: Linux - Build and test module
+    runs-on: ubuntu-20.04
+
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: '0'
+    - name: Set up Python 3.9
+      uses: actions/setup-python@v3
+      with:
+        python-version: '3.9'
+    - name: Build and test
+      run: |
+        ARTIFACTSDIR=${GITHUB_WORKSPACE}/wheelhouse
+        rm -rf ${ARTIFACTSDIR} && mkdir ${ARTIFACTSDIR}
+        python -m pip install --upgrade pip wheel build pytest
+        python -m build
+        for w in dist/*.whl ; do
+          python -m pip install $w
+          cp $w ${ARTIFACTSDIR}
+        done
+        cd testes
+        pytest
+    - uses: actions/upload-artifact@v3
+      if: github.event_name == 'release'
+      with:
+        name: artefacts
+        path: wheelhouse/
+
+        
+
+  publish_to_pypi:
+    name: Publish to pypi
+    if: github.event_name == 'release'
+    needs: linux
+    runs-on: ubuntu-20.04
+    steps:
+    - name: Download all wheels
+      uses: actions/download-artifact@v3
+      with:
+        path: wheelhouse
+    - name: Put them all in the dist folder
+      run: |
+        mkdir dist
+        for w in `find wheelhouse/ -type f -name "*.whl"` ; do cp $w dist/ ; done
+    - name: Publish wheels
+      uses: pypa/gh-action-pypi-publish@release/v1
+      with:
+        user: __token__
+        password: ${{ secrets.PYPI_QUJAX_API_TOKEN }}
+        verbose: true
+
