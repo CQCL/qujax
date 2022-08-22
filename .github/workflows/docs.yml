@@ -1,0 +1,49 @@
+name: Qujax Docs
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  docs:
+    name: Build and publish docs
+    if: github.event_name == 'push'
+    runs-on: ubuntu-20.04
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: '0'
+    - name: Set up Python 3.9
+      uses: actions/setup-python@v3
+      with:
+        python-version: '3.9'
+    - name: Upgrade pip and install wheel
+      run: pip install --upgrade pip wheel
+    - name: Install qujax
+      run: |        
+        pip install .
+    - name: Install docs dependencies
+      run: |
+        pip install -r .github/workflows/docs/requirements.txt
+    - name: Build docs
+      timeout-minutes: 20
+      run: |
+        cd .github/workflows/docs        
+        sphinx-build ../../../docs . -a
+    - name: Configure git
+      run: |
+        git config --global user.email "qujax-bot@cambridgequantum.com"
+        git config --global user.name  "«$GITHUB_WORKFLOW» github action"
+    - name: Check out gh-pages branch
+      run: git checkout gh-pages
+    - name: Remove old docs
+      run: git rm -r --ignore-unmatch docs/api
+    - name: Add generated docs to repository
+      run: |
+        mkdir -p docs
+        mv .github/workflows/docs docs/api
+        git add -f docs/api
+        git commit --allow-empty -m "Add generated documentation."
+    - name: Publish docs
+      run:  git push origin gh-pages:gh-pages
