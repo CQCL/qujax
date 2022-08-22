@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-      - add/docs-build
 
 jobs:
   docs:
