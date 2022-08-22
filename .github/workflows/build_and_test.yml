@@ -49,7 +49,7 @@ jobs:
   publish_to_pypi:
     name: Publish to pypi
     if: github.event_name == 'release'
-    needs: linux
+    needs: linux-checks
     runs-on: ubuntu-20.04
     steps:
     - name: Download all wheels
