@@ -31,8 +31,8 @@ jobs:
       timeout-minutes: 20
       run: |
         cd .github/workflows/docs
-        mkdir extensions
-        ./build-docs -d ${GITHUB_WORKSPACE}/.github/workflows/docs/extensions
+        mkdir build
+        sphinx-build ../../docs build -a
     - name: Configure git
       run: |
         git config --global user.email "qujax-bot@cambridgequantum.com"
