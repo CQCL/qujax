@@ -95,8 +95,4 @@ Pull requests are welcomed!
 5. Issue a pull request into [`develop`](https://github.com/CQCL/qujax/tree/develop).
 
 New commits on [`develop`](https://github.com/CQCL/qujax/tree/develop) will then be merged into
-[`main`](https://github.com/CQCL/qujax/tree/develop) on the next release.
-
-We use [semantic versioning](https://semver.org/) with version number `x.y.z` -
-where `x` increases with API changes, `y` increases with added functionality that is backwards compatible
-and `z` increases with patches.
+[`main`](https://github.com/CQCL/qujax/tree/main) on the next release.
