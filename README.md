@@ -83,3 +83,16 @@ In particular, the
 functions.
 An example notebook can be found at [`pytket-qujax_heisenberg_vqe.ipynb`](https://github.com/CQCL/pytket/blob/main/examples/pytket-qujax_heisenberg_vqe.ipynb).
 
+
+## Contributing
+Bugs and feature requests are managed using [GitHub issues](https://github.com/CQCL/qujax/issues).
+
+Pull requests are welcomed!
+1. First fork the repo and create your branch from [`develop`](https://github.com/CQCL/qujax/tree/develop).
+2. Add your code.
+3. Add your tests.
+4. Update the documentation if required.
+5. Issue a pull request into [`develop`](https://github.com/CQCL/qujax/tree/develop).
+
+New commits on [`develop`](https://github.com/CQCL/qujax/tree/develop) will then be merged into
+[`main`](https://github.com/CQCL/qujax/tree/main) on the next release.
