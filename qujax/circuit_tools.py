@@ -73,6 +73,9 @@ def _get_gate_str(gate_obj: Union[str,
         else:
             gate_str = 'Other'
 
+    if hasattr(param_inds, 'tolist'):
+        param_inds = param_inds.tolist()
+
     if param_inds == [] or param_inds == [None]:
         if len(gate_str) > 7:
             gate_str = gate_str[:6] + '.'
@@ -174,8 +177,8 @@ def print_circuit(gate_seq: Sequence[Union[str,
     rows = [f'q{qubit_min}: '.ljust(3) + '-' * sep_length]
     if n_qubits_disp > 1:
         for i in range(qubit_min + 1, qubit_max + 1):
-            rows += ['   ', f'q{i}: '.ljust(3) + '-' * sep_length]
-    qubits_free = [True] * n_qubits_disp
+            rows += [' ', f'q{i}: '.ljust(3) + '-' * sep_length]
+    rows, qubits_free = _pad_rows(rows)
 
     for gate_ind in range(gate_ind_min, gate_ind_max + 1):
         g = gate_str_seq[gate_ind]
@@ -193,7 +196,6 @@ def print_circuit(gate_seq: Sequence[Union[str,
                 qubits_free[row_ind // 2] = False
             elif row_ind % 2 == 1:
                 rows[row_ind] += ' ' * sep_length + '   ' + '|' + '   '
-
             elif row_ind / 2 in qi:
                 rows[row_ind] += '-' * sep_length + '---' + '◯' + '---'
                 qubits_free[row_ind // 2] = False
