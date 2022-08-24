@@ -27,7 +27,7 @@ circuit_gates = ['H', 'Ry', 'CZ']
 circuit_qubit_inds = [[0], [0], [0, 1]]
 circuit_params_inds = [[], [0], []]
 
-qujax.print_circuit(circuit_gates, circuit_qubit_inds, circuit_params_inds)
+qujax.print_circuit(circuit_gates, circuit_qubit_inds, circuit_params_inds);
 # q0: -----H-----Ry[0]-----◯---
 #                          |   
 # q1: ---------------------CZ--
