@@ -93,19 +93,19 @@
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>gate_seq_seq</strong> (<em>Sequence</em><em>[</em><em>Sequence</em><em>[</em><em>Union</em><em>[</em><em>str</em><em>, </em><em>jax._src.numpy.ndarray.ndarray</em><em>]</em><em>]</em><em>]</em>) – Sequence of sequences of gates.
+<li><strong>gate_seq_seq</strong> (<em>Sequence</em><em>[</em><em>Sequence</em><em>[</em><em>Union</em><em>[</em><em>str</em><em>, </em><em>jnp.ndarray</em><em>]</em><em>]</em><em>]</em>) – Sequence of sequences of gates.
 Each gate is either a tensor (jnp.ndarray) or a string corresponding to a array in qujax.gates.
 E.g. [[‘Z’, ‘Z’], [‘X’]]</li>
 <li><strong>qubits_seq_seq</strong> (<em>Sequence</em><em>[</em><em>Sequence</em><em>[</em><em>int</em><em>]</em><em>]</em>) – Sequence of sequences of integer qubit indices.
 E.g. [[0,1], [2]]</li>
-<li><strong>coefficients</strong> (<em>Union</em><em>[</em><em>Sequence</em><em>[</em><em>float</em><em>]</em><em>, </em><em>jax._src.numpy.ndarray.ndarray</em><em>]</em>) – Sequence of float coefficients to scale the expected values.</li>
+<li><strong>coefficients</strong> (<em>Union</em><em>[</em><em>Sequence</em><em>[</em><em>float</em><em>]</em><em>, </em><em>jnp.ndarray</em><em>]</em>) – Sequence of float coefficients to scale the expected values.</li>
 </ul>
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Function that takes statetensor and returns expected value (float).</p>
 </td>
 </tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">Callable[[jax._src.numpy.ndarray.ndarray], float]</p>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">Callable[[jnp.ndarray], float]</p>
 </td>
 </tr>
 </tbody>

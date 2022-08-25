@@ -93,7 +93,7 @@
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>gate_seq</strong> (<em>Sequence</em><em>[</em><em>Union</em><em>[</em><em>str</em><em>, </em><em>jax._src.numpy.ndarray.ndarray</em><em>, </em><em>Callable</em><em>[</em><em>[</em><em>jax._src.numpy.ndarray.ndarray</em><em>]</em><em>, </em><em>jax._src.numpy.ndarray.ndarray</em><em>]</em><em>, </em><em>Callable</em><em>[</em><em>[</em><em>]</em><em>, </em><em>jax._src.numpy.ndarray.ndarray</em><em>]</em><em>]</em><em>]</em>) – Sequence of gates.
+<li><strong>gate_seq</strong> (<em>Sequence</em><em>[</em><em>Union</em><em>[</em><em>str</em><em>, </em><em>jnp.ndarray</em><em>, </em><em>Callable</em><em>[</em><em>[</em><em>jnp.ndarray</em><em>]</em><em>, </em><em>jnp.ndarray</em><em>]</em><em>, </em><em>Callable</em><em>[</em><em>[</em><em>]</em><em>, </em><em>jnp.ndarray</em><em>]</em><em>]</em><em>]</em>) – Sequence of gates.
 Each element is either a string matching an array or function in qujax.gates,
 a unitary array (which will be reshaped into a tensor of shape (2,2,2,…) )
 or a function taking parameters and returning gate unitary in tensor form.</li>
@@ -101,7 +101,7 @@ or a function taking parameters and returning gate unitary in tensor form.</li>
 <li><strong>param_inds_seq</strong> (<em>Sequence</em><em>[</em><em>Sequence</em><em>[</em><em>int</em><em>]</em><em>]</em>) – Sequence of parameter indices that gates are using,
 i.e. [[0], [], [5, 2]] tells qujax that the first gate uses the first parameter,
 the second gate is not parameterised and the third gates used the fifth and second parameters.</li>
-<li><strong>n_qubits</strong> (<em>Optional</em><em>[</em><em>int</em><em>]</em>) – Number of qubits, if fixed.</li>
+<li><strong>n_qubits</strong> (<em>int</em>) – Number of qubits, if fixed.</li>
 </ul>
 </td>
 </tr>
@@ -109,7 +109,7 @@ the second gate is not parameterised and the third gates used the fifth and seco
 If no parameters are found then the function only takes optional statetensor_in.</p>
 </td>
 </tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">Union[qujax.circuit.CallableArrayAndOptionalArray, qujax.circuit.CallableOptionalArray]</p>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">UnionCallableOptionalArray</p>
 </td>
 </tr>
 </tbody>
