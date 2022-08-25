@@ -1,6 +1,6 @@
-from typing import Sequence, Callable, Union
+from __future__ import annotations
+from typing import Sequence, Callable, Union, Optional
 
-import jax.numpy as jnp
 from jax import numpy as jnp, random
 
 from qujax import gates
@@ -135,7 +135,7 @@ def bitstrings_to_integers(bitstrings: jnp.ndarray) -> Union[int, jnp.ndarray]:
 
 def sample_integers(random_key: random.PRNGKeyArray,
                     statetensor: jnp.ndarray,
-                    n_samps: int = 1) -> jnp.ndarray:
+                    n_samps: Optional[int] = 1) -> jnp.ndarray:
     """
     Generate random integer samples according to statetensor.
 
@@ -155,7 +155,7 @@ def sample_integers(random_key: random.PRNGKeyArray,
 
 def sample_bitstrings(random_key: random.PRNGKeyArray,
                       statetensor: jnp.ndarray,
-                      n_samps: int = 1) -> jnp.ndarray:
+                      n_samps: Optional[int] = 1) -> jnp.ndarray:
     """
     Generate random bitstring samples according to statetensor.
 

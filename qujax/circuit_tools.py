@@ -1,4 +1,5 @@
-from typing import Sequence, Union, Callable, List, Tuple
+from __future__ import annotations
+from typing import Sequence, Union, Callable, List, Tuple, Optional
 import collections.abc
 
 from jax import numpy as jnp
@@ -128,12 +129,12 @@ def print_circuit(gate_seq: Sequence[Union[str,
                                            Callable[[], jnp.ndarray]]],
                   qubit_inds_seq: Sequence[Sequence[int]],
                   param_inds_seq: Sequence[Sequence[int]],
-                  n_qubits: int = None,
-                  qubit_min: int = 0,
-                  qubit_max: int = jnp.inf,
-                  gate_ind_min: int = 0,
-                  gate_ind_max: int = jnp.inf,
-                  sep_length: int = 1) -> List[str]:
+                  n_qubits: Optional[int] = None,
+                  qubit_min: Optional[int] = 0,
+                  qubit_max: Optional[int] = jnp.inf,
+                  gate_ind_min: Optional[int] = 0,
+                  gate_ind_max: Optional[int] = jnp.inf,
+                  sep_length: Optional[int] = 1) -> List[str]:
     """
     Returns and prints basic string representation of circuit.
 
