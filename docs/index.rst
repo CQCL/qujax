@@ -24,6 +24,7 @@ Docs
 
 	get_params_to_statetensor_func
 	get_statetensor_to_expectation_func
+    get_statetensor_to_sampled_expectation_func
 	integers_to_bitstrings
 	bitstrings_to_integers
 	sample_integers
