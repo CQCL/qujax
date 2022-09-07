@@ -2,6 +2,7 @@ from __future__ import annotations
 from typing import Sequence, Callable, Union, Optional
 
 from jax import numpy as jnp, random
+from jax.lax import fori_loop
 
 from qujax import gates
 
@@ -99,6 +100,55 @@ def get_statetensor_to_expectation_func(gate_seq_seq: Sequence[Sequence[Union[st
     return statetensor_to_expectation_func
 
 
+def get_statetensor_to_sampled_expectation_func(gate_seq_seq: Sequence[Sequence[Union[str, jnp.ndarray]]],
+                                                qubits_seq_seq: Sequence[Sequence[int]],
+                                                coefficients: Union[Sequence[float], jnp.ndarray]) \
+        -> Callable[[jnp.ndarray, random.PRNGKeyArray, int], float]:
+    """
+    Converts gate strings, qubit indices and coefficients into a function that converts statetensor into
+    a sampled expectation value.
+
+    Args:
+        gate_seq_seq: Sequence of sequences of gates.
+            Each gate is either a tensor (jnp.ndarray) or a string corresponding to a array in qujax.gates.
+            E.g. [['Z', 'Z'], ['X']]
+        qubits_seq_seq: Sequence of sequences of integer qubit indices.
+            E.g. [[0,1], [2]]
+        coefficients: Sequence of float coefficients to scale the expected values.
+
+    Returns:
+        Function that takes statetensor, random key and integer number of shots
+        and returns sampled expected value (float).
+    """
+    statetensor_to_expectation_func = get_statetensor_to_expectation_func(gate_seq_seq, qubits_seq_seq, coefficients)
+
+    def statetensor_to_sampled_expectation_func(statetensor: jnp.ndarray,
+                                                random_key: random.PRNGKeyArray,
+                                                n_samps: int) -> float:
+        """
+        Maps statetensor to sampled expected value.
+
+        Args:
+            statetensor: Input statetensor.
+            random_key: JAX random key
+            n_samps: Number of samples contributing to sampled expectation.
+
+        Returns:
+            Sampled expected value (float).
+
+        """
+        sampled_integers = sample_integers(random_key, statetensor, n_samps)
+        sampled_probs = fori_loop(0, n_samps,
+                                  lambda i, sv: sv.at[sampled_integers[i]].add(1),
+                                  jnp.zeros(statetensor.size))
+
+        sampled_probs /= n_samps
+        sampled_st = jnp.sqrt(sampled_probs).reshape(statetensor.shape)
+        return statetensor_to_expectation_func(sampled_st)
+
+    return statetensor_to_sampled_expectation_func
+
+
 def integers_to_bitstrings(integers: Union[int, jnp.ndarray],
                            nbits: int = None) -> jnp.ndarray:
     """
@@ -107,13 +157,14 @@ def integers_to_bitstrings(integers: Union[int, jnp.ndarray],
     Args:
         integers: Integer or array of integers to be converted.
         nbits: Length of output binary expansion.
+            Defaults to smallest possible.
 
     Returns:
         Array of binary expansion(s).
     """
     integers = jnp.atleast_1d(integers)
     if nbits is None:
-        nbits = (jnp.ceil(jnp.log2(integers.max()) + 1e-5)).astype(int)
+        nbits = (jnp.ceil(jnp.log2(jnp.maximum(integers.max(), 1)) + 1e-5)).astype(int)
 
     return jnp.squeeze(((integers[:, None] & (1 << jnp.arange(nbits - 1, -1, -1))) > 0).astype(int))
 
@@ -130,7 +181,7 @@ def bitstrings_to_integers(bitstrings: jnp.ndarray) -> Union[int, jnp.ndarray]:
     """
     bitstrings = jnp.atleast_2d(bitstrings)
     convarr = 2 ** jnp.arange(bitstrings.shape[-1] - 1, -1, -1)
-    return jnp.squeeze(bitstrings.dot(convarr))
+    return jnp.squeeze(bitstrings.dot(convarr)).astype(int)
 
 
 def sample_integers(random_key: random.PRNGKeyArray,

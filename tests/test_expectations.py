@@ -76,6 +76,14 @@ def test_ZZ_X():
     assert jnp.abs(-0.23738188 - jax_exp) < 1e-5
     assert jnp.abs(-0.23738188 - jax_exp_jit) < 1e-5
 
+    st_to_samp_exp = qujax.get_statetensor_to_sampled_expectation_func(gate_str_seq_seq,
+                                                                       qubit_inds_seq,
+                                                                       coefs)
+    jax_samp_exp = st_to_samp_exp(st_in, random.PRNGKey(1), 10000)
+    jax_samp_exp_jit = jit(st_to_samp_exp, static_argnums=2)(st_in, random.PRNGKey(2), 10000)
+    assert jnp.abs(-0.23738188 - jax_samp_exp) < 1e-2
+    assert jnp.abs(-0.23738188 - jax_samp_exp_jit) < 1e-2
+
 
 def test_sampling():
     target_pmf = jnp.array([0, 1, 1, 0, 1, 0, 1, 0, 1, 1, 0, 0, 0, 1, 0, 0])
@@ -85,10 +93,10 @@ def test_sampling():
 
     n_samps = 7
 
-    sample_ints = qujax.sample_integers(random.PRNGKey(0), target_st , n_samps)
-    assert sample_ints.shape == (n_samps, )
+    sample_ints = qujax.sample_integers(random.PRNGKey(0), target_st, n_samps)
+    assert sample_ints.shape == (n_samps,)
     assert all(target_pmf[sample_ints] > 0)
 
-    sample_bitstrings = qujax.sample_bitstrings(random.PRNGKey(0), target_st , n_samps)
+    sample_bitstrings = qujax.sample_bitstrings(random.PRNGKey(0), target_st, n_samps)
     assert sample_bitstrings.shape == (n_samps, int(jnp.log2(target_pmf.size)))
     assert all(qujax.bitstrings_to_integers(sample_bitstrings) == sample_ints)
