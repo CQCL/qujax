@@ -157,6 +157,7 @@ def integers_to_bitstrings(integers: Union[int, jnp.ndarray],
     Args:
         integers: Integer or array of integers to be converted.
         nbits: Length of output binary expansion.
+            Defaults to smallest possible.
 
     Returns:
         Array of binary expansion(s).
