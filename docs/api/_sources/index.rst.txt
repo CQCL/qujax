@@ -22,25 +22,26 @@ Docs
 
 .. toctree::
 
-	get_params_to_statetensor_func
-	get_statetensor_to_expectation_func
-	integers_to_bitstrings
-	bitstrings_to_integers
-	sample_integers
-	sample_bitstrings
-	check_circuit
-	print_circuit
-	gates <https://github.com/CQCL/qujax/blob/main/qujax/gates.py>
+    get_params_to_statetensor_func
+    get_statetensor_to_expectation_func
+    get_statetensor_to_sampled_expectation_func
+    integers_to_bitstrings
+    bitstrings_to_integers
+    sample_integers
+    sample_bitstrings
+    check_circuit
+    print_circuit
+    gates <https://github.com/CQCL/qujax/blob/main/qujax/gates.py>
 
 
 .. toctree::
-	:caption: Links:
-	:hidden:
+    :caption: Links:
+    :hidden:
 
-	GitHub <https://github.com/CQCL/qujax>
-	Example notebooks <https://github.com/CQCL/qujax/tree/main/examples>
-	PyPI <https://pypi.org/project/qujax/>
-	pytket-qujax <https://cqcl.github.io/pytket-qujax/api>
+    GitHub <https://github.com/CQCL/qujax>
+    Example notebooks <https://github.com/CQCL/qujax/tree/main/examples>
+    PyPI <https://pypi.org/project/qujax/>
+    pytket-qujax <https://cqcl.github.io/pytket-qujax/api>
 
 
 

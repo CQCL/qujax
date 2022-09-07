@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>integers_to_bitstrings &mdash; qujax 0.2.6 documentation</title>
+  <title>get_statetensor_to_expectation_func &mdash; qujax 0.2.6 documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -17,8 +17,8 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="bitstrings_to_integers" href="bitstrings_to_integers.html" />
-    <link rel="prev" title="get_statetensor_to_expectation_func" href="get_statetensor_to_sampled_expectation_func.html" /> 
+    <link rel="next" title="integers_to_bitstrings" href="integers_to_bitstrings.html" />
+    <link rel="prev" title="get_statetensor_to_expectation_func" href="get_statetensor_to_expectation_func.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -42,8 +42,8 @@
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="get_params_to_statetensor_func.html">get_params_to_statetensor_func</a></li>
 <li class="toctree-l1"><a class="reference internal" href="get_statetensor_to_expectation_func.html">get_statetensor_to_expectation_func</a></li>
-<li class="toctree-l1"><a class="reference internal" href="get_statetensor_to_sampled_expectation_func.html">get_statetensor_to_expectation_func</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">integers_to_bitstrings</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">get_statetensor_to_expectation_func</a></li>
+<li class="toctree-l1"><a class="reference internal" href="integers_to_bitstrings.html">integers_to_bitstrings</a></li>
 <li class="toctree-l1"><a class="reference internal" href="bitstrings_to_integers.html">bitstrings_to_integers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="sample_integers.html">sample_integers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="sample_bitstrings.html">sample_bitstrings</a></li>
@@ -73,9 +73,9 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
-      <li>integers_to_bitstrings</li>
+      <li>get_statetensor_to_expectation_func</li>
       <li class="wy-breadcrumbs-aside">
-            <a href="_sources/integers_to_bitstrings.rst.txt" rel="nofollow"> View page source</a>
+            <a href="_sources/get_statetensor_to_sampled_expectation_func.rst.txt" rel="nofollow"> View page source</a>
       </li>
   </ul>
   <hr/>
@@ -83,27 +83,32 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <div class="section" id="integers-to-bitstrings">
-<h1>integers_to_bitstrings<a class="headerlink" href="#integers-to-bitstrings" title="Permalink to this headline"></a></h1>
+  <div class="section" id="get-statetensor-to-expectation-func">
+<h1>get_statetensor_to_expectation_func<a class="headerlink" href="#get-statetensor-to-expectation-func" title="Permalink to this headline"></a></h1>
 <dl class="py function">
-<dt class="sig sig-object py" id="qujax.integers_to_bitstrings">
-<code class="sig-prename descclassname"><span class="pre">qujax.</span></code><code class="sig-name descname"><span class="pre">integers_to_bitstrings</span></code><span class="sig-paren">(</span><em><span class="n"><span class="pre">integers</span></span></em>, <em><span class="n"><span class="pre">nbits</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qujax.integers_to_bitstrings" title="Permalink to this definition"></a></dt>
-<dd><p>Convert integer or array of integers into their binary expansion(s).</p>
+<dt class="sig sig-object py" id="qujax.get_statetensor_to_sampled_expectation_func">
+<code class="sig-prename descclassname"><span class="pre">qujax.</span></code><code class="sig-name descname"><span class="pre">get_statetensor_to_sampled_expectation_func</span></code><span class="sig-paren">(</span><em><span class="n"><span class="pre">gate_seq_seq</span></span></em>, <em><span class="n"><span class="pre">qubits_seq_seq</span></span></em>, <em><span class="n"><span class="pre">coefficients</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qujax.get_statetensor_to_sampled_expectation_func" title="Permalink to this definition"></a></dt>
+<dd><p>Converts gate strings, qubit indices and coefficients into a function that converts statetensor into
+a sampled expectation value.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>integers</strong> (<em>Union</em><em>[</em><em>int</em><em>, </em><em>jnp.ndarray</em><em>]</em>) – Integer or array of integers to be converted.</li>
-<li><strong>nbits</strong> (<em>int</em>) – Length of output binary expansion.
-Defaults to smallest possible.</li>
+<li><strong>gate_seq_seq</strong> (<em>Sequence</em><em>[</em><em>Sequence</em><em>[</em><em>Union</em><em>[</em><em>str</em><em>, </em><em>jnp.ndarray</em><em>]</em><em>]</em><em>]</em>) – Sequence of sequences of gates.
+Each gate is either a tensor (jnp.ndarray) or a string corresponding to a array in qujax.gates.
+E.g. [[‘Z’, ‘Z’], [‘X’]]</li>
+<li><strong>qubits_seq_seq</strong> (<em>Sequence</em><em>[</em><em>Sequence</em><em>[</em><em>int</em><em>]</em><em>]</em>) – Sequence of sequences of integer qubit indices.
+E.g. [[0,1], [2]]</li>
+<li><strong>coefficients</strong> (<em>Union</em><em>[</em><em>Sequence</em><em>[</em><em>float</em><em>]</em><em>, </em><em>jnp.ndarray</em><em>]</em>) – Sequence of float coefficients to scale the expected values.</li>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Array of binary expansion(s).</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Function that takes statetensor, random key and integer number of shots
+and returns sampled expected value (float).</p>
 </td>
 </tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">jnp.ndarray</p>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">Callable[[jnp.ndarray, random.PRNGKeyArray, int], float]</p>
 </td>
 </tr>
 </tbody>
@@ -116,8 +121,8 @@ Defaults to smallest possible.</li>
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="get_statetensor_to_sampled_expectation_func.html" class="btn btn-neutral float-left" title="get_statetensor_to_expectation_func" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="bitstrings_to_integers.html" class="btn btn-neutral float-right" title="bitstrings_to_integers" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="get_statetensor_to_expectation_func.html" class="btn btn-neutral float-left" title="get_statetensor_to_expectation_func" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="integers_to_bitstrings.html" class="btn btn-neutral float-right" title="integers_to_bitstrings" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
