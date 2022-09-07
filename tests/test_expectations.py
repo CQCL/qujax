@@ -79,10 +79,10 @@ def test_ZZ_X():
     st_to_samp_exp = qujax.get_statetensor_to_sampled_expectation_func(gate_str_seq_seq,
                                                                        qubit_inds_seq,
                                                                        coefs)
-    jax_samp_exp = st_to_samp_exp(st_in, random.PRNGKey(1), 1000)
-    jax_samp_exp_jit = jit(st_to_samp_exp, static_argnums=2)(st_in, random.PRNGKey(2), 1000)
-    assert jnp.abs(-0.23738188 - jax_samp_exp) < 1e-1
-    assert jnp.abs(-0.23738188 - jax_samp_exp_jit) < 1e-1
+    jax_samp_exp = st_to_samp_exp(st_in, random.PRNGKey(1), 10000)
+    jax_samp_exp_jit = jit(st_to_samp_exp, static_argnums=2)(st_in, random.PRNGKey(2), 10000)
+    assert jnp.abs(-0.23738188 - jax_samp_exp) < 1e-2
+    assert jnp.abs(-0.23738188 - jax_samp_exp_jit) < 1e-2
 
 
 def test_sampling():
