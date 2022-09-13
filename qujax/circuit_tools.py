@@ -66,6 +66,10 @@ def _get_gate_str(gate_obj: Union[str,
     """
     if isinstance(gate_obj, str):
         gate_str = gate_obj
+    elif hasattr(gate_obj, '__array__'):
+        gate_str = 'Arr'
+    elif callable(gate_obj):
+        gate_str = 'Func'
     else:
         if hasattr(gate_obj, '__name__'):
             gate_str = gate_obj.__name__
