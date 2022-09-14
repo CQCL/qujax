@@ -151,10 +151,10 @@ def ISWAP(param: float) -> jnp.ndarray:
 def PhasedISWAP(param0: float, param1: float) -> jnp.ndarray:
     param1_pi_2 = param1 * jnp.pi / 2
     c = jnp.cos(param1_pi_2)
-    i_s_e = 1.j * jnp.sin(param1_pi_2) * jnp.exp(-2.j * jnp.pi * param0)
+    i_s = 1.j * jnp.sin(param1_pi_2)
     return jnp.array([[1., 0., 0., 0.],
-                      [0., c, i_s_e, 0.],
-                      [0., i_s_e, c, 0.],
+                      [0., c, i_s * jnp.exp(2.j * jnp.pi * param0), 0.],
+                      [0., i_s * jnp.exp(-2.j * jnp.pi * param0), c, 0.],
                       [0., 0., 0., 1.]]).reshape((2,) * 4)
 
 
