@@ -95,11 +95,7 @@ def get_params_to_statetensor_func(gate_seq: Sequence[Union[str,
     gate_seq_callable = []
     for gate in gate_seq:
         if isinstance(gate, str):
-            if gate in gates.__dict__:
-                gate = gates.__dict__[gate]
-            else:
-                raise KeyError(f'Gate string \'{gate}\' not found in qujax.gates '
-                               f'- consider changing input to an array or callable')
+            gate = gates.__dict__[gate]
 
         if callable(gate):
             gate_func = gate
@@ -109,8 +105,8 @@ def get_params_to_statetensor_func(gate_seq: Sequence[Union[str,
             gate = gate_arr.reshape((2,) * int(jnp.log2(gate_size)))
             gate_func = _array_to_callable(gate)
         else:
-            raise TypeError('Unsupported gate type'
-                            '- gate must be either a string in qujax.gates, an array or callable')
+            raise TypeError(f'Unsupported gate type - gate must be either a string in qujax.gates, an array or '
+                            f'callable: {gate}')
         gate_seq_callable.append(gate_func)
 
     apply_gate_seq = [_get_apply_gate(g, q) for g, q in zip(gate_seq_callable, qubit_inds_seq)]

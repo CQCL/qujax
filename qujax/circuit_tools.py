@@ -1,8 +1,38 @@
 from __future__ import annotations
 from typing import Sequence, Union, Callable, List, Tuple, Optional
 import collections.abc
+from inspect import signature
 
 from jax import numpy as jnp
+
+from qujax import gates
+
+
+def check_unitary(gate: Union[str,
+                              jnp.ndarray,
+                              Callable[[jnp.ndarray], jnp.ndarray],
+                              Callable[[], jnp.ndarray]]):
+    if isinstance(gate, str):
+        if gate in gates.__dict__:
+            gate = gates.__dict__[gate]
+        else:
+            raise KeyError(f'Gate string \'{gate}\' not found in qujax.gates '
+                           f'- consider changing input to an array or callable')
+
+    if callable(gate):
+        num_args = len(signature(gate).parameters)
+        gate_arr = gate(*jnp.ones(num_args) * 0.1)
+    elif hasattr(gate, '__array__'):
+        gate_arr = gate
+    else:
+        raise TypeError(f'Unsupported gate type - gate must be either a string in qujax.gates, an array or '
+                        f'callable: {gate}')
+
+    gate_square_dim = int(jnp.sqrt(gate_arr.size))
+    gate_arr = gate_arr.reshape(gate_square_dim, gate_square_dim)
+
+    if jnp.any(jnp.abs(gate_arr @ jnp.conjugate(gate_arr).T - jnp.eye(gate_square_dim)) > 1e-3):
+        raise TypeError(f'Gate not unitary: {gate}')
 
 
 def check_circuit(gate_seq: Sequence[Union[str,
@@ -44,6 +74,9 @@ def check_circuit(gate_seq: Sequence[Union[str,
 
     if n_qubits is not None and n_qubits < max([max(qi) for qi in qubit_inds_seq]) + 1:
         raise TypeError('n_qubits must be larger than largest qubit index in qubit_inds_seq')
+
+    for g in gate_seq:
+        check_unitary(g)
 
 
 def _get_gate_str(gate_obj: Union[str,
