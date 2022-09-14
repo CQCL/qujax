@@ -12,6 +12,7 @@ from qujax.observable import bitstrings_to_integers
 from qujax.observable import sample_integers
 from qujax.observable import sample_bitstrings
 
+from qujax.circuit_tools import check_unitary
 from qujax.circuit_tools import check_circuit
 from qujax.circuit_tools import print_circuit
 
