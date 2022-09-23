@@ -44,11 +44,12 @@ def get_statetensor_to_expectation_func(gate_seq_seq: Sequence[Sequence[Union[st
                                         coefficients: Union[Sequence[float], jnp.ndarray]) \
         -> Callable[[jnp.ndarray], float]:
     """
-    Converts gate strings, qubit indices and coefficients into a function that converts statetensor into expected value.
+    Converts gate strings (or arrays), qubit indices and coefficients into a function that
+    converts statetensor into expected value.
 
     Args:
         gate_seq_seq: Sequence of sequences of gates.
-            Each gate is either a tensor (jnp.ndarray) or a string corresponding to a array in qujax.gates.
+            Each gate is either a tensor (jnp.ndarray) or a string corresponding to an array in qujax.gates.
             E.g. [['Z', 'Z'], ['X']]
         qubits_seq_seq: Sequence of sequences of integer qubit indices.
             E.g. [[0,1], [2]]
@@ -105,12 +106,12 @@ def get_statetensor_to_sampled_expectation_func(gate_seq_seq: Sequence[Sequence[
                                                 coefficients: Union[Sequence[float], jnp.ndarray]) \
         -> Callable[[jnp.ndarray, random.PRNGKeyArray, int], float]:
     """
-    Converts gate strings, qubit indices and coefficients into a function that converts statetensor into
-    a sampled expectation value.
+    Converts gate strings (or arrays), qubit indices and coefficients into a function that
+    converts statetensor into a sampled expectation value.
 
     Args:
         gate_seq_seq: Sequence of sequences of gates.
-            Each gate is either a tensor (jnp.ndarray) or a string corresponding to a array in qujax.gates.
+            Each gate is either a tensor (jnp.ndarray) or a string corresponding to an array in qujax.gates.
             E.g. [['Z', 'Z'], ['X']]
         qubits_seq_seq: Sequence of sequences of integer qubit indices.
             E.g. [[0,1], [2]]
