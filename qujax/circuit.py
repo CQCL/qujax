@@ -29,7 +29,7 @@ def apply_gate(statetensor: jnp.ndarray, gate_unitary: jnp.ndarray, qubit_inds: 
         gate_unitary: Unitary array representing gate
             must be in tensor form with shape (2,2,...)
         qubit_inds: Sequence of indices for gate to be applied to.
-            len(qubit_inds) is equal to the dimension of the gate unitary tensor.
+            2 * len(qubit_inds) is equal to the dimension of the gate unitary tensor.
 
     Returns:
         Updated statetensor.
@@ -70,9 +70,6 @@ def _to_gate_funcs(gate_seq: Sequence[Union[str,
         if callable(gate):
             gate_func = gate
         elif hasattr(gate, '__array__'):
-            gate_arr = jnp.array(gate)
-            gate_size = gate_arr.size
-            gate = gate_arr.reshape((2,) * int(jnp.log2(gate_size)))
             gate_func = _array_to_callable(jnp.array(gate))
         else:
             raise TypeError(f'Unsupported gate type - gate must be either a string in qujax.gates, an array or '
@@ -100,13 +97,16 @@ def get_params_to_statetensor_func(gate_seq: Sequence[Union[str,
 
     Args:
         gate_seq: Sequence of gates.
-            Each element is either a string matching an array or function in qujax.gates,
-            a unitary array (which will be reshaped into a tensor of shape (2,2,2,...) )
-            or a function taking parameters and returning gate unitary in tensor form.
-        qubit_inds_seq: Sequences of qubits (ints) that gates are acting on.
-        param_inds_seq: Sequence of parameter indices that gates are using,
-            i.e. [[0], [], [5, 2]] tells qujax that the first gate uses the first parameter,
-            the second gate is not parameterised and the third gates used the fifth and second parameters.
+            Each element is either a string matching a unitary array or function in qujax.gates,
+            a custom unitary array or a custom function taking parameters and returning a unitary array.
+            Unitary arrays will be reshaped into tensor form (2, 2,...)
+        qubit_inds_seq: Sequences of sequences representing qubit indices (ints) that gates are acting on.
+            i.e. [[0], [0,1], [1]] tells qujax the first gate is a single qubit gate acting on the zeroth qubit,
+            the second gate is a two qubit gate acting on the zeroth and first qubit etc.
+        param_inds_seq: Sequence of sequences representing parameter indices that gates are using,
+            i.e. [[0], [], [5, 2]] tells qujax that the first gate uses the zeroth parameter
+            (the float at position zero in the parameter vector/array), the second gate is not parameterised
+            and the third gates used the parameters at position five and two.
         n_qubits: Number of qubits, if fixed.
 
     Returns:
@@ -145,7 +145,9 @@ def get_params_to_statetensor_func(gate_seq: Sequence[Union[str,
         params = jnp.atleast_1d(params)
         for gate_func, qubit_inds, param_inds in zip(gate_seq_callable, qubit_inds_seq, param_inds_seq):
             gate_params = jnp.take(params, param_inds)
-            statetensor = apply_gate(statetensor, gate_func(*gate_params), qubit_inds)
+            gate_unitary = gate_func(*gate_params)
+            gate_unitary = gate_unitary.reshape((2,) * (2 * len(qubit_inds)))   # Ensure gate is in tensor form
+            statetensor = apply_gate(statetensor, gate_unitary, qubit_inds)
         return statetensor
 
     if all([pi.size == 0 for pi in param_inds_seq]):
