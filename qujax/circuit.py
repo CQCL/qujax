@@ -1,6 +1,5 @@
 from __future__ import annotations
-from typing import Sequence, Union, Callable, Protocol, Tuple
-
+from typing import Sequence, Union, Callable, Protocol
 from jax import numpy as jnp
 
 from qujax import gates
@@ -20,41 +19,25 @@ class CallableOptionalArray(Protocol):
 UnionCallableOptionalArray = Union[CallableArrayAndOptionalArray, CallableOptionalArray]
 
 
-def _get_apply_gate(gate_func: Callable,
-                    qubit_inds: Sequence[int]) -> Callable[[jnp.ndarray, jnp.ndarray], jnp.ndarray]:
+def apply_gate(statetensor: jnp.ndarray, gate_unitary: jnp.ndarray, qubit_inds: Sequence[int]) -> jnp.ndarray:
     """
-    Creates a function that applies a given gate_func to given qubit_inds of a statetensor.
+    Applies gate to statetensor and returns updated statetensor.
+    Gate is represented by a unitary matrix (i.e. not parameterised).
 
     Args:
-        gate_func: Function that takes any gate parameters and returns the gate unitary (in tensor form).
+        statetensor: Input statetensor.
+        gate_unitary: Unitary array representing gate
+            must be in tensor form with shape (2,2,...)
         qubit_inds: Sequence of indices for gate to be applied to.
             len(qubit_inds) is equal to the dimension of the gate unitary tensor.
 
     Returns:
-        Function that takes statetensor and gate parameters, returns updated statetensor.
-
+        Updated statetensor.
     """
-
-    def apply_gate(statetensor: jnp.ndarray, params: jnp.ndarray) -> jnp.ndarray:
-        """
-        Applies {} gate to statetensor.
-
-        Args:
-            statetensor: Input statetensor.
-            params: Gate parameters if any.
-
-        Returns:
-            Updated statetensor.
-        """
-        gate_unitary = gate_func(*params)
-        statetensor = jnp.tensordot(gate_unitary, statetensor,
-                                    axes=(list(range(-len(qubit_inds), 0)), qubit_inds))
-        statetensor = jnp.moveaxis(statetensor, list(range(len(qubit_inds))), qubit_inds)
-        return statetensor
-
-    apply_gate.__doc__ = apply_gate.__doc__.format(gate_func.__name__)
-
-    return apply_gate
+    statetensor = jnp.tensordot(gate_unitary, statetensor,
+                                axes=(list(range(-len(qubit_inds), 0)), qubit_inds))
+    statetensor = jnp.moveaxis(statetensor, list(range(len(qubit_inds))), qubit_inds)
+    return statetensor
 
 
 def _to_gate_funcs(gate_seq: Sequence[Union[str,
@@ -90,7 +73,7 @@ def _to_gate_funcs(gate_seq: Sequence[Union[str,
             gate_arr = jnp.array(gate)
             gate_size = gate_arr.size
             gate = gate_arr.reshape((2,) * int(jnp.log2(gate_size)))
-            gate_func = _array_to_callable(gate)
+            gate_func = _array_to_callable(jnp.array(gate))
         else:
             raise TypeError(f'Unsupported gate type - gate must be either a string in qujax.gates, an array or '
                             f'callable: {gate}')
@@ -139,7 +122,6 @@ def get_params_to_statetensor_func(gate_seq: Sequence[Union[str,
 
     gate_seq_callable = _to_gate_funcs(gate_seq)
     param_inds_seq = _arrayify_inds(param_inds_seq)
-    apply_gate_seq = [_get_apply_gate(g, q) for g, q in zip(gate_seq_callable, qubit_inds_seq)]
 
     def params_to_statetensor_func(params: jnp.ndarray,
                                    statetensor_in: jnp.ndarray = None) -> jnp.ndarray:
@@ -161,9 +143,9 @@ def get_params_to_statetensor_func(gate_seq: Sequence[Union[str,
         else:
             statetensor = statetensor_in
         params = jnp.atleast_1d(params)
-        for gate_ind, apply_gate in enumerate(apply_gate_seq):
-            gate_params = jnp.take(params, param_inds_seq[gate_ind])
-            statetensor = apply_gate(statetensor, gate_params)
+        for gate_func, qubit_inds, param_inds in zip(gate_seq_callable, qubit_inds_seq, param_inds_seq):
+            gate_params = jnp.take(params, param_inds)
+            statetensor = apply_gate(statetensor, gate_func(*gate_params), qubit_inds)
         return statetensor
 
     if all([pi.size == 0 for pi in param_inds_seq]):
