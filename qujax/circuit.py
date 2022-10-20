@@ -27,7 +27,7 @@ def apply_gate(statetensor: jnp.ndarray, gate_unitary: jnp.ndarray, qubit_inds: 
     Args:
         statetensor: Input statetensor.
         gate_unitary: Unitary array representing gate
-            must be in tensor form with shape (2,2,...)
+            must be in tensor form with shape (2,2,...).
         qubit_inds: Sequence of indices for gate to be applied to.
             2 * len(qubit_inds) is equal to the dimension of the gate unitary tensor.
 
