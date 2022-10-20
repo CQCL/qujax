@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Sequence, Union, Callable, Protocol
+from typing import Sequence, Union, Callable, Protocol, Tuple
 
 from jax import numpy as jnp
 
@@ -57,6 +57,54 @@ def _get_apply_gate(gate_func: Callable,
     return apply_gate
 
 
+def _to_gate_funcs(gate_seq: Sequence[Union[str,
+                                            jnp.ndarray,
+                                            Callable[[jnp.ndarray], jnp.ndarray],
+                                            Callable[[], jnp.ndarray]]])\
+        -> Sequence[Callable[[jnp.ndarray], jnp.ndarray]]:
+    """
+    Ensures all gate_seq elements are functions that map (possibly empty) parameters
+    to a unitary tensor.
+
+    Args:
+        gate_seq: Sequence of gates.
+            Each element is either a string matching an array or function in qujax.gates,
+            a unitary array (which will be reshaped into a tensor of shape (2,2,2,...) )
+            or a function taking parameters and returning gate unitary in tensor form.
+
+    Returns:
+        Sequence of gate parameter to unitary functions
+
+    """
+    def _array_to_callable(arr: jnp.ndarray) -> Callable[[], jnp.ndarray]:
+        return lambda: arr
+
+    gate_seq_callable = []
+    for gate in gate_seq:
+        if isinstance(gate, str):
+            gate = gates.__dict__[gate]
+
+        if callable(gate):
+            gate_func = gate
+        elif hasattr(gate, '__array__'):
+            gate_arr = jnp.array(gate)
+            gate_size = gate_arr.size
+            gate = gate_arr.reshape((2,) * int(jnp.log2(gate_size)))
+            gate_func = _array_to_callable(gate)
+        else:
+            raise TypeError(f'Unsupported gate type - gate must be either a string in qujax.gates, an array or '
+                            f'callable: {gate}')
+        gate_seq_callable.append(gate_func)
+
+    return gate_seq_callable
+
+
+def _arrayify_inds(param_inds_seq: Sequence[Sequence[int]]) -> Sequence[jnp.ndarray]:
+    param_inds_seq = [jnp.array(p) for p in param_inds_seq]
+    param_inds_seq = [jnp.array([]) if jnp.any(jnp.isnan(p)) else p.astype(int) for p in param_inds_seq]
+    return param_inds_seq
+
+
 def get_params_to_statetensor_func(gate_seq: Sequence[Union[str,
                                                             jnp.ndarray,
                                                             Callable[[jnp.ndarray], jnp.ndarray],
@@ -89,29 +137,9 @@ def get_params_to_statetensor_func(gate_seq: Sequence[Union[str,
     if n_qubits is None:
         n_qubits = max([max(qi) for qi in qubit_inds_seq]) + 1
 
-    def _array_to_callable(arr: jnp.ndarray) -> Callable[[], jnp.ndarray]:
-        return lambda: arr
-
-    gate_seq_callable = []
-    for gate in gate_seq:
-        if isinstance(gate, str):
-            gate = gates.__dict__[gate]
-
-        if callable(gate):
-            gate_func = gate
-        elif hasattr(gate, '__array__'):
-            gate_arr = jnp.array(gate)
-            gate_size = gate_arr.size
-            gate = gate_arr.reshape((2,) * int(jnp.log2(gate_size)))
-            gate_func = _array_to_callable(gate)
-        else:
-            raise TypeError(f'Unsupported gate type - gate must be either a string in qujax.gates, an array or '
-                            f'callable: {gate}')
-        gate_seq_callable.append(gate_func)
-
+    gate_seq_callable = _to_gate_funcs(gate_seq)
+    param_inds_seq = _arrayify_inds(param_inds_seq)
     apply_gate_seq = [_get_apply_gate(g, q) for g, q in zip(gate_seq_callable, qubit_inds_seq)]
-    param_inds_seq = [jnp.array(p) for p in param_inds_seq]
-    param_inds_seq = [jnp.array([]) if jnp.any(jnp.isnan(p)) else p.astype(int) for p in param_inds_seq]
 
     def params_to_statetensor_func(params: jnp.ndarray,
                                    statetensor_in: jnp.ndarray = None) -> jnp.ndarray:
@@ -156,4 +184,3 @@ def get_params_to_statetensor_func(gate_seq: Sequence[Union[str,
         return no_params_to_statetensor_func
 
     return params_to_statetensor_func
-
