@@ -7,7 +7,7 @@ from qujax.circuit import apply_gate, UnionCallableOptionalArray, _to_gate_funcs
 from qujax.circuit_tools import check_circuit
 
 
-def _kraus_single(density_tensor: jnp.ndarray,
+def _kraus_single(densitytensor: jnp.ndarray,
                   array: jnp.ndarray,
                   qubit_inds: Sequence[int]) -> jnp.ndarray:
     """
@@ -17,20 +17,20 @@ def _kraus_single(density_tensor: jnp.ndarray,
         \rho_\text{out} = B \rho_\text{in} B^{\dagger}
 
     Args:
-        density_tensor: Input density matrix of shape=(2, 2, ...) and ndim=2*n_qubits
+        densitytensor: Input density matrix of shape=(2, 2, ...) and ndim=2*n_qubits
         array: Array containing the Kraus operator.
         qubit_inds: Sequence of qubit indices on which to apply the Kraus operation.
 
     Returns:
         Updated density matrix.
     """
-    n_qubits = density_tensor.ndim // 2
-    density_tensor = apply_gate(density_tensor, array, qubit_inds)
-    density_tensor = apply_gate(density_tensor, array.conj(), [n_qubits + i for i in qubit_inds])
-    return density_tensor
+    n_qubits = densitytensor.ndim // 2
+    densitytensor = apply_gate(densitytensor, array, qubit_inds)
+    densitytensor = apply_gate(densitytensor, array.conj(), [n_qubits + i for i in qubit_inds])
+    return densitytensor
 
 
-def kraus(density_tensor: jnp.ndarray,
+def kraus(densitytensor: jnp.ndarray,
           arrays: Union[Sequence[jnp.ndarray], jnp.ndarray],
           qubit_inds: Sequence[int]) -> jnp.ndarray:
     """
@@ -40,7 +40,7 @@ def kraus(density_tensor: jnp.ndarray,
         \rho_\text{out} = \sum_i B_i \rho_\text{in} B_i^{\dagger}
 
     Args:
-        density_tensor: Input density matrix of shape=(2, 2, ...) and ndim=2*n_qubits
+        densitytensor: Input density matrix of shape=(2, 2, ...) and ndim=2*n_qubits
         arrays: Sequence of arrays containing the Kraus operators.
         qubit_inds: Sequence of qubit indices on which to apply the Kraus operation.
 
@@ -48,10 +48,10 @@ def kraus(density_tensor: jnp.ndarray,
         Updated density matrix.
     """
     arrays = jnp.atleast_3d(arrays)
-    new_density_tensor, _ = scan(lambda dt, arr: dt + _kraus_single(density_tensor, arr, qubit_inds),
-                                 init=jnp.zeros_like(density_tensor), xs=arrays)
-    # i.e. new_density_tensor = vmap(_kraus_single, in_axes=(None, 0, None))(density_tensor, arrays, qubit_inds)
-    return new_density_tensor
+    new_densitytensor, _ = scan(lambda dt, arr: dt + _kraus_single(densitytensor, arr, qubit_inds),
+                                 init=jnp.zeros_like(densitytensor), xs=arrays)
+    # i.e. new_densitytensor = vmap(_kraus_single, in_axes=(None, 0, None))(densitytensor, arrays, qubit_inds)
+    return new_densitytensor
 
 
 def get_params_to_densitytensor_func(gate_seq: Sequence[Union[str,
