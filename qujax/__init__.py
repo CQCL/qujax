@@ -17,7 +17,12 @@ from qujax.circuit_tools import check_unitary
 from qujax.circuit_tools import check_circuit
 from qujax.circuit_tools import print_circuit
 
+from qujax.density_matrix import _kraus_single
+from qujax.density_matrix import kraus
+from qujax.density_matrix import get_params_to_densitytensor_func
+
 del version
 del circuit
 del observable
 del circuit_tools
+del density_matrix
