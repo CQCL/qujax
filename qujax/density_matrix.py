@@ -90,7 +90,7 @@ def _to_kraus_operator_seq_funcs(kraus_op: kraus_op_type,
 
 def get_params_to_densitytensor_func(kraus_ops_seq: Sequence[kraus_op_type],
                                      qubit_inds_seq: Sequence[Sequence[int]],
-                                     param_inds_seq: Sequence[Sequence[int]],
+                                     param_inds_seq: Sequence[Union[Sequence[int], Sequence[Sequence[int]]]],
                                      n_qubits: int = None) -> UnionCallableOptionalArray:
     """
     Creates a function that maps circuit parameters to a density tensor.
