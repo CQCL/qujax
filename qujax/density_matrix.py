@@ -1,5 +1,9 @@
+
 from __future__ import annotations
-from typing import Sequence, Union, Callable
+from string import ascii_lowercase
+
+from typing import Sequence, Union, Callable, Iterable
+import jax
 from jax import numpy as jnp
 from jax.lax import scan
 
@@ -53,6 +57,14 @@ def kraus(densitytensor: jnp.ndarray,
     # i.e. new_densitytensor = vmap(_kraus_single, in_axes=(None, 0, None))(densitytensor, arrays, qubit_inds)
     return new_densitytensor
 
+def _partial_trace(densitytensor: jnp.ndarray,
+                   indices_to_contract: Iterable[int]):
+    n_qubits = densitytensor.ndim // 2
+    einsum_indices = list(range(densitytensor.ndim))
+    for i in indices_to_contract:
+        einsum_indices[i + n_qubits] = einsum_indices[i]
+    densitytensor = jnp.einsum(densitytensor, einsum_indices)
+    return densitytensor
 
 def get_params_to_densitytensor_func(gate_seq: Sequence[Union[str,
                                                               jnp.ndarray,
@@ -86,13 +98,19 @@ def get_params_to_densitytensor_func(gate_seq: Sequence[Union[str,
 
     """
 
-    check_circuit(gate_seq, qubit_inds_seq, param_inds_seq, n_qubits)
+    additional_operations=("discard", "create")
+    check_circuit(gate_seq,
+                  qubit_inds_seq,
+                  param_inds_seq,
+                  n_qubits,
+                  additional_operations=additional_operations)
 
     if n_qubits is None:
         n_qubits = max([max(qi) for qi in qubit_inds_seq]) + 1
 
-    gate_seq_callable = _to_gate_funcs(gate_seq)
+    gate_seq_callable = _to_gate_funcs(gate_seq, ignore=additional_operations)
     param_inds_seq = _arrayify_inds(param_inds_seq)
+
 
     def params_to_densitytensor_func(params: jnp.ndarray,
                                      densitytensor_in: jnp.ndarray = None) -> jnp.ndarray:
@@ -108,17 +126,57 @@ def get_params_to_densitytensor_func(gate_seq: Sequence[Union[str,
             Updated densitytensor.
 
         """
+        nonlocal n_qubits
+        # Keeps track of created/discarded qubit indices
+        qubit_dict = {i:i for i in range(n_qubits)}
         if densitytensor_in is None:
             densitytensor = jnp.zeros((2,) * 2 * n_qubits)
             densitytensor = densitytensor.at[(0,) * 2 * n_qubits].set(1.)
         else:
             densitytensor = densitytensor_in
         params = jnp.atleast_1d(params)
-        for gate_func, qubit_inds, param_inds in zip(gate_seq_callable, qubit_inds_seq, param_inds_seq):
-            gate_params = jnp.take(params, param_inds)
-            gate_unitary = gate_func(*gate_params)
-            gate_unitary = gate_unitary.reshape((2,) * (2 * len(qubit_inds)))  # Ensure gate is in tensor form
-            densitytensor = _kraus_single(densitytensor, gate_unitary, qubit_inds)
+        for operation, qubit_inds, param_inds in zip(gate_seq_callable, qubit_inds_seq, param_inds_seq):
+            if operation == "discard":
+                nonexistant_qubits = set(qubit_inds) - set(qubit_dict.keys())
+                if nonexistant_qubits:
+                    raise ValueError(f"Trying to discard nonexistant qubits {nonexistant_qubits}")
+                indices_to_delete = [qubit_dict[i] for i in qubit_inds]
+                densitytensor = _partial_trace(densitytensor, indices_to_delete)
+                for i in qubit_inds:
+                    # Delete discarded qubit indices
+                    del qubit_dict[i]
+                    # Track shift of indices greater than discarded ones
+                    for k in qubit_dict:
+                        if qubit_dict[k] > i:
+                            qubit_dict[k] -= 1
+            elif operation == "create":
+                if set(qubit_inds) & set(qubit_dict.keys()):
+                    raise ValueError("Trying to create existing qubits")
+                if len(param_inds) > 1:
+                    raise ValueError("Multiple density tensors not yet supported when creating qubits")
+                new_qubit_dt = params[param_inds[0]]
+                if len(qubit_inds) is not new_qubit_dt.ndim // 2:
+                    raise ValueError(f"Trying to create {len(qubit_inds)} qubits using density tensor representing {new_qubit_dt.ndim // 2} qubits")
+
+                original_nr_qubits = densitytensor.ndim // 2
+
+                # Tensor deisity matrices ensuring co- and contravariant indices are correctly ordered
+                indices_1 = jnp.array(range(densitytensor.ndim))
+                indices_2 = jnp.array(range(densitytensor.ndim, densitytensor.ndim + new_qubit_dt.ndim))
+                indices_out = jnp.c_[indices_1.reshape(2, -1), indices_2.reshape(2, -1)].reshape(-1)
+                densitytensor = jnp.einsum(densitytensor, indices_1.tolist(),
+                                           new_qubit_dt, indices_2.tolist(),
+                                           indices_out.tolist())
+
+                # Keep track of new qubit indices
+                for n, i in enumerate(qubit_inds):
+                    qubit_dict[i] = original_nr_qubits + n
+            else:
+                qubit_inds = [qubit_dict[i] for i in qubit_inds]
+                gate_params = jnp.take(params, param_inds)
+                gate_unitary = operation(*gate_params)
+                gate_unitary = gate_unitary.reshape((2,) * (2 * len(qubit_inds)))  # Ensure gate is in tensor form
+                densitytensor = _kraus_single(densitytensor, gate_unitary, qubit_inds)
         return densitytensor
 
     if all([pi.size == 0 for pi in param_inds_seq]):

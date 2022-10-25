@@ -41,7 +41,8 @@ def check_circuit(gate_seq: Sequence[Union[str,
                                            Callable[[], jnp.ndarray]]],
                   qubit_inds_seq: Sequence[Sequence[int]],
                   param_inds_seq: Sequence[Sequence[int]],
-                  n_qubits: int = None):
+                  n_qubits: int = None,
+                  additional_operations: tuple[str, ...] = ()):
     """
     Basic checks that circuit arguments conform.
 
@@ -72,11 +73,14 @@ def check_circuit(gate_seq: Sequence[Union[str,
         raise TypeError(f'gate_seq ({len(gate_seq)}), qubit_inds_seq ({len(qubit_inds_seq)})'
                         f'and param_inds_seq ({len(param_inds_seq)}) must have matching lengths')
 
-    if n_qubits is not None and n_qubits < max([max(qi) for qi in qubit_inds_seq]) + 1:
+    if (n_qubits is not None and
+       "create" not in additional_operations and
+        n_qubits < max([max(qi) for qi in qubit_inds_seq]) + 1):
         raise TypeError('n_qubits must be larger than largest qubit index in qubit_inds_seq')
 
     for g in gate_seq:
-        check_unitary(g)
+        if g not in additional_operations:
+            check_unitary(g)
 
 
 def _get_gate_str(gate_obj: Union[str,

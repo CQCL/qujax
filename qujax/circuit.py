@@ -43,7 +43,8 @@ def apply_gate(statetensor: jnp.ndarray, gate_unitary: jnp.ndarray, qubit_inds: 
 def _to_gate_funcs(gate_seq: Sequence[Union[str,
                                             jnp.ndarray,
                                             Callable[[jnp.ndarray], jnp.ndarray],
-                                            Callable[[], jnp.ndarray]]])\
+                                            Callable[[], jnp.ndarray]]],
+                   ignore: tuple[str, ...] = ())\
         -> Sequence[Callable[[jnp.ndarray], jnp.ndarray]]:
     """
     Ensures all gate_seq elements are functions that map (possibly empty) parameters
@@ -64,6 +65,10 @@ def _to_gate_funcs(gate_seq: Sequence[Union[str,
 
     gate_seq_callable = []
     for gate in gate_seq:
+        if gate in ignore:
+            gate_seq_callable.append(gate)
+            continue
+
         if isinstance(gate, str):
             gate = gates.__dict__[gate]
 
