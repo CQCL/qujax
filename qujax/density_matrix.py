@@ -18,7 +18,7 @@ def _kraus_single(densitytensor: jnp.ndarray,
 
     Args:
         densitytensor: Input density matrix of shape=(2, 2, ...) and ndim=2*n_qubits
-        array: Array containing the Kraus operator.
+        array: Array containing the Kraus operator (in tensor form).
         qubit_inds: Sequence of qubit indices on which to apply the Kraus operation.
 
     Returns:
@@ -41,16 +41,20 @@ def kraus(densitytensor: jnp.ndarray,
 
     Args:
         densitytensor: Input density matrix of shape=(2, 2, ...) and ndim=2*n_qubits
-        arrays: Sequence of arrays containing the Kraus operators.
+        arrays: Sequence of arrays containing the Kraus operators (in tensor form).
         qubit_inds: Sequence of qubit indices on which to apply the Kraus operation.
 
     Returns:
         Updated density matrix.
     """
-    arrays = jnp.atleast_3d(arrays)
-    new_densitytensor, _ = scan(lambda dt, arr: dt + _kraus_single(densitytensor, arr, qubit_inds),
-                                 init=jnp.zeros_like(densitytensor), xs=arrays)
-    # i.e. new_densitytensor = vmap(_kraus_single, in_axes=(None, 0, None))(densitytensor, arrays, qubit_inds)
+    arrays = jnp.array(arrays)
+    if arrays.ndim == (2 * len(qubit_inds)):
+        arrays = arrays[jnp.newaxis]
+        # ensure first dimensions indexes different kraus operators
+
+    new_densitytensor, _ = scan(lambda dt, arr: (dt + _kraus_single(densitytensor, arr, qubit_inds), None),
+                                init=jnp.zeros_like(densitytensor, dtype='complex64'), xs=arrays)
+    # i.e. new_densitytensor = vmap(_kraus_single, in_axes=(None, 0, None))(densitytensor, arrays, qubit_inds).sum(0)
     return new_densitytensor
 
 
@@ -118,7 +122,7 @@ def get_params_to_densitytensor_func(gate_seq: Sequence[Union[str,
             gate_params = jnp.take(params, param_inds)
             gate_unitary = gate_func(*gate_params)
             gate_unitary = gate_unitary.reshape((2,) * (2 * len(qubit_inds)))  # Ensure gate is in tensor form
-            densitytensor = _kraus_single(densitytensor, gate_unitary, qubit_inds)
+            densitytensor = kraus(densitytensor, gate_unitary, qubit_inds)
         return densitytensor
 
     if all([pi.size == 0 for pi in param_inds_seq]):
