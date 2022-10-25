@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Sequence, Union, Callable
+from typing import Sequence, Union, Callable, Iterable
 from jax import numpy as jnp
 from jax.lax import scan
 
@@ -31,7 +31,7 @@ def _kraus_single(densitytensor: jnp.ndarray,
 
 
 def kraus(densitytensor: jnp.ndarray,
-          arrays: Union[Sequence[jnp.ndarray], jnp.ndarray],
+          arrays: Iterable[jnp.ndarray],
           qubit_inds: Sequence[int]) -> jnp.ndarray:
     """
     Performs Kraus operation.
