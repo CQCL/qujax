@@ -41,7 +41,8 @@ def check_circuit(gate_seq: Sequence[Union[str,
                                            Callable[[], jnp.ndarray]]],
                   qubit_inds_seq: Sequence[Sequence[int]],
                   param_inds_seq: Sequence[Sequence[int]],
-                  n_qubits: int = None):
+                  n_qubits: int = None,
+                  check_unitaries: bool = True):
     """
     Basic checks that circuit arguments conform.
 
@@ -55,6 +56,7 @@ def check_circuit(gate_seq: Sequence[Union[str,
             i.e. [[0], [], [5, 2]] tells qujax that the first gate uses the first parameter,
             the second gate is not parameterised and the third gates used the fifth and second parameters.
         n_qubits: Number of qubits, if fixed.
+        check_unitaries: boolean on whether to check if each gate represents a unitary matrix
 
     """
     if not isinstance(gate_seq, collections.abc.Sequence):
@@ -75,8 +77,9 @@ def check_circuit(gate_seq: Sequence[Union[str,
     if n_qubits is not None and n_qubits < max([max(qi) for qi in qubit_inds_seq]) + 1:
         raise TypeError('n_qubits must be larger than largest qubit index in qubit_inds_seq')
 
-    for g in gate_seq:
-        check_unitary(g)
+    if check_unitaries:
+        for g in gate_seq:
+            check_unitary(g)
 
 
 def _get_gate_str(gate_obj: Union[str,

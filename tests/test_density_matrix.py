@@ -124,3 +124,41 @@ def test_params_to_densitytensor_func():
 
     jit_dt = jit(params_to_dt)(params)
     assert jnp.allclose(jit_dt, dt_test)
+
+
+def test_params_to_densitytensor_func_with_bit_flip():
+    n_qubits = 2
+
+    gate_seq = ["Rx" for _ in range(n_qubits)]
+    qubit_inds_seq = [(i,) for i in range(n_qubits)]
+    param_inds_seq = [(i,) for i in range(n_qubits)]
+
+    gate_seq += ["CZ" for _ in range(n_qubits - 1)]
+    qubit_inds_seq += [(i, i+1) for i in range(n_qubits - 1)]
+    param_inds_seq += [() for _ in range(n_qubits - 1)]
+
+    params_to_pre_bf_st = get_params_to_statetensor_func(gate_seq, qubit_inds_seq, param_inds_seq, n_qubits)
+
+    kraus_ops = [[0.3 * jnp.eye(2), 0.7 * qujax.gates.X]]
+    kraus_qubit_inds = [(0,)]
+    kraus_param_inds = [((), ())]
+
+    gate_seq += kraus_ops
+    qubit_inds_seq += kraus_qubit_inds
+    param_inds_seq += kraus_param_inds
+
+    params_to_dt = get_params_to_densitytensor_func(gate_seq, qubit_inds_seq, param_inds_seq, n_qubits)
+
+    params = jnp.arange(n_qubits)/10.
+
+    pre_bf_st = params_to_pre_bf_st(params)
+    pre_bf_dt = (pre_bf_st.reshape(-1, 1) @ pre_bf_st.reshape(1, -1).conj()).reshape(2 for _ in range(2*n_qubits))
+    dt_test = kraus(pre_bf_dt, kraus_ops[0], kraus_qubit_inds[0])
+
+    dt = params_to_dt(params)
+
+    assert jnp.allclose(dt, dt_test)
+
+    jit_dt = jit(params_to_dt)(params)
+    assert jnp.allclose(jit_dt, dt_test)
+

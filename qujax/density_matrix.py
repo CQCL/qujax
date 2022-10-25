@@ -1,10 +1,13 @@
 from __future__ import annotations
-from typing import Sequence, Union, Callable, Iterable
+from typing import Sequence, Union, Callable, Iterable, Tuple
 from jax import numpy as jnp
 from jax.lax import scan
 
-from qujax.circuit import apply_gate, UnionCallableOptionalArray, _to_gate_funcs, _arrayify_inds
+from qujax.circuit import apply_gate, UnionCallableOptionalArray, gate_type
+from qujax.circuit import _to_gate_func, _arrayify_inds, _gate_func_to_unitary
 from qujax.circuit_tools import check_circuit
+
+kraus_op_type = Union[gate_type, Iterable[gate_type]]
 
 
 def _kraus_single(densitytensor: jnp.ndarray,
@@ -58,10 +61,34 @@ def kraus(densitytensor: jnp.ndarray,
     return new_densitytensor
 
 
-def get_params_to_densitytensor_func(gate_seq: Sequence[Union[str,
-                                                              jnp.ndarray,
-                                                              Callable[[jnp.ndarray], jnp.ndarray],
-                                                              Callable[[], jnp.ndarray]]],
+def _to_kraus_operator_seq_funcs(kraus_op: kraus_op_type,
+                                 param_inds: Union[Sequence[int], Sequence[Sequence[int]]]) \
+        -> Tuple[Sequence[Callable[[jnp.ndarray], jnp.ndarray]],
+                 Sequence[jnp.ndarray]]:
+    """
+    Ensures Kraus operators are a sequence of functions that map (possibly empty) parameters to tensors
+    and that each element of param_inds_seq is a sequence of arrays that correspond to the parameter indices
+    of each Kraus operator.
+
+    Args:
+        kraus_op: Either a normal gate_type or a sequence of gate_types representing Kraus operators.
+        param_inds: If kraus_op is a normal gate_type then a sequence of parameter indices,
+            if kraus_op is a sequence of Kraus operators then a sequence of sequences of parameter indices
+
+    Returns:
+        Tuple containing sequence of functions mapping to Kraus operators
+        and sequence of arrays with parameter indices
+
+    """
+    if isinstance(kraus_op, (list, tuple)):
+        kraus_op_funcs = [_to_gate_func(ko) for ko in kraus_op]
+    else:
+        kraus_op_funcs = [_to_gate_func(kraus_op)]
+        param_inds = [param_inds]
+    return kraus_op_funcs, _arrayify_inds(param_inds)
+
+
+def get_params_to_densitytensor_func(kraus_ops_seq: Sequence[kraus_op_type],
                                      qubit_inds_seq: Sequence[Sequence[int]],
                                      param_inds_seq: Sequence[Sequence[int]],
                                      n_qubits: int = None) -> UnionCallableOptionalArray:
@@ -71,7 +98,7 @@ def get_params_to_densitytensor_func(gate_seq: Sequence[Union[str,
     densitymatrix = densitytensor.reshape(2 ** n_qubits, 2 ** n_qubits)
 
     Args:
-        gate_seq: Sequence of gates.
+        kraus_ops_seq: Sequence of gates.
             Each element is either a string matching a unitary array or function in qujax.gates,
             a custom unitary array or a custom function taking parameters and returning a unitary array.
             Unitary arrays will be reshaped into tensor form (2, 2,...)
@@ -90,13 +117,15 @@ def get_params_to_densitytensor_func(gate_seq: Sequence[Union[str,
 
     """
 
-    check_circuit(gate_seq, qubit_inds_seq, param_inds_seq, n_qubits)
+    check_circuit(kraus_ops_seq, qubit_inds_seq, param_inds_seq, n_qubits, False)
 
     if n_qubits is None:
         n_qubits = max([max(qi) for qi in qubit_inds_seq]) + 1
 
-    gate_seq_callable = _to_gate_funcs(gate_seq)
-    param_inds_seq = _arrayify_inds(param_inds_seq)
+    kraus_ops_seq_callable_and_param_inds = [_to_kraus_operator_seq_funcs(ko, param_inds)
+                                             for ko, param_inds in zip(kraus_ops_seq, param_inds_seq)]
+    kraus_ops_seq_callable = [ko_pi[0] for ko_pi in kraus_ops_seq_callable_and_param_inds]
+    param_inds_array_seq = [ko_pi[1] for ko_pi in kraus_ops_seq_callable_and_param_inds]
 
     def params_to_densitytensor_func(params: jnp.ndarray,
                                      densitytensor_in: jnp.ndarray = None) -> jnp.ndarray:
@@ -118,14 +147,15 @@ def get_params_to_densitytensor_func(gate_seq: Sequence[Union[str,
         else:
             densitytensor = densitytensor_in
         params = jnp.atleast_1d(params)
-        for gate_func, qubit_inds, param_inds in zip(gate_seq_callable, qubit_inds_seq, param_inds_seq):
-            gate_params = jnp.take(params, param_inds)
-            gate_unitary = gate_func(*gate_params)
-            gate_unitary = gate_unitary.reshape((2,) * (2 * len(qubit_inds)))  # Ensure gate is in tensor form
-            densitytensor = kraus(densitytensor, gate_unitary, qubit_inds)
+        for gate_func_single_seq, qubit_inds, param_inds_single_seq in zip(kraus_ops_seq_callable, qubit_inds_seq,
+                                                                           param_inds_array_seq):
+            kraus_operators = [_gate_func_to_unitary(gf, qubit_inds, pi, params)
+                               for gf, pi in zip(gate_func_single_seq, param_inds_single_seq)]
+            densitytensor = kraus(densitytensor, kraus_operators, qubit_inds)
         return densitytensor
 
-    if all([pi.size == 0 for pi in param_inds_seq]):
+    non_parameterised = all([all([pi.size == 0 for pi in pi_seq]) for pi_seq in param_inds_array_seq])
+    if non_parameterised:
         def no_params_to_densitytensor_func(densitytensor_in: jnp.ndarray = None) -> jnp.ndarray:
             """
             Applies circuit (series of gates with no parameters) to a densitytensor_in (default is |0>^N <0|^N).
