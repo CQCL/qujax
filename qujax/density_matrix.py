@@ -56,7 +56,7 @@ def kraus(densitytensor: jnp.ndarray,
         # ensure first dimensions indexes different kraus operators
 
     new_densitytensor, _ = scan(lambda dt, arr: (dt + _kraus_single(densitytensor, arr, qubit_inds), None),
-                                init=jnp.zeros_like(densitytensor, dtype='complex64'), xs=arrays)
+                                init=jnp.zeros_like(densitytensor, dtype='complex'), xs=arrays)
     # i.e. new_densitytensor = vmap(_kraus_single, in_axes=(None, 0, None))(densitytensor, arrays, qubit_inds).sum(0)
     return new_densitytensor
 
