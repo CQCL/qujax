@@ -20,6 +20,7 @@ from qujax.circuit_tools import print_circuit
 from qujax.density_matrix import _kraus_single
 from qujax.density_matrix import kraus
 from qujax.density_matrix import get_params_to_densitytensor_func
+from qujax.density_matrix import partial_trace
 
 del version
 del circuit
