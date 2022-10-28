@@ -48,13 +48,13 @@ def test_kraus_single_2qubit():
 
     qubit_inds = (1, 2)
 
-    # qujax._kraus_single
-    qujax_kraus_dt = _kraus_single(density_tensor, kraus_operator_tensor, qubit_inds)
-    qujax_kraus_dm = qujax_kraus_dt.reshape(dim, dim)
-
     unitary_matrix = jnp.kron(jnp.eye(2 * qubit_inds[0]), kraus_operator)
     unitary_matrix = jnp.kron(unitary_matrix, jnp.eye(2 * (n_qubits - qubit_inds[-1] - 1)))
     check_kraus_dm = unitary_matrix @ density_matrix @ unitary_matrix.conj().T
+
+    # qujax._kraus_single
+    qujax_kraus_dt = _kraus_single(density_tensor, kraus_operator_tensor, qubit_inds)
+    qujax_kraus_dm = qujax_kraus_dt.reshape(dim, dim)
 
     assert jnp.allclose(qujax_kraus_dm, check_kraus_dm)
 
@@ -64,6 +64,10 @@ def test_kraus_single_2qubit():
 
     # qujax.kraus (but for a single array)
     qujax_kraus_dt = kraus(density_tensor, kraus_operator_tensor, qubit_inds)
+    qujax_kraus_dm = qujax_kraus_dt.reshape(dim, dim)
+    assert jnp.allclose(qujax_kraus_dm, check_kraus_dm)
+
+    qujax_kraus_dt = kraus(density_tensor, kraus_operator, qubit_inds)  # check reshape kraus_operator correctly
     qujax_kraus_dm = qujax_kraus_dt.reshape(dim, dim)
     assert jnp.allclose(qujax_kraus_dm, check_kraus_dm)
 
@@ -82,15 +86,15 @@ def test_kraus_multiple():
 
     qubit_inds = (1,)
 
-    qujax_kraus_dt = kraus(density_tensor, kraus_operators, qubit_inds)
-    qujax_kraus_dm = qujax_kraus_dt.reshape(dim, dim)
-
     unitary_matrices = [jnp.kron(jnp.eye(2 * qubit_inds[0]), ko) for ko in kraus_operators]
     unitary_matrices = [jnp.kron(um, jnp.eye(2 * (n_qubits - qubit_inds[0] - 1))) for um in unitary_matrices]
 
     check_kraus_dm = jnp.zeros_like(density_matrix)
     for um in unitary_matrices:
         check_kraus_dm += um @ density_matrix @ um.conj().T
+
+    qujax_kraus_dt = kraus(density_tensor, kraus_operators, qubit_inds)
+    qujax_kraus_dm = qujax_kraus_dt.reshape(dim, dim)
 
     assert jnp.allclose(qujax_kraus_dm, check_kraus_dm)
 

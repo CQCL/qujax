@@ -51,9 +51,10 @@ def kraus(densitytensor: jnp.ndarray,
         Updated density matrix.
     """
     arrays = jnp.array(arrays)
-    if arrays.ndim == (2 * len(qubit_inds)):
+    if arrays.ndim % 2 == 0:
         arrays = arrays[jnp.newaxis]
         # ensure first dimensions indexes different kraus operators
+    arrays = arrays.reshape((arrays.shape[0],) + (2,) * 2 * len(qubit_inds))
 
     new_densitytensor, _ = scan(lambda dt, arr: (dt + _kraus_single(densitytensor, arr, qubit_inds), None),
                                 init=jnp.zeros_like(densitytensor) * 0.j, xs=arrays)
