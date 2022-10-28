@@ -91,6 +91,27 @@ def _to_kraus_operator_seq_funcs(kraus_op: kraus_op_type,
         param_inds = [param_inds]
     return kraus_op_funcs, _arrayify_inds(param_inds)
 
+def partial_trace(densitytensor: jnp.ndarray,
+                  indices_to_trace: Iterable[int]) -> jnp.ndarray:
+    """
+    Traces out (discards) specified qubits, resulting in a densitytensor
+    representing the mixed quantum state on the remaining qubits.
+
+    Args:
+        densitytensor: Input densitytensor.
+        indices_to_trace: Indices of qubits to trace out/discard.
+
+    Returns:
+        Resulting densitytensor on remaining qubits.
+
+    """                   
+    n_qubits = densitytensor.ndim // 2
+    einsum_indices = list(range(densitytensor.ndim))
+    for i in indices_to_trace:
+        einsum_indices[i + n_qubits] = einsum_indices[i]
+    densitytensor = jnp.einsum(densitytensor, einsum_indices)
+    return densitytensor
+
 
 def get_params_to_densitytensor_func(kraus_ops_seq: Sequence[kraus_op_type],
                                      qubit_inds_seq: Sequence[Sequence[int]],
