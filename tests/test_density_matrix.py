@@ -14,13 +14,13 @@ def test_kraus_single():
 
     qubit_inds = (1,)
 
-    # qujax._kraus_single
-    qujax_kraus_dt = _kraus_single(density_tensor, kraus_operator, qubit_inds)
-    qujax_kraus_dm = qujax_kraus_dt.reshape(dim, dim)
-
     unitary_matrix = jnp.kron(jnp.eye(2 * qubit_inds[0]), kraus_operator)
     unitary_matrix = jnp.kron(unitary_matrix, jnp.eye(2 * (n_qubits - qubit_inds[-1] - 1)))
     check_kraus_dm = unitary_matrix @ density_matrix @ unitary_matrix.conj().T
+
+    # qujax._kraus_single
+    qujax_kraus_dt = _kraus_single(density_tensor, kraus_operator, qubit_inds)
+    qujax_kraus_dm = qujax_kraus_dt.reshape(dim, dim)
 
     assert jnp.allclose(qujax_kraus_dm, check_kraus_dm)
 
@@ -141,7 +141,7 @@ def test_params_to_densitytensor_func_with_bit_flip():
 
     kraus_ops = [[0.3 * jnp.eye(2), 0.7 * qujax.gates.X]]
     kraus_qubit_inds = [(0,)]
-    kraus_param_inds = [((), ())]
+    kraus_param_inds = [None]
 
     gate_seq += kraus_ops
     qubit_inds_seq += kraus_qubit_inds

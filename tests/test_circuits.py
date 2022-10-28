@@ -37,7 +37,7 @@ def test_H_redundant_qubits():
 def test_CX_Rz_CY():
     gates = ['H', 'H', 'H', 'CX', 'Rz', 'CY']
     qubits = [[0], [1], [2], [0, 1], [1], [1, 2]]
-    param_inds = [[], [], [], [], [0], []]
+    param_inds = [[], [], [], None, [0], []]
 
     param_to_st = qujax.get_params_to_statetensor_func(gates, qubits, param_inds)
     st = param_to_st(jnp.array(0.1))

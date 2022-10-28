@@ -74,7 +74,7 @@ def _to_gate_func(gate: gate_type) -> Callable[[jnp.ndarray], jnp.ndarray]:
     return gate_func
 
 
-def _arrayify_inds(param_inds_seq: Sequence[Sequence[int]]) -> Sequence[jnp.ndarray]:
+def _arrayify_inds(param_inds_seq: Sequence[Union[None, Sequence[int]]]) -> Sequence[jnp.ndarray]:
     """
     Ensure each element of param_inds_seq is an array (and therefore valid for jnp.take)
 
@@ -116,7 +116,7 @@ def _gate_func_to_unitary(gate_func: Callable[[jnp.ndarray], jnp.ndarray],
 
 def get_params_to_statetensor_func(gate_seq: Sequence[gate_type],
                                    qubit_inds_seq: Sequence[Sequence[int]],
-                                   param_inds_seq: Sequence[Sequence[int]],
+                                   param_inds_seq: Sequence[Union[None, Sequence[int]]],
                                    n_qubits: int = None) -> UnionCallableOptionalArray:
     """
     Creates a function that maps circuit parameters to a statetensor.
