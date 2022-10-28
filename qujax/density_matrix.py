@@ -51,9 +51,10 @@ def kraus(densitytensor: jnp.ndarray,
         Updated density matrix.
     """
     arrays = jnp.array(arrays)
-    if arrays.ndim == (2 * len(qubit_inds)):
+    if arrays.ndim % 2 == 0:
         arrays = arrays[jnp.newaxis]
         # ensure first dimensions indexes different kraus operators
+    arrays = arrays.reshape((arrays.shape[0],) + (2,) * 2 * len(qubit_inds))
 
     new_densitytensor, _ = scan(lambda dt, arr: (dt + _kraus_single(densitytensor, arr, qubit_inds), None),
                                 init=jnp.zeros_like(densitytensor) * 0.j, xs=arrays)
@@ -62,7 +63,7 @@ def kraus(densitytensor: jnp.ndarray,
 
 
 def _to_kraus_operator_seq_funcs(kraus_op: kraus_op_type,
-                                 param_inds: Union[Sequence[int], Sequence[Sequence[int]]]) \
+                                 param_inds: Union[None, Sequence[int], Sequence[Sequence[int]]]) \
         -> Tuple[Sequence[Callable[[jnp.ndarray], jnp.ndarray]],
                  Sequence[jnp.ndarray]]:
     """
@@ -80,6 +81,9 @@ def _to_kraus_operator_seq_funcs(kraus_op: kraus_op_type,
         and sequence of arrays with parameter indices
 
     """
+    if param_inds is None:
+        param_inds = [None for _ in kraus_op]
+
     if isinstance(kraus_op, (list, tuple)):
         kraus_op_funcs = [_to_gate_func(ko) for ko in kraus_op]
     else:
@@ -90,7 +94,7 @@ def _to_kraus_operator_seq_funcs(kraus_op: kraus_op_type,
 
 def get_params_to_densitytensor_func(kraus_ops_seq: Sequence[kraus_op_type],
                                      qubit_inds_seq: Sequence[Sequence[int]],
-                                     param_inds_seq: Sequence[Union[Sequence[int], Sequence[Sequence[int]]]],
+                                     param_inds_seq: Sequence[Union[None, Sequence[int], Sequence[Sequence[int]]]],
                                      n_qubits: int = None) -> UnionCallableOptionalArray:
     """
     Creates a function that maps circuit parameters to a density tensor.

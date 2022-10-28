@@ -67,7 +67,8 @@ def check_circuit(gate_seq: Sequence[Union[str,
         raise TypeError('qubit_inds_seq must be Sequence of Sequences e.g. [[0,1], [0], []]')
 
     if (not isinstance(param_inds_seq, collections.abc.Sequence)) or \
-            (any([not (isinstance(p, collections.abc.Sequence) or hasattr(p, '__array__')) for p in param_inds_seq])):
+            (any([not (isinstance(p, collections.abc.Sequence) or hasattr(p, '__array__') or p is None)
+                  for p in param_inds_seq])):
         raise TypeError('param_inds_seq must be Sequence of Sequences e.g. [[0,1], [0], []]')
 
     if len(gate_seq) != len(qubit_inds_seq) or len(param_inds_seq) != len(param_inds_seq):
