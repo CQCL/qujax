@@ -3,6 +3,7 @@ from jax import numpy as jnp, jit
 import qujax
 from qujax import _kraus_single, kraus, get_params_to_densitytensor_func
 from qujax import get_params_to_statetensor_func
+from qujax import partial_trace
 
 
 def test_kraus_single():
@@ -166,3 +167,40 @@ def test_params_to_densitytensor_func_with_bit_flip():
     jit_dt = jit(params_to_dt)(params)
     assert jnp.allclose(jit_dt, dt_test)
 
+
+def test_partial_trace_1():
+    state1 = 1/jnp.sqrt(2) * jnp.array([1., 1.])
+    state2 = jnp.kron(state1, state1)
+    state3 = jnp.kron(state1, state2)
+
+    dt1 = jnp.outer(state1, state1.conj()).reshape((2,) * 2)
+    dt2 = jnp.outer(state2, state2.conj()).reshape((2,) * 4)
+    dt3 = jnp.outer(state3, state3.conj()).reshape((2,) * 6)
+
+    for i in range(3):
+        assert jnp.allclose(partial_trace(dt3, [i]), dt2)
+
+    from itertools import combinations
+    for i in combinations(range(3), 2):
+        assert jnp.allclose(partial_trace(dt3, i), dt1)
+
+def test_partial_trace_2():
+    n_qubits = 3
+
+    gate_seq = ["Rx" for _ in range(n_qubits)]
+    qubit_inds_seq = [(i,) for i in range(n_qubits)]
+    param_inds_seq = [(i,) for i in range(n_qubits)]
+
+    gate_seq += ["CZ" for _ in range(n_qubits - 1)]
+    qubit_inds_seq += [(i, i+1) for i in range(n_qubits - 1)]
+    param_inds_seq += [() for _ in range(n_qubits - 1)]
+
+    params_to_dt = get_params_to_densitytensor_func(gate_seq, qubit_inds_seq, param_inds_seq, n_qubits)
+
+    params = jnp.arange(1, n_qubits+1)/10.
+
+    dt = params_to_dt(params)
+    dt_discard_test = jnp.trace(dt, axis1=0, axis2=n_qubits)
+    dt_discard = partial_trace(dt, [0])
+
+    assert jnp.allclose(dt_discard, dt_discard_test)
