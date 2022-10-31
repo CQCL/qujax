@@ -1,4 +1,4 @@
-from jax import numpy as jnp, jit, grad, random
+from jax import numpy as jnp, jit, grad, random, config
 
 import qujax
 
@@ -31,31 +31,33 @@ def test_bitstring_expectation():
 
     param_to_expectation = lambda p: st_to_expectation(param_to_st(p))
 
+    def brute_force_param_to_exp(p):
+        sv = param_to_st(p).flatten()
+        return jnp.dot(sv, jnp.diag(costs) @ sv.conj()).real
+
+    true_expectation = brute_force_param_to_exp(params)
+
     expectation = param_to_expectation(params)
     expectation_jit = jit(param_to_expectation)(params)
 
     assert expectation.shape == ()
-    assert expectation.dtype == 'float32'
-    assert jnp.abs(-0.97042876 - expectation) < 1e-5
-    assert jnp.abs(-0.97042876 - expectation_jit) < 1e-5
+    assert expectation.dtype.name[:5] == 'float'
+    assert jnp.isclose(true_expectation, expectation)
+    assert jnp.isclose(true_expectation, expectation_jit)
 
+    true_expectation_grad = grad(brute_force_param_to_exp)(params)
     expectation_grad = grad(param_to_expectation)(params)
     expectation_grad_jit = jit(grad(param_to_expectation))(params)
 
-    true_expectation_grad = jnp.array([5.1673526e-01, 1.2618620e+00, 5.1392573e-01,
-                                       1.5056899e+00, 4.3226164e-02, 3.4227133e-02,
-                                       8.1762001e-02, 7.7345759e-01, 5.1567715e-01,
-                                       -3.1131029e-01, -1.7132770e-01, -6.6244489e-01,
-                                       9.3626760e-08, -4.6813380e-08, -2.3406690e-08,
-                                       -9.3626760e-08])
-
     assert expectation_grad.shape == (n_params,)
-    assert expectation_grad.dtype == 'float32'
-    assert jnp.all(jnp.abs(expectation_grad - true_expectation_grad) < 1e-5)
-    assert jnp.all(jnp.abs(expectation_grad_jit - true_expectation_grad) < 1e-5)
+    assert expectation_grad.dtype.name[:5] == 'float'
+    assert jnp.allclose(true_expectation_grad, expectation_grad, atol=1e-5)
+    assert jnp.allclose(true_expectation_grad, expectation_grad_jit, atol=1e-5)
 
 
 def test_ZZ_X():
+    config.update("jax_enable_x64", True)  # Run this test with 64 bit precision
+
     n_qubits = 5
 
     gate_str_seq_seq = [['Z', 'Z']] * (n_qubits - 1) + [['X']] * n_qubits
@@ -70,19 +72,46 @@ def test_ZZ_X():
     state /= jnp.linalg.norm(state)
     st_in = state.reshape((2,) * n_qubits)
 
-    jax_exp = st_to_exp(st_in)
-    jax_exp_jit = jit(st_to_exp)(st_in)
+    def big_unitary_matrix(gate_str_seq, qubit_inds):
+        qubit_gate_arrs = [getattr(qujax.gates, s) for s in gate_str_seq]
+        gate_arrs = []
+        j = 0
+        for i in range(n_qubits):
+            if i in qubit_inds:
+                gate_arrs.append(qubit_gate_arrs[j])
+                j += 1
+            else:
+                gate_arrs.append(jnp.eye(2))
 
-    assert jnp.abs(-0.23738188 - jax_exp) < 1e-5
-    assert jnp.abs(-0.23738188 - jax_exp_jit) < 1e-5
+        big_u = gate_arrs[0]
+        for k in range(1, n_qubits):
+            big_u = jnp.kron(big_u, gate_arrs[k])
+        return big_u
+
+    sum_big_us = jnp.zeros((2 ** n_qubits, 2 ** n_qubits))
+    for i in range(len(gate_str_seq_seq)):
+        sum_big_us += coefs[i] * big_unitary_matrix(gate_str_seq_seq[i], qubit_inds_seq[i])
+
+    sv = st_in.flatten()
+    true_exp = jnp.dot(sv, sum_big_us @ sv.conj())
+
+    qujax_exp = st_to_exp(st_in)
+    qujax_exp_jit = jit(st_to_exp)(st_in)
+
+    assert jnp.array(qujax_exp).shape == ()
+    assert jnp.array(qujax_exp).dtype.name[:5] == 'float'
+    assert jnp.isclose(true_exp, qujax_exp)
+    assert jnp.isclose(true_exp, qujax_exp_jit)
 
     st_to_samp_exp = qujax.get_statetensor_to_sampled_expectation_func(gate_str_seq_seq,
                                                                        qubit_inds_seq,
                                                                        coefs)
-    jax_samp_exp = st_to_samp_exp(st_in, random.PRNGKey(1), 10000)
-    jax_samp_exp_jit = jit(st_to_samp_exp, static_argnums=2)(st_in, random.PRNGKey(2), 10000)
-    assert jnp.abs(-0.23738188 - jax_samp_exp) < 1e-2
-    assert jnp.abs(-0.23738188 - jax_samp_exp_jit) < 1e-2
+    qujax_samp_exp = st_to_samp_exp(st_in, random.PRNGKey(1), 10000)
+    qujax_samp_exp_jit = jit(st_to_samp_exp, static_argnums=2)(st_in, random.PRNGKey(2), 100000)
+    assert jnp.array(qujax_samp_exp).shape == ()
+    assert jnp.array(qujax_samp_exp).dtype.name[:5] == 'float'
+    assert jnp.isclose(true_exp, qujax_samp_exp, rtol=1e-2)
+    assert jnp.isclose(true_exp, qujax_samp_exp_jit, rtol=1e-2)
 
 
 def test_sampling():
