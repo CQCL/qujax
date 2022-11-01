@@ -12,6 +12,14 @@ def check_unitary(gate: Union[str,
                               jnp.ndarray,
                               Callable[[jnp.ndarray], jnp.ndarray],
                               Callable[[], jnp.ndarray]]):
+    """
+    Checks whether a matrix or tensor is unitary.
+
+    Args:
+        gate: array containing potentially unitary string, array
+            or function (which will be evaluated with all arguments set to 0.1).
+
+    """
     if isinstance(gate, str):
         if gate in gates.__dict__:
             gate = gates.__dict__[gate]

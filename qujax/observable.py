@@ -4,52 +4,62 @@ from typing import Sequence, Callable, Union, Optional
 from jax import numpy as jnp, random
 from jax.lax import fori_loop
 
-from qujax import gates
+from qujax.circuit import apply_gate
+from qujax.gates import I, X, Y, Z
+
+paulis = {'I': I, 'X': X, 'Y': Y, 'Z': Z}
 
 
-def _statetensor_to_single_expectation_func(gate_tensor: jnp.ndarray,
-                                            qubit_inds: Sequence[int]) -> Callable[[jnp.ndarray], float]:
+def statetensor_to_single_expectation(statetensor: jnp.ndarray,
+                                      hermitian: jnp.ndarray,
+                                      qubit_inds: Sequence[int]) -> float:
     """
-    Creates a function that maps statetensor to its expected value under the given gate unitary and qubit indices.
+    Evaluates expected value of statetensor through a Hermitian matrix (in tensor form).
 
     Args:
-        gate_tensor: Gate unitary in tensor form.
-        qubit_inds: Sequence of integer qubit indices to apply gate to.
+        statetensor: Input statetensor.
+        hermitian: Hermitian array
+            must be in tensor form with shape (2,2,...).
+        qubit_inds: Sequence of qubit indices for Hermitian to be applied to.
+            Must have 2 * len(qubit_inds) = hermitian.ndim
 
     Returns:
-        Function that takes statetensor and returns expected value (float).
+        Expected value (float).
     """
-
-    def statetensor_to_single_expectation(statetensor: jnp.ndarray) -> float:
-        """
-        Evaluates expected value of statetensor through gate.
-
-        Args:
-            statetensor: Input statetensor.
-
-        Returns:
-            Expected value (float).
-        """
-        statetensor_new = jnp.tensordot(gate_tensor, statetensor,
-                                        axes=(list(range(-len(qubit_inds), 0)), qubit_inds))
-        statetensor_new = jnp.moveaxis(statetensor_new, list(range(len(qubit_inds))), qubit_inds)
-        axes = tuple(range(statetensor.ndim))
-        return jnp.tensordot(statetensor.conjugate(), statetensor_new, axes=(axes, axes)).real
-
-    return statetensor_to_single_expectation
+    statetensor_new = apply_gate(statetensor, hermitian, qubit_inds)
+    axes = tuple(range(statetensor.ndim))
+    return jnp.tensordot(statetensor.conjugate(), statetensor_new, axes=(axes, axes)).real
 
 
-def get_statetensor_to_expectation_func(gate_seq_seq: Sequence[Sequence[Union[str, jnp.ndarray]]],
+def check_hermitian(hermitian: Union[str, jnp.ndarray]):
+    """
+    Checks whether a matrix or tensor is Hermitian.
+
+    Args:
+        hermitian: array containing potentially Hermitian matrix or tensor
+
+    """
+    if isinstance(hermitian, str):
+        if hermitian not in paulis:
+            raise TypeError(f'qujax only accepts {tuple(paulis.keys())} as Hermitian strings, received: {hermitian}')
+    else:
+        n_qubits = hermitian.ndim // 2
+        hermitian_mat = hermitian.reshape(2 * n_qubits, 2 * n_qubits)
+        if not jnp.allclose(hermitian_mat, hermitian_mat.T.conj()):
+            raise TypeError(f'Array not Hermitian: {hermitian}')
+
+
+def get_statetensor_to_expectation_func(hermitian_seq_seq: Sequence[Sequence[Union[str, jnp.ndarray]]],
                                         qubits_seq_seq: Sequence[Sequence[int]],
                                         coefficients: Union[Sequence[float], jnp.ndarray]) \
         -> Callable[[jnp.ndarray], float]:
     """
-    Converts gate strings (or arrays), qubit indices and coefficients into a function that
-    converts statetensor into expected value.
+    Converts strings (or arrays) representing Hermitian matrices, qubit indices and
+    coefficients into a function that converts a statetensor into an expected value.
 
     Args:
-        gate_seq_seq: Sequence of sequences of gates.
-            Each gate is either a tensor (jnp.ndarray) or a string corresponding to an array in qujax.gates.
+        hermitian_seq_seq: Sequence of sequences of Hermitian matrices/tensors.
+            Each Hermitian is either a tensor (jnp.ndarray) or a string in ('X', 'Y', 'Z').
             E.g. [['Z', 'Z'], ['X']]
         qubits_seq_seq: Sequence of sequences of integer qubit indices.
             E.g. [[0,1], [2]]
@@ -59,28 +69,31 @@ def get_statetensor_to_expectation_func(gate_seq_seq: Sequence[Sequence[Union[st
         Function that takes statetensor and returns expected value (float).
     """
 
-    def get_gate_tensor(gate_seq: Sequence[Union[str, jnp.ndarray]]) -> jnp.ndarray:
+    def get_hermitian_tensor(hermitian_seq: Sequence[Union[str, jnp.ndarray]]) -> jnp.ndarray:
         """
-        Convert sequence of gate strings into single gate unitary (in tensor form).
+        Convert sequence of Hermitian strings/arrays into single array (in tensor form).
 
         Args:
-            gate_seq: Sequence of gate strings or arrays.
+            hermitian_seq: Sequence of Hermitian strings or arrays.
 
         Returns:
-            Single gate unitary in tensor form (array).
+            Hermitian matrix in tensor form (array).
 
         """
-        single_gate_arrs = [gates.__dict__[gate] if isinstance(gate, str) else gate for gate in gate_seq]
-        single_gate_arrs = [gate_arr.reshape((2,) * int(jnp.log2(gate_arr.size)))
-                            for gate_arr in single_gate_arrs]
-        full_gate_mat = single_gate_arrs[0]
-        for single_gate_matrix in single_gate_arrs[1:]:
-            full_gate_mat = jnp.kron(full_gate_mat, single_gate_matrix)
-        full_gate_mat = full_gate_mat.reshape((2,) * int(jnp.log2(full_gate_mat.size)))
-        return full_gate_mat
+        for h in hermitian_seq:
+            check_hermitian(h)
 
-    apply_gate_funcs = [_statetensor_to_single_expectation_func(get_gate_tensor(gns), qi)
-                        for gns, qi in zip(gate_seq_seq, qubits_seq_seq)]
+        single_arrs = [paulis[h] if isinstance(h, str) else h for h in hermitian_seq]
+        single_arrs = [h_arr.reshape((2,) * int(jnp.log2(h_arr.size))) for h_arr in single_arrs]
+
+
+        full_mat = single_arrs[0]
+        for single_matrix in single_arrs[1:]:
+            full_mat = jnp.kron(full_mat, single_matrix)
+        full_mat = full_mat.reshape((2,) * int(jnp.log2(full_mat.size)))
+        return full_mat
+
+    hermitian_tensors = [get_hermitian_tensor(h_seq) for h_seq in hermitian_seq_seq]
 
     def statetensor_to_expectation_func(statetensor: jnp.ndarray) -> float:
         """
@@ -94,24 +107,24 @@ def get_statetensor_to_expectation_func(gate_seq_seq: Sequence[Sequence[Union[st
 
         """
         out = 0
-        for coeff, f in zip(coefficients, apply_gate_funcs):
-            out += coeff * f(statetensor)
+        for hermitian, qubit_inds, coeff in zip(hermitian_tensors, qubits_seq_seq, coefficients):
+            out += coeff * statetensor_to_single_expectation(statetensor, hermitian, qubit_inds)
         return out
 
     return statetensor_to_expectation_func
 
 
-def get_statetensor_to_sampled_expectation_func(gate_seq_seq: Sequence[Sequence[Union[str, jnp.ndarray]]],
+def get_statetensor_to_sampled_expectation_func(hermitian_seq_seq: Sequence[Sequence[Union[str, jnp.ndarray]]],
                                                 qubits_seq_seq: Sequence[Sequence[int]],
                                                 coefficients: Union[Sequence[float], jnp.ndarray]) \
         -> Callable[[jnp.ndarray, random.PRNGKeyArray, int], float]:
     """
-    Converts gate strings (or arrays), qubit indices and coefficients into a function that
-    converts statetensor into a sampled expectation value.
+    Converts strings (or arrays) representing Hermitian matrices, qubit indices and
+    coefficients into a function that converts a statetensor into a sampled expected value.
 
     Args:
-        gate_seq_seq: Sequence of sequences of gates.
-            Each gate is either a tensor (jnp.ndarray) or a string corresponding to an array in qujax.gates.
+        hermitian_seq_seq: Sequence of sequences of Hermitian matrices/tensors.
+            Each Hermitian is either a tensor (jnp.ndarray) or a string in ('X', 'Y', 'Z').
             E.g. [['Z', 'Z'], ['X']]
         qubits_seq_seq: Sequence of sequences of integer qubit indices.
             E.g. [[0,1], [2]]
@@ -121,7 +134,9 @@ def get_statetensor_to_sampled_expectation_func(gate_seq_seq: Sequence[Sequence[
         Function that takes statetensor, random key and integer number of shots
         and returns sampled expected value (float).
     """
-    statetensor_to_expectation_func = get_statetensor_to_expectation_func(gate_seq_seq, qubits_seq_seq, coefficients)
+    statetensor_to_expectation_func = get_statetensor_to_expectation_func(hermitian_seq_seq,
+                                                                          qubits_seq_seq,
+                                                                          coefficients)
 
     def statetensor_to_sampled_expectation_func(statetensor: jnp.ndarray,
                                                 random_key: random.PRNGKeyArray,

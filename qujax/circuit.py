@@ -26,14 +26,14 @@ gate_type = Union[str,
 def apply_gate(statetensor: jnp.ndarray, gate_unitary: jnp.ndarray, qubit_inds: Sequence[int]) -> jnp.ndarray:
     """
     Applies gate to statetensor and returns updated statetensor.
-    Gate is represented by a unitary matrix (i.e. not parameterised).
+    Gate is represented by a unitary matrix in tensor form.
 
     Args:
         statetensor: Input statetensor.
         gate_unitary: Unitary array representing gate
             must be in tensor form with shape (2,2,...).
         qubit_inds: Sequence of indices for gate to be applied to.
-            2 * len(qubit_inds) is equal to the dimension of the gate unitary tensor.
+            Must have 2 * len(qubit_inds) = gate_unitary.ndim
 
     Returns:
         Updated statetensor.
