@@ -1,5 +1,4 @@
 from jax import numpy as jnp, jit, grad, random, config
-
 import qujax
 
 
@@ -58,13 +57,13 @@ def test_bitstring_expectation():
 def test_ZZ_X():
     config.update("jax_enable_x64", True)  # Run this test with 64 bit precision
 
-    n_qubits = 5
+    n_qubits = 4
 
-    gate_str_seq_seq = [['Z', 'Z']] * (n_qubits - 1) + [['X']] * n_qubits
-    coefs = random.normal(random.PRNGKey(0), shape=(len(gate_str_seq_seq),))
+    hermitian_str_seq_seq = [['Z', 'Z']] * (n_qubits - 1) + [['Y']] * n_qubits
+    coefs = random.normal(random.PRNGKey(0), shape=(len(hermitian_str_seq_seq),))
 
     qubit_inds_seq = [[i, i + 1] for i in range(n_qubits - 1)] + [[i] for i in range(n_qubits)]
-    st_to_exp = qujax.get_statetensor_to_expectation_func(gate_str_seq_seq,
+    st_to_exp = qujax.get_statetensor_to_expectation_func(hermitian_str_seq_seq,
                                                           qubit_inds_seq,
                                                           coefs)
 
@@ -72,28 +71,30 @@ def test_ZZ_X():
     state /= jnp.linalg.norm(state)
     st_in = state.reshape((2,) * n_qubits)
 
-    def big_unitary_matrix(gate_str_seq, qubit_inds):
-        qubit_gate_arrs = [getattr(qujax.gates, s) for s in gate_str_seq]
-        gate_arrs = []
+    def big_hermitian_matrix(hermitian_str_seq, qubit_inds):
+        qubit_arrs = [getattr(qujax.gates, s) for s in hermitian_str_seq]
+        hermitian_arrs = []
         j = 0
         for i in range(n_qubits):
             if i in qubit_inds:
-                gate_arrs.append(qubit_gate_arrs[j])
+                hermitian_arrs.append(qubit_arrs[j])
                 j += 1
             else:
-                gate_arrs.append(jnp.eye(2))
+                hermitian_arrs.append(jnp.eye(2))
 
-        big_u = gate_arrs[0]
+        big_h = hermitian_arrs[0]
         for k in range(1, n_qubits):
-            big_u = jnp.kron(big_u, gate_arrs[k])
-        return big_u
+            big_h = jnp.kron(big_h, hermitian_arrs[k])
+        return big_h
 
-    sum_big_us = jnp.zeros((2 ** n_qubits, 2 ** n_qubits))
-    for i in range(len(gate_str_seq_seq)):
-        sum_big_us += coefs[i] * big_unitary_matrix(gate_str_seq_seq[i], qubit_inds_seq[i])
+    sum_big_hs = jnp.zeros((2 ** n_qubits, 2 ** n_qubits), dtype='complex')
+    for i in range(len(hermitian_str_seq_seq)):
+        sum_big_hs += coefs[i] * big_hermitian_matrix(hermitian_str_seq_seq[i], qubit_inds_seq[i])
+
+    assert jnp.allclose(sum_big_hs, sum_big_hs.conj().T)
 
     sv = st_in.flatten()
-    true_exp = jnp.dot(sv, sum_big_us @ sv.conj())
+    true_exp = jnp.dot(sv, sum_big_hs @ sv.conj()).real
 
     qujax_exp = st_to_exp(st_in)
     qujax_exp_jit = jit(st_to_exp)(st_in)
@@ -103,11 +104,11 @@ def test_ZZ_X():
     assert jnp.isclose(true_exp, qujax_exp)
     assert jnp.isclose(true_exp, qujax_exp_jit)
 
-    st_to_samp_exp = qujax.get_statetensor_to_sampled_expectation_func(gate_str_seq_seq,
+    st_to_samp_exp = qujax.get_statetensor_to_sampled_expectation_func(hermitian_str_seq_seq,
                                                                        qubit_inds_seq,
                                                                        coefs)
-    qujax_samp_exp = st_to_samp_exp(st_in, random.PRNGKey(1), 10000)
-    qujax_samp_exp_jit = jit(st_to_samp_exp, static_argnums=2)(st_in, random.PRNGKey(2), 100000)
+    qujax_samp_exp = st_to_samp_exp(st_in, random.PRNGKey(1), 1000000)
+    qujax_samp_exp_jit = jit(st_to_samp_exp, static_argnums=2)(st_in, random.PRNGKey(2), 1000000)
     assert jnp.array(qujax_samp_exp).shape == ()
     assert jnp.array(qujax_samp_exp).dtype.name[:5] == 'float'
     assert jnp.isclose(true_exp, qujax_samp_exp, rtol=1e-2)
