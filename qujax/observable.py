@@ -86,7 +86,6 @@ def get_statetensor_to_expectation_func(hermitian_seq_seq: Sequence[Sequence[Uni
         single_arrs = [paulis[h] if isinstance(h, str) else h for h in hermitian_seq]
         single_arrs = [h_arr.reshape((2,) * int(jnp.log2(h_arr.size))) for h_arr in single_arrs]
 
-
         full_mat = single_arrs[0]
         for single_matrix in single_arrs[1:]:
             full_mat = jnp.kron(full_mat, single_matrix)
