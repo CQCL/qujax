@@ -91,6 +91,7 @@ def _to_kraus_operator_seq_funcs(kraus_op: kraus_op_type,
         param_inds = [param_inds]
     return kraus_op_funcs, _arrayify_inds(param_inds)
 
+
 def partial_trace(densitytensor: jnp.ndarray,
                   indices_to_trace: Iterable[int]) -> jnp.ndarray:
     """
@@ -104,7 +105,7 @@ def partial_trace(densitytensor: jnp.ndarray,
     Returns:
         Resulting densitytensor on remaining qubits.
 
-    """                   
+    """
     n_qubits = densitytensor.ndim // 2
     einsum_indices = list(range(densitytensor.ndim))
     for i in indices_to_trace:
