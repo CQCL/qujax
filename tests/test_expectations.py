@@ -54,7 +54,7 @@ def test_bitstring_expectation():
     assert jnp.allclose(true_expectation_grad, expectation_grad_jit, atol=1e-5)
 
 
-def test_ZZ_X():
+def test_ZZ_Y():
     config.update("jax_enable_x64", True)  # Run this test with 64 bit precision
 
     n_qubits = 4
