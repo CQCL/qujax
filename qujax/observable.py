@@ -59,7 +59,7 @@ def get_statetensor_to_expectation_func(hermitian_seq_seq: Sequence[Sequence[Uni
 
     Args:
         hermitian_seq_seq: Sequence of sequences of Hermitian matrices/tensors.
-            Each Hermitian is either a tensor (jnp.ndarray) or a string in ('X', 'Y', 'Z').
+            Each Hermitian matrix is either represented by a tensor (jnp.ndarray) or by a list of 'X', 'Y' or 'Z' characters corresponding to the standard Pauli matrices.
             E.g. [['Z', 'Z'], ['X']]
         qubits_seq_seq: Sequence of sequences of integer qubit indices.
             E.g. [[0,1], [2]]
