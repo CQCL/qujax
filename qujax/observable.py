@@ -14,7 +14,7 @@ def statetensor_to_single_expectation(statetensor: jnp.ndarray,
                                       hermitian: jnp.ndarray,
                                       qubit_inds: Sequence[int]) -> float:
     """
-    Evaluates expected value of statetensor through a Hermitian matrix (in tensor form).
+    Evaluates expectation value of an observable represented by a Hermitian matrix (in tensor form).
 
     Args:
         statetensor: Input statetensor.
