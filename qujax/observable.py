@@ -55,7 +55,7 @@ def get_statetensor_to_expectation_func(hermitian_seq_seq: Sequence[Sequence[Uni
         -> Callable[[jnp.ndarray], float]:
     """
     Takes strings (or arrays) representing Hermitian matrices, along with qubit indices and
-    coefficients into a function that converts a statetensor into an expected value.
+   a list of coefficients and returns a function that converts a statetensor into an expected value.
 
     Args:
         hermitian_seq_seq: Sequence of sequences of Hermitian matrices/tensors.
