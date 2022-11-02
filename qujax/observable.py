@@ -71,7 +71,7 @@ def get_statetensor_to_expectation_func(hermitian_seq_seq: Sequence[Sequence[Uni
 
     def get_hermitian_tensor(hermitian_seq: Sequence[Union[str, jnp.ndarray]]) -> jnp.ndarray:
         """
-        Convert sequence of Hermitian strings/arrays into single array (in tensor form).
+        Convert a sequence of observables represented by Pauli strings or Hermitian matrices in tensor form into single array (in tensor form).
 
         Args:
             hermitian_seq: Sequence of Hermitian strings or arrays.
