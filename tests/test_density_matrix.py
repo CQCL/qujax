@@ -2,9 +2,8 @@ from itertools import combinations
 from jax import numpy as jnp, jit
 
 import qujax
-from qujax import _kraus_single, kraus, get_params_to_densitytensor_func
 from qujax import get_params_to_statetensor_func
-from qujax import partial_trace
+from qujax import _kraus_single, kraus, get_params_to_densitytensor_func, partial_trace, statetensor_to_densitytensor
 from qujax import densitytensor_to_measurement_probabilities, densitytensor_to_measured_densitytensor
 
 
@@ -123,7 +122,7 @@ def test_params_to_densitytensor_func():
     params = jnp.arange(n_qubits) / 10.
 
     st = params_to_st(params)
-    dt_test = (st.reshape(-1, 1) @ st.reshape(1, -1).conj()).reshape(2 for _ in range(2 * n_qubits))
+    dt_test = statetensor_to_densitytensor(st)
 
     dt = params_to_dt(params)
 

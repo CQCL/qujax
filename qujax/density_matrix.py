@@ -9,6 +9,22 @@ from qujax.circuit_tools import check_circuit
 
 kraus_op_type = Union[gate_type, Iterable[gate_type]]
 
+def statetensor_to_densitytensor(statetensor: jnp.ndarray) -> jnp.ndarray:
+    """
+    Computes a densitytensor representation of a pure quantum state
+    from its statetensor representaton
+
+    Args:
+        statetensor: Input statetensor.
+
+    Returns:
+        A densitytensor representing the quantum state.
+    """
+    n_qubits = statetensor.ndim
+    st = statetensor
+    dt = (st.reshape(-1, 1) @ st.reshape(1, -1).conj()).reshape(2 for _ in range(2*n_qubits))
+    return dt
+
 
 def _kraus_single(densitytensor: jnp.ndarray,
                   array: jnp.ndarray,

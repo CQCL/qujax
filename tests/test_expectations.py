@@ -1,5 +1,29 @@
 from jax import numpy as jnp, jit, grad, random, config
+
+import qujax.gates
 import qujax
+from qujax import densitytensor_to_single_expectation, statetensor_to_single_expectation
+from qujax import statetensor_to_densitytensor
+
+
+def test_single_expectation():
+    Z = qujax.gates.Z
+
+    st1 = jnp.zeros((2, 2, 2))
+    st2 = jnp.zeros((2, 2, 2))
+    st1 = st1.at[(0, 0, 0)].set(1.)
+    st2 = st2.at[(1, 0, 0)].set(1.)
+    dt1 = statetensor_to_densitytensor(st1)
+    dt2 = statetensor_to_densitytensor(st2)
+    ZZ = jnp.kron(Z, Z).reshape(2, 2, 2, 2)
+
+    est1 = statetensor_to_single_expectation(dt1, ZZ, [0, 1])
+    est2 = statetensor_to_single_expectation(dt2, ZZ, [0, 1])
+    edt1 = densitytensor_to_single_expectation(dt1, ZZ, [0, 1])
+    edt2 = densitytensor_to_single_expectation(dt2, ZZ, [0, 1])
+
+    assert est1.item() == edt1.item() == 1
+    assert est2.item() == edt2.item() == -1
 
 
 def test_bitstring_expectation():
@@ -66,10 +90,14 @@ def test_ZZ_Y():
     st_to_exp = qujax.get_statetensor_to_expectation_func(hermitian_str_seq_seq,
                                                           qubit_inds_seq,
                                                           coefs)
+    dt_to_exp = qujax.get_statetensor_to_expectation_func(hermitian_str_seq_seq,
+                                                          qubit_inds_seq,
+                                                          coefs)
 
     state = random.uniform(random.PRNGKey(0), shape=(2 ** n_qubits,)) * 2
     state /= jnp.linalg.norm(state)
     st_in = state.reshape((2,) * n_qubits)
+    dt_in = statetensor_to_densitytensor(st_in)
 
     def big_hermitian_matrix(hermitian_str_seq, qubit_inds):
         qubit_arrs = [getattr(qujax.gates, s) for s in hermitian_str_seq]
@@ -97,22 +125,33 @@ def test_ZZ_Y():
     true_exp = jnp.dot(sv, sum_big_hs @ sv.conj()).real
 
     qujax_exp = st_to_exp(st_in)
+    qujax_dt_exp = dt_to_exp(dt_in)
     qujax_exp_jit = jit(st_to_exp)(st_in)
+    qujax_dt_exp_jit = jit(dt_to_exp)(dt_in)
 
     assert jnp.array(qujax_exp).shape == ()
     assert jnp.array(qujax_exp).dtype.name[:5] == 'float'
     assert jnp.isclose(true_exp, qujax_exp)
+    assert jnp.isclose(true_exp, qujax_dt_exp)
     assert jnp.isclose(true_exp, qujax_exp_jit)
+    assert jnp.isclose(true_exp, qujax_dt_exp_jit)
 
     st_to_samp_exp = qujax.get_statetensor_to_sampled_expectation_func(hermitian_str_seq_seq,
                                                                        qubit_inds_seq,
                                                                        coefs)
+    dt_to_samp_exp = qujax.get_statetensor_to_sampled_expectation_func(hermitian_str_seq_seq,
+                                                                       qubit_inds_seq,
+                                                                       coefs)
     qujax_samp_exp = st_to_samp_exp(st_in, random.PRNGKey(1), 1000000)
     qujax_samp_exp_jit = jit(st_to_samp_exp, static_argnums=2)(st_in, random.PRNGKey(2), 1000000)
+    qujax_samp_exp_dt = st_to_samp_exp(st_in, random.PRNGKey(1), 1000000)
+    qujax_samp_exp_dt_jit = jit(st_to_samp_exp, static_argnums=2)(st_in, random.PRNGKey(2), 1000000)
     assert jnp.array(qujax_samp_exp).shape == ()
     assert jnp.array(qujax_samp_exp).dtype.name[:5] == 'float'
     assert jnp.isclose(true_exp, qujax_samp_exp, rtol=1e-2)
     assert jnp.isclose(true_exp, qujax_samp_exp_jit, rtol=1e-2)
+    assert jnp.isclose(true_exp, qujax_samp_exp_dt, rtol=1e-2)
+    assert jnp.isclose(true_exp, qujax_samp_exp_dt_jit, rtol=1e-2)
 
 
 def test_sampling():
