@@ -23,6 +23,8 @@ from qujax.density_matrix import _kraus_single
 from qujax.density_matrix import kraus
 from qujax.density_matrix import get_params_to_densitytensor_func
 from qujax.density_matrix import partial_trace
+from qujax.density_matrix import densitytensor_to_measurement_probabilities
+from qujax.density_matrix import densitytensor_to_measured_densitytensor
 
 del version
 del circuit
