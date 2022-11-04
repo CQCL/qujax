@@ -3,7 +3,7 @@ from jax import numpy as jnp, jit, grad, random, config
 import qujax.gates
 import qujax
 from qujax import densitytensor_to_single_expectation, statetensor_to_single_expectation
-from qujax import statetensor_to_densitytensor
+from qujax.observable import statetensor_to_densitytensor
 
 
 def test_single_expectation():

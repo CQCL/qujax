@@ -3,7 +3,8 @@ from jax import numpy as jnp, jit
 
 import qujax
 from qujax import get_params_to_statetensor_func
-from qujax import _kraus_single, kraus, get_params_to_densitytensor_func, partial_trace, statetensor_to_densitytensor
+from qujax import _kraus_single, kraus, get_params_to_densitytensor_func, partial_trace
+from qujax.observable import statetensor_to_densitytensor
 from qujax import densitytensor_to_measurement_probabilities, densitytensor_to_measured_densitytensor
 
 
