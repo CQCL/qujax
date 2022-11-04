@@ -6,24 +6,9 @@ from jax.lax import scan
 from qujax.circuit import apply_gate, UnionCallableOptionalArray, gate_type
 from qujax.circuit import _to_gate_func, _arrayify_inds, _gate_func_to_unitary
 from qujax.circuit_tools import check_circuit
+from qujax.observable import bitstrings_to_integers
 
 kraus_op_type = Union[gate_type, Iterable[gate_type]]
-
-def statetensor_to_densitytensor(statetensor: jnp.ndarray) -> jnp.ndarray:
-    """
-    Computes a densitytensor representation of a pure quantum state
-    from its statetensor representaton
-
-    Args:
-        statetensor: Input statetensor.
-
-    Returns:
-        A densitytensor representing the quantum state.
-    """
-    n_qubits = statetensor.ndim
-    st = statetensor
-    dt = (st.reshape(-1, 1) @ st.reshape(1, -1).conj()).reshape(2 for _ in range(2*n_qubits))
-    return dt
 
 
 def _kraus_single(densitytensor: jnp.ndarray,
@@ -215,3 +200,52 @@ def get_params_to_densitytensor_func(kraus_ops_seq: Sequence[kraus_op_type],
         return no_params_to_densitytensor_func
 
     return params_to_densitytensor_func
+
+
+def densitytensor_to_measurement_probabilities(densitytensor: jnp.ndarray,
+                                               qubit_inds: Sequence[int]) -> jnp.ndarray:
+    """
+    Extract array of measurement probabilities given a densitytensor and some qubit indices to measure
+    (in the computational basis).
+    I.e. the ith element of the array corresponds to the probability of observing the bitstring
+    represented by the integer i on the measured qubits.
+
+    Args:
+        densitytensor: Input densitytensor.
+        qubit_inds: Sequence of qubit indices to measure.
+
+    Returns:
+        Normalised array of measurement probabilities.
+    """
+    n_qubits = densitytensor.ndim // 2
+    n_qubits_measured = len(qubit_inds)
+    qubit_inds_trace_out = [i for i in range(n_qubits) if i not in qubit_inds]
+    return jnp.diag(partial_trace(densitytensor, qubit_inds_trace_out).reshape(2 * n_qubits_measured,
+                                                                               2 * n_qubits_measured)).real
+
+
+def densitytensor_to_measured_densitytensor(densitytensor: jnp.ndarray,
+                                            qubit_inds: Sequence[int],
+                                            measurement: Union[int, jnp.ndarray]) -> jnp.ndarray:
+    """
+    Returns the post-measurement densitytensor assuming that qubit_inds are measured
+    (in the computational basis) and the given measurement (integer or bitstring) is observed.
+
+    Args:
+        densitytensor: Input densitytensor.
+        qubit_inds: Sequence of qubit indices to measure.
+        measurement: Observed integer or bitstring.
+
+    Returns:
+        Post-measurement densitytensor (same shape as input densitytensor).
+    """
+    measurement = jnp.array(measurement)
+    measured_int = bitstrings_to_integers(measurement) if measurement.ndim == 1 else measurement
+
+    n_qubits = densitytensor.ndim // 2
+    n_qubits_measured = len(qubit_inds)
+    qubit_inds_projector = jnp.diag(jnp.zeros(2 ** n_qubits_measured).at[measured_int].set(1)) \
+        .reshape((2,) * 2 * n_qubits_measured)
+    unnorm_densitytensor = _kraus_single(densitytensor, qubit_inds_projector, qubit_inds)
+    norm_const = jnp.trace(unnorm_densitytensor.reshape(2 ** n_qubits, 2 ** n_qubits)).real
+    return unnorm_densitytensor / norm_const

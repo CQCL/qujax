@@ -1,5 +1,4 @@
-from qujax import gates
-from qujax.circuit_tools import check_unitary
+from qujax import gates, check_unitary
 
 
 def test_gates():

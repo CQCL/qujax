@@ -6,7 +6,6 @@ from jax.lax import fori_loop
 
 from qujax.circuit import apply_gate
 from qujax.gates import X, Y, Z
-from qujax.density_matrix import statetensor_to_densitytensor
 
 paulis = {'X': X, 'Y': Y, 'Z': Z}
 
@@ -28,11 +27,12 @@ def densitytensor_to_single_expectation(densitytensor: jnp.ndarray,
     """
     n_qubits = densitytensor.ndim // 2
     dt_indices = 2 * list(range(n_qubits))
-    hermitian_indices = [i + densitytensor.ndim //2 for i in range(hermitian.ndim)]
+    hermitian_indices = [i + densitytensor.ndim // 2 for i in range(hermitian.ndim)]
     for n, q in enumerate(qubit_inds):
         dt_indices[q] = hermitian_indices[n + len(qubit_inds)]
         dt_indices[q + n_qubits] = hermitian_indices[n]
     return jnp.einsum(densitytensor, dt_indices, hermitian, hermitian_indices).real
+
 
 def statetensor_to_single_expectation(statetensor: jnp.ndarray,
                                       hermitian: jnp.ndarray,
@@ -74,7 +74,7 @@ def check_hermitian(hermitian: Union[str, jnp.ndarray]):
 
 
 def get_hermitian_tensor(hermitian_seq: Sequence[Union[str, jnp.ndarray]]) -> jnp.ndarray:
-        """
+    """
         Convert a sequence of observables represented by Pauli strings or Hermitian matrices in tensor form into single array (in tensor form).
 
         Args:
@@ -84,23 +84,23 @@ def get_hermitian_tensor(hermitian_seq: Sequence[Union[str, jnp.ndarray]]) -> jn
             Hermitian matrix in tensor form (array).
 
         """
-        for h in hermitian_seq:
-            check_hermitian(h)
+    for h in hermitian_seq:
+        check_hermitian(h)
 
-        single_arrs = [paulis[h] if isinstance(h, str) else h for h in hermitian_seq]
-        single_arrs = [h_arr.reshape((2,) * int(jnp.log2(h_arr.size))) for h_arr in single_arrs]
+    single_arrs = [paulis[h] if isinstance(h, str) else h for h in hermitian_seq]
+    single_arrs = [h_arr.reshape((2,) * int(jnp.log2(h_arr.size))) for h_arr in single_arrs]
 
-        full_mat = single_arrs[0]
-        for single_matrix in single_arrs[1:]:
-            full_mat = jnp.kron(full_mat, single_matrix)
-        full_mat = full_mat.reshape((2,) * int(jnp.log2(full_mat.size)))
-        return full_mat
+    full_mat = single_arrs[0]
+    for single_matrix in single_arrs[1:]:
+        full_mat = jnp.kron(full_mat, single_matrix)
+    full_mat = full_mat.reshape((2,) * int(jnp.log2(full_mat.size)))
+    return full_mat
 
 
 def _get_tensor_to_expectation_func(hermitian_seq_seq: Sequence[Sequence[Union[str, jnp.ndarray]]],
-                                        qubits_seq_seq: Sequence[Sequence[int]],
-                                        coefficients: Union[Sequence[float], jnp.ndarray],
-                                        contraction_function: Callable) \
+                                    qubits_seq_seq: Sequence[Sequence[int]],
+                                    coefficients: Union[Sequence[float], jnp.ndarray],
+                                    contraction_function: Callable) \
         -> Callable[[jnp.ndarray], float]:
     """
     Takes strings (or arrays) representing Hermitian matrices, along with qubit indices and
@@ -141,6 +141,7 @@ def _get_tensor_to_expectation_func(hermitian_seq_seq: Sequence[Sequence[Union[s
 
     return statetensor_to_expectation_func
 
+
 def get_statetensor_to_expectation_func(hermitian_seq_seq: Sequence[Sequence[Union[str, jnp.ndarray]]],
                                         qubits_seq_seq: Sequence[Sequence[int]],
                                         coefficients: Union[Sequence[float], jnp.ndarray]) \
@@ -161,11 +162,13 @@ def get_statetensor_to_expectation_func(hermitian_seq_seq: Sequence[Sequence[Uni
         Function that takes statetensor and returns expected value (float).
     """
 
-    return _get_tensor_to_expectation_func(hermitian_seq_seq, qubits_seq_seq, coefficients, statetensor_to_single_expectation)
+    return _get_tensor_to_expectation_func(hermitian_seq_seq, qubits_seq_seq, coefficients,
+                                           statetensor_to_single_expectation)
+
 
 def get_densitytensor_to_expectation_func(hermitian_seq_seq: Sequence[Sequence[Union[str, jnp.ndarray]]],
-                                        qubits_seq_seq: Sequence[Sequence[int]],
-                                        coefficients: Union[Sequence[float], jnp.ndarray]) \
+                                          qubits_seq_seq: Sequence[Sequence[int]],
+                                          coefficients: Union[Sequence[float], jnp.ndarray]) \
         -> Callable[[jnp.ndarray], float]:
     """
     Takes strings (or arrays) representing Hermitian matrices, along with qubit indices and
@@ -183,7 +186,9 @@ def get_densitytensor_to_expectation_func(hermitian_seq_seq: Sequence[Sequence[U
         Function that takes densitytensor and returns expected value (float).
     """
 
-    return _get_tensor_to_expectation_func(hermitian_seq_seq, qubits_seq_seq, coefficients, densitytensor_to_single_expectation)
+    return _get_tensor_to_expectation_func(hermitian_seq_seq, qubits_seq_seq, coefficients,
+                                           densitytensor_to_single_expectation)
+
 
 def get_statetensor_to_sampled_expectation_func(hermitian_seq_seq: Sequence[Sequence[Union[str, jnp.ndarray]]],
                                                 qubits_seq_seq: Sequence[Sequence[int]],
@@ -261,8 +266,8 @@ def get_densitytensor_to_sampled_expectation_func(hermitian_seq_seq: Sequence[Se
                                                                               coefficients)
 
     def densitytensor_to_sampled_expectation_func(statetensor: jnp.ndarray,
-                                                random_key: random.PRNGKeyArray,
-                                                n_samps: int) -> float:
+                                                  random_key: random.PRNGKeyArray,
+                                                  n_samps: int) -> float:
         """
         Maps statetensor to sampled expected value.
 
@@ -358,3 +363,20 @@ def sample_bitstrings(random_key: random.PRNGKeyArray,
 
     """
     return integers_to_bitstrings(sample_integers(random_key, statetensor, n_samps), statetensor.ndim)
+
+
+def statetensor_to_densitytensor(statetensor: jnp.ndarray) -> jnp.ndarray:
+    """
+    Computes a densitytensor representation of a pure quantum state
+    from its statetensor representaton
+
+    Args:
+        statetensor: Input statetensor.
+
+    Returns:
+        A densitytensor representing the quantum state.
+    """
+    n_qubits = statetensor.ndim
+    st = statetensor
+    dt = (st.reshape(-1, 1) @ st.reshape(1, -1).conj()).reshape(2 for _ in range(2 * n_qubits))
+    return dt
