@@ -246,4 +246,6 @@ def test_measure():
     measured_dt_true = measured_dm.reshape((2,) * 2 * n_qubits)
 
     measured_dt = densitytensor_to_measured_densitytensor(dt, qubit_inds, 0)
+    measured_dt_bits = densitytensor_to_measured_densitytensor(dt, qubit_inds, (0,)*n_qubits)
     assert jnp.allclose(measured_dt_true, measured_dt)
+    assert jnp.allclose(measured_dt_true, measured_dt_bits)
