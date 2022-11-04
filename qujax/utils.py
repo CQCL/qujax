@@ -1,17 +1,33 @@
 from __future__ import annotations
-from typing import Sequence, Union, Callable, List, Tuple, Optional
+from typing import Sequence, Union, Callable, List, Tuple, Optional, Protocol, Iterable
 import collections.abc
 from inspect import signature
-
-from jax import numpy as jnp
+from jax import numpy as jnp, random
 
 from qujax import gates
 
+paulis = {'X': gates.X, 'Y': gates.Y, 'Z': gates.Z}
 
-def check_unitary(gate: Union[str,
-                              jnp.ndarray,
-                              Callable[[jnp.ndarray], jnp.ndarray],
-                              Callable[[], jnp.ndarray]]):
+
+class CallableArrayAndOptionalArray(Protocol):
+    def __call__(self, params: jnp.ndarray, statetensor_in: jnp.ndarray = None) -> jnp.ndarray:
+        ...
+
+
+class CallableOptionalArray(Protocol):
+    def __call__(self, statetensor_in: jnp.ndarray = None) -> jnp.ndarray:
+        ...
+
+
+UnionCallableOptionalArray = Union[CallableArrayAndOptionalArray, CallableOptionalArray]
+gate_type = Union[str,
+                  jnp.ndarray,
+                  Callable[[jnp.ndarray], jnp.ndarray],
+                  Callable[[], jnp.ndarray]]
+kraus_op_type = Union[gate_type, Iterable[gate_type]]
+
+
+def check_unitary(gate: gate_type):
     """
     Checks whether a matrix or tensor is unitary.
 
@@ -43,10 +59,45 @@ def check_unitary(gate: Union[str,
         raise TypeError(f'Gate not unitary: {gate}')
 
 
-def check_circuit(gate_seq: Sequence[Union[str,
-                                           jnp.ndarray,
-                                           Callable[[jnp.ndarray], jnp.ndarray],
-                                           Callable[[], jnp.ndarray]]],
+def check_hermitian(hermitian: Union[str, jnp.ndarray]):
+    """
+    Checks whether a matrix or tensor is Hermitian.
+
+    Args:
+        hermitian: array containing potentially Hermitian matrix or tensor
+
+    """
+    if isinstance(hermitian, str):
+        if hermitian not in paulis:
+            raise TypeError(f'qujax only accepts {tuple(paulis.keys())} as Hermitian strings, received: {hermitian}')
+    else:
+        n_qubits = hermitian.ndim // 2
+        hermitian_mat = hermitian.reshape(2 * n_qubits, 2 * n_qubits)
+        if not jnp.allclose(hermitian_mat, hermitian_mat.T.conj()):
+            raise TypeError(f'Array not Hermitian: {hermitian}')
+
+
+def _arrayify_inds(param_inds_seq: Sequence[Union[None, Sequence[int]]]) -> Sequence[jnp.ndarray]:
+    """
+    Ensure each element of param_inds_seq is an array (and therefore valid for jnp.take)
+
+    Args:
+        param_inds_seq: Sequence of sequences representing parameter indices that gates are using,
+            i.e. [[0], [], [5, 2]] tells qujax that the first gate uses the zeroth parameter
+            (the float at position zero in the parameter vector/array), the second gate is not parameterised
+            and the third gates used the parameters at position five and two.
+
+    Returns:
+        Sequence of arrays representing parameter indices.
+    """
+    if param_inds_seq is None:
+        param_inds_seq = [None]
+    param_inds_seq = [jnp.array(p) for p in param_inds_seq]
+    param_inds_seq = [jnp.array([]) if jnp.any(jnp.isnan(p)) else p.astype(int) for p in param_inds_seq]
+    return param_inds_seq
+
+
+def check_circuit(gate_seq: Sequence[kraus_op_type],
                   qubit_inds_seq: Sequence[Sequence[int]],
                   param_inds_seq: Sequence[Sequence[int]],
                   n_qubits: int = None,
@@ -59,6 +110,7 @@ def check_circuit(gate_seq: Sequence[Union[str,
             Each element is either a string matching an array or function in qujax.gates,
             a unitary array (which will be reshaped into a tensor of shape (2,2,2,...) )
             or a function taking parameters and returning gate unitary in tensor form.
+            Or alternatively a sequence of the above representing Kraus operators.
         qubit_inds_seq: Sequences of qubits (ints) that gates are acting on.
         param_inds_seq: Sequence of parameter indices that gates are using,
             i.e. [[0], [], [5, 2]] tells qujax that the first gate uses the first parameter,
@@ -91,11 +143,8 @@ def check_circuit(gate_seq: Sequence[Union[str,
             check_unitary(g)
 
 
-def _get_gate_str(gate_obj: Union[str,
-                                  jnp.ndarray,
-                                  Callable[[jnp.ndarray], jnp.ndarray],
-                                  Callable[[], jnp.ndarray]],
-                  param_inds: Sequence[int]) -> str:
+def _get_gate_str(gate_obj: kraus_op_type,
+                  param_inds: Union[None, Sequence[int], Sequence[Sequence[int]]]) -> str:
     """
     Maps single gate object to a four character string representation
 
@@ -103,12 +152,18 @@ def _get_gate_str(gate_obj: Union[str,
         gate_obj: Either a string matching a function in qujax.gates,
             a unitary array (which will be reshaped into a tensor of shape e.g. (2,2,2,...) )
             or a function taking parameters (can be empty) and returning gate unitary in tensor form.
-        param_inds: Parameter indices that gates are using, i.e. gate uses 1st and 666th parameter.
+            Or alternatively, a sequence of Krause operators represented by strings, arrays or functions.
+        param_inds: Parameter indices that gates are using, i.e. gate uses 1st and 5th parameter.
 
     Returns:
         Four character string representation of the gate
 
     """
+    if isinstance(gate_obj, (tuple, list)) or (hasattr(gate_obj, '__array__') and gate_obj.ndim % 2 == 1):
+        # Kraus operators
+        gate_obj = 'Kr'
+        param_inds = jnp.unique(jnp.concatenate(_arrayify_inds(param_inds), axis=0))
+
     if isinstance(gate_obj, str):
         gate_str = gate_obj
     elif hasattr(gate_obj, '__array__'):
@@ -126,7 +181,10 @@ def _get_gate_str(gate_obj: Union[str,
     if hasattr(param_inds, 'tolist'):
         param_inds = param_inds.tolist()
 
-    if param_inds == [] or param_inds == [None]:
+    if isinstance(param_inds, tuple):
+        param_inds = list(param_inds)
+
+    if param_inds == [] or param_inds == [None] or param_inds is None:
         if len(gate_str) > 7:
             gate_str = gate_str[:6] + '.'
     else:
@@ -172,10 +230,7 @@ def _pad_rows(rows: List[str]) -> Tuple[List[str], List[bool]]:
     return out_rows, [True] * len(rows)
 
 
-def print_circuit(gate_seq: Sequence[Union[str,
-                                           jnp.ndarray,
-                                           Callable[[jnp.ndarray], jnp.ndarray],
-                                           Callable[[], jnp.ndarray]]],
+def print_circuit(gate_seq: Sequence[kraus_op_type],
                   qubit_inds_seq: Sequence[Sequence[int]],
                   param_inds_seq: Sequence[Sequence[int]],
                   n_qubits: Optional[int] = None,
@@ -192,6 +247,7 @@ def print_circuit(gate_seq: Sequence[Union[str,
             Each element is either a string matching an array or function in qujax.gates,
             a unitary array (which will be reshaped into a tensor of shape (2,2,2,...) )
             or a function taking parameters and returning gate unitary in tensor form.
+            Or alternatively a sequence of the above representing Kraus operators.
         qubit_inds_seq: Sequences of qubits (ints) that gates are acting on.
         param_inds_seq: Sequence of parameter indices that gates are using,
             i.e. [[0], [], [5, 2]] tells qujax that the first gate uses the first parameter,
@@ -207,7 +263,7 @@ def print_circuit(gate_seq: Sequence[Union[str,
         String representation of circuit
 
     """
-    check_circuit(gate_seq, qubit_inds_seq, param_inds_seq, n_qubits)
+    check_circuit(gate_seq, qubit_inds_seq, param_inds_seq, n_qubits, False)
 
     gate_ind_max = min(len(gate_seq) - 1, gate_ind_max)
     if gate_ind_max < gate_ind_min:
@@ -259,3 +315,93 @@ def print_circuit(gate_seq: Sequence[Union[str,
         print(p)
 
     return rows
+
+
+def integers_to_bitstrings(integers: Union[int, jnp.ndarray],
+                           nbits: int = None) -> jnp.ndarray:
+    """
+    Convert integer or array of integers into their binary expansion(s).
+
+    Args:
+        integers: Integer or array of integers to be converted.
+        nbits: Length of output binary expansion.
+            Defaults to smallest possible.
+
+    Returns:
+        Array of binary expansion(s).
+    """
+    integers = jnp.atleast_1d(integers)
+    if nbits is None:
+        nbits = (jnp.ceil(jnp.log2(jnp.maximum(integers.max(), 1)) + 1e-5)).astype(int)
+
+    return jnp.squeeze(((integers[:, None] & (1 << jnp.arange(nbits - 1, -1, -1))) > 0).astype(int))
+
+
+def bitstrings_to_integers(bitstrings: jnp.ndarray) -> Union[int, jnp.ndarray]:
+    """
+    Convert binary expansion(s) into integers.
+
+    Args:
+        bitstrings: Bitstring array or array of bitstring arrays.
+
+    Returns:
+        Array of integers.
+    """
+    bitstrings = jnp.atleast_2d(bitstrings)
+    convarr = 2 ** jnp.arange(bitstrings.shape[-1] - 1, -1, -1)
+    return jnp.squeeze(bitstrings.dot(convarr)).astype(int)
+
+
+def sample_integers(random_key: random.PRNGKeyArray,
+                    statetensor: jnp.ndarray,
+                    n_samps: Optional[int] = 1) -> jnp.ndarray:
+    """
+    Generate random integer samples according to statetensor.
+
+    Args:
+        random_key: JAX random key to seed samples.
+        statetensor: Statetensor encoding sampling probabilities (in the form of amplitudes).
+        n_samps: Number of samples to generate. Defaults to 1.
+
+    Returns:
+        Array with sampled integers, shape=(n_samps,).
+
+    """
+    sv_probs = jnp.square(jnp.abs(statetensor.flatten()))
+    sampled_inds = random.choice(random_key, a=jnp.arange(statetensor.size), shape=(n_samps,), p=sv_probs)
+    return sampled_inds
+
+
+def sample_bitstrings(random_key: random.PRNGKeyArray,
+                      statetensor: jnp.ndarray,
+                      n_samps: Optional[int] = 1) -> jnp.ndarray:
+    """
+    Generate random bitstring samples according to statetensor.
+
+    Args:
+        random_key: JAX random key to seed samples.
+        statetensor: Statetensor encoding sampling probabilities (in the form of amplitudes).
+        n_samps: Number of samples to generate. Defaults to 1.
+
+    Returns:
+        Array with sampled bitstrings, shape=(n_samps, statetensor.ndim).
+
+    """
+    return integers_to_bitstrings(sample_integers(random_key, statetensor, n_samps), statetensor.ndim)
+
+
+def statetensor_to_densitytensor(statetensor: jnp.ndarray) -> jnp.ndarray:
+    """
+    Computes a densitytensor representation of a pure quantum state
+    from its statetensor representaton
+
+    Args:
+        statetensor: Input statetensor.
+
+    Returns:
+        A densitytensor representing the quantum state.
+    """
+    n_qubits = statetensor.ndim
+    st = statetensor
+    dt = (st.reshape(-1, 1) @ st.reshape(1, -1).conj()).reshape(2 for _ in range(2 * n_qubits))
+    return dt

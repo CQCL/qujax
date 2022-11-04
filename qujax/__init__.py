@@ -2,36 +2,39 @@ from qujax.version import __version__
 
 from qujax import gates
 
-from qujax.circuit import UnionCallableOptionalArray
-from qujax.circuit import apply_gate
-from qujax.circuit import get_params_to_statetensor_func
+from qujax.statetensor import apply_gate
+from qujax.statetensor import get_params_to_statetensor_func
 
-from qujax.circuit_tools import check_unitary
-from qujax.circuit_tools import check_circuit
-from qujax.circuit_tools import print_circuit
+from qujax.statetensor_observable import statetensor_to_single_expectation
+from qujax.statetensor_observable import get_statetensor_to_expectation_func
+from qujax.statetensor_observable import get_statetensor_to_sampled_expectation_func
 
-from qujax.observable import statetensor_to_densitytensor
-from qujax.observable import statetensor_to_single_expectation
-from qujax.observable import densitytensor_to_single_expectation
-from qujax.observable import get_statetensor_to_expectation_func
-from qujax.observable import get_statetensor_to_sampled_expectation_func
-from qujax.observable import get_densitytensor_to_expectation_func
-from qujax.observable import get_densitytensor_to_sampled_expectation_func
-from qujax.observable import check_hermitian
-from qujax.observable import integers_to_bitstrings
-from qujax.observable import bitstrings_to_integers
-from qujax.observable import sample_integers
-from qujax.observable import sample_bitstrings
+from qujax.densitytensor import _kraus_single
+from qujax.densitytensor import kraus
+from qujax.densitytensor import get_params_to_densitytensor_func
+from qujax.densitytensor import partial_trace
 
-from qujax.density_matrix import _kraus_single
-from qujax.density_matrix import kraus
-from qujax.density_matrix import get_params_to_densitytensor_func
-from qujax.density_matrix import partial_trace
-from qujax.density_matrix import densitytensor_to_measurement_probabilities
-from qujax.density_matrix import densitytensor_to_measured_densitytensor
+from qujax.densitytensor_observable import densitytensor_to_single_expectation
+from qujax.densitytensor_observable import get_densitytensor_to_expectation_func
+from qujax.densitytensor_observable import get_densitytensor_to_sampled_expectation_func
+from qujax.densitytensor_observable import densitytensor_to_measurement_probabilities
+from qujax.densitytensor_observable import densitytensor_to_measured_densitytensor
+
+from qujax.utils import UnionCallableOptionalArray
+from qujax.utils import check_unitary
+from qujax.utils import check_hermitian
+from qujax.utils import check_circuit
+from qujax.utils import print_circuit
+from qujax.utils import integers_to_bitstrings
+from qujax.utils import bitstrings_to_integers
+from qujax.utils import sample_integers
+from qujax.utils import sample_bitstrings
+from qujax.utils import statetensor_to_densitytensor
 
 del version
-del circuit
-del observable
-del circuit_tools
-del density_matrix
+del statetensor
+del statetensor_observable
+del densitytensor
+del densitytensor_observable
+del utils
+

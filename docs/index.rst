@@ -32,6 +32,7 @@ Docs
     sample_bitstrings
     check_circuit
     print_circuit
+    densitytensor
     gates <https://github.com/CQCL/qujax/blob/main/qujax/gates.py>
 
 
