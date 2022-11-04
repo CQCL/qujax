@@ -7,8 +7,11 @@ from qujax.circuit import apply_gate
 from qujax.circuit import get_params_to_statetensor_func
 
 from qujax.observable import statetensor_to_single_expectation
+from qujax.observable import densitytensor_to_single_expectation
 from qujax.observable import get_statetensor_to_expectation_func
 from qujax.observable import get_statetensor_to_sampled_expectation_func
+from qujax.observable import get_densitytensor_to_expectation_func
+from qujax.observable import get_densitytensor_to_sampled_expectation_func
 from qujax.observable import check_hermitian
 from qujax.observable import integers_to_bitstrings
 from qujax.observable import bitstrings_to_integers
