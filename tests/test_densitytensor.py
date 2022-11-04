@@ -2,10 +2,6 @@ from itertools import combinations
 from jax import numpy as jnp, jit
 
 import qujax
-from qujax import get_params_to_statetensor_func
-from qujax import _kraus_single, kraus, get_params_to_densitytensor_func, partial_trace
-from qujax.observable import statetensor_to_densitytensor
-from qujax import densitytensor_to_measurement_probabilities, densitytensor_to_measured_densitytensor
 
 
 def test_kraus_single():
@@ -22,21 +18,21 @@ def test_kraus_single():
     check_kraus_dm = unitary_matrix @ density_matrix @ unitary_matrix.conj().T
 
     # qujax._kraus_single
-    qujax_kraus_dt = _kraus_single(density_tensor, kraus_operator, qubit_inds)
+    qujax_kraus_dt = qujax._kraus_single(density_tensor, kraus_operator, qubit_inds)
     qujax_kraus_dm = qujax_kraus_dt.reshape(dim, dim)
 
     assert jnp.allclose(qujax_kraus_dm, check_kraus_dm)
 
-    qujax_kraus_dt_jit = jit(_kraus_single, static_argnums=(2,))(density_tensor, kraus_operator, qubit_inds)
+    qujax_kraus_dt_jit = jit(qujax._kraus_single, static_argnums=(2,))(density_tensor, kraus_operator, qubit_inds)
     qujax_kraus_dm_jit = qujax_kraus_dt_jit.reshape(dim, dim)
     assert jnp.allclose(qujax_kraus_dm_jit, check_kraus_dm)
 
     # qujax.kraus (but for a single array)
-    qujax_kraus_dt = kraus(density_tensor, kraus_operator, qubit_inds)
+    qujax_kraus_dt = qujax.kraus(density_tensor, kraus_operator, qubit_inds)
     qujax_kraus_dm = qujax_kraus_dt.reshape(dim, dim)
     assert jnp.allclose(qujax_kraus_dm, check_kraus_dm)
 
-    qujax_kraus_dt_jit = jit(kraus, static_argnums=(2,))(density_tensor, kraus_operator, qubit_inds)
+    qujax_kraus_dt_jit = jit(qujax.kraus, static_argnums=(2,))(density_tensor, kraus_operator, qubit_inds)
     qujax_kraus_dm_jit = qujax_kraus_dt_jit.reshape(dim, dim)
     assert jnp.allclose(qujax_kraus_dm_jit, check_kraus_dm)
 
@@ -56,25 +52,27 @@ def test_kraus_single_2qubit():
     check_kraus_dm = unitary_matrix @ density_matrix @ unitary_matrix.conj().T
 
     # qujax._kraus_single
-    qujax_kraus_dt = _kraus_single(density_tensor, kraus_operator_tensor, qubit_inds)
+    qujax_kraus_dt = qujax._kraus_single(density_tensor, kraus_operator_tensor, qubit_inds)
     qujax_kraus_dm = qujax_kraus_dt.reshape(dim, dim)
 
     assert jnp.allclose(qujax_kraus_dm, check_kraus_dm)
 
-    qujax_kraus_dt_jit = jit(_kraus_single, static_argnums=(2,))(density_tensor, kraus_operator_tensor, qubit_inds)
+    qujax_kraus_dt_jit = jit(qujax._kraus_single, static_argnums=(2,))(density_tensor,
+                                                                       kraus_operator_tensor,
+                                                                       qubit_inds)
     qujax_kraus_dm_jit = qujax_kraus_dt_jit.reshape(dim, dim)
     assert jnp.allclose(qujax_kraus_dm_jit, check_kraus_dm)
 
     # qujax.kraus (but for a single array)
-    qujax_kraus_dt = kraus(density_tensor, kraus_operator_tensor, qubit_inds)
+    qujax_kraus_dt = qujax.kraus(density_tensor, kraus_operator_tensor, qubit_inds)
     qujax_kraus_dm = qujax_kraus_dt.reshape(dim, dim)
     assert jnp.allclose(qujax_kraus_dm, check_kraus_dm)
 
-    qujax_kraus_dt = kraus(density_tensor, kraus_operator, qubit_inds)  # check reshape kraus_operator correctly
+    qujax_kraus_dt = qujax.kraus(density_tensor, kraus_operator, qubit_inds)  # check reshape kraus_operator correctly
     qujax_kraus_dm = qujax_kraus_dt.reshape(dim, dim)
     assert jnp.allclose(qujax_kraus_dm, check_kraus_dm)
 
-    qujax_kraus_dt_jit = jit(kraus, static_argnums=(2,))(density_tensor, kraus_operator_tensor, qubit_inds)
+    qujax_kraus_dt_jit = jit(qujax.kraus, static_argnums=(2,))(density_tensor, kraus_operator_tensor, qubit_inds)
     qujax_kraus_dm_jit = qujax_kraus_dt_jit.reshape(dim, dim)
     assert jnp.allclose(qujax_kraus_dm_jit, check_kraus_dm)
 
@@ -96,12 +94,12 @@ def test_kraus_multiple():
     for um in unitary_matrices:
         check_kraus_dm += um @ density_matrix @ um.conj().T
 
-    qujax_kraus_dt = kraus(density_tensor, kraus_operators, qubit_inds)
+    qujax_kraus_dt = qujax.kraus(density_tensor, kraus_operators, qubit_inds)
     qujax_kraus_dm = qujax_kraus_dt.reshape(dim, dim)
 
     assert jnp.allclose(qujax_kraus_dm, check_kraus_dm)
 
-    qujax_kraus_dt_jit = jit(kraus, static_argnums=(2,))(density_tensor, kraus_operators, qubit_inds)
+    qujax_kraus_dt_jit = jit(qujax.kraus, static_argnums=(2,))(density_tensor, kraus_operators, qubit_inds)
     qujax_kraus_dm_jit = qujax_kraus_dt_jit.reshape(dim, dim)
     assert jnp.allclose(qujax_kraus_dm_jit, check_kraus_dm)
 
@@ -117,13 +115,13 @@ def test_params_to_densitytensor_func():
     qubit_inds_seq += [(i, i + 1) for i in range(n_qubits - 1)]
     param_inds_seq += [() for _ in range(n_qubits - 1)]
 
-    params_to_dt = get_params_to_densitytensor_func(gate_seq, qubit_inds_seq, param_inds_seq, n_qubits)
-    params_to_st = get_params_to_statetensor_func(gate_seq, qubit_inds_seq, param_inds_seq, n_qubits)
+    params_to_dt = qujax.get_params_to_densitytensor_func(gate_seq, qubit_inds_seq, param_inds_seq, n_qubits)
+    params_to_st = qujax.get_params_to_statetensor_func(gate_seq, qubit_inds_seq, param_inds_seq, n_qubits)
 
     params = jnp.arange(n_qubits) / 10.
 
     st = params_to_st(params)
-    dt_test = statetensor_to_densitytensor(st)
+    dt_test = qujax.statetensor_to_densitytensor(st)
 
     dt = params_to_dt(params)
 
@@ -144,7 +142,7 @@ def test_params_to_densitytensor_func_with_bit_flip():
     qubit_inds_seq += [(i, i + 1) for i in range(n_qubits - 1)]
     param_inds_seq += [() for _ in range(n_qubits - 1)]
 
-    params_to_pre_bf_st = get_params_to_statetensor_func(gate_seq, qubit_inds_seq, param_inds_seq, n_qubits)
+    params_to_pre_bf_st = qujax.get_params_to_statetensor_func(gate_seq, qubit_inds_seq, param_inds_seq, n_qubits)
 
     kraus_ops = [[0.3 * jnp.eye(2), 0.7 * qujax.gates.X]]
     kraus_qubit_inds = [(0,)]
@@ -154,13 +152,15 @@ def test_params_to_densitytensor_func_with_bit_flip():
     qubit_inds_seq += kraus_qubit_inds
     param_inds_seq += kraus_param_inds
 
-    params_to_dt = get_params_to_densitytensor_func(gate_seq, qubit_inds_seq, param_inds_seq, n_qubits)
+    _ = qujax.print_circuit(gate_seq, qubit_inds_seq, param_inds_seq)
+
+    params_to_dt = qujax.get_params_to_densitytensor_func(gate_seq, qubit_inds_seq, param_inds_seq, n_qubits)
 
     params = jnp.arange(n_qubits) / 10.
 
     pre_bf_st = params_to_pre_bf_st(params)
     pre_bf_dt = (pre_bf_st.reshape(-1, 1) @ pre_bf_st.reshape(1, -1).conj()).reshape(2 for _ in range(2 * n_qubits))
-    dt_test = kraus(pre_bf_dt, kraus_ops[0], kraus_qubit_inds[0])
+    dt_test = qujax.kraus(pre_bf_dt, kraus_ops[0], kraus_qubit_inds[0])
 
     dt = params_to_dt(params)
 
@@ -180,10 +180,10 @@ def test_partial_trace_1():
     dt3 = jnp.outer(state3, state3.conj()).reshape((2,) * 6)
 
     for i in range(3):
-        assert jnp.allclose(partial_trace(dt3, [i]), dt2)
+        assert jnp.allclose(qujax.partial_trace(dt3, [i]), dt2)
 
     for i in combinations(range(3), 2):
-        assert jnp.allclose(partial_trace(dt3, i), dt1)
+        assert jnp.allclose(qujax.partial_trace(dt3, i), dt1)
 
 
 def test_partial_trace_2():
@@ -197,13 +197,13 @@ def test_partial_trace_2():
     qubit_inds_seq += [(i, i + 1) for i in range(n_qubits - 1)]
     param_inds_seq += [() for _ in range(n_qubits - 1)]
 
-    params_to_dt = get_params_to_densitytensor_func(gate_seq, qubit_inds_seq, param_inds_seq, n_qubits)
+    params_to_dt = qujax.get_params_to_densitytensor_func(gate_seq, qubit_inds_seq, param_inds_seq, n_qubits)
 
     params = jnp.arange(1, n_qubits + 1) / 10.
 
     dt = params_to_dt(params)
     dt_discard_test = jnp.trace(dt, axis1=0, axis2=n_qubits)
-    dt_discard = partial_trace(dt, [0])
+    dt_discard = qujax.partial_trace(dt, [0])
 
     assert jnp.allclose(dt_discard, dt_discard_test)
 
@@ -219,7 +219,7 @@ def test_measure():
     qubit_inds_seq += [(i, i + 1) for i in range(n_qubits - 1)]
     param_inds_seq += [() for _ in range(n_qubits - 1)]
 
-    params_to_dt = get_params_to_densitytensor_func(gate_seq, qubit_inds_seq, param_inds_seq, n_qubits)
+    params_to_dt = qujax.get_params_to_densitytensor_func(gate_seq, qubit_inds_seq, param_inds_seq, n_qubits)
 
     params = jnp.arange(1, n_qubits + 1) / 10.
 
@@ -231,7 +231,7 @@ def test_measure():
     all_probs_marginalise \
         = all_probs.reshape((2,) * n_qubits).sum(axis=[i for i in range(n_qubits) if i not in qubit_inds])
 
-    probs = densitytensor_to_measurement_probabilities(dt, qubit_inds)
+    probs = qujax.densitytensor_to_measurement_probabilities(dt, qubit_inds)
 
     assert jnp.isclose(probs.sum(), 1.)
     assert jnp.isclose(all_probs.sum(), 1.)
@@ -245,7 +245,7 @@ def test_measure():
     measured_dm /= jnp.trace(projector.T.conj() @ projector @ dm)
     measured_dt_true = measured_dm.reshape((2,) * 2 * n_qubits)
 
-    measured_dt = densitytensor_to_measured_densitytensor(dt, qubit_inds, 0)
-    measured_dt_bits = densitytensor_to_measured_densitytensor(dt, qubit_inds, (0,)*n_qubits)
+    measured_dt = qujax.densitytensor_to_measured_densitytensor(dt, qubit_inds, 0)
+    measured_dt_bits = qujax.densitytensor_to_measured_densitytensor(dt, qubit_inds, (0,)*n_qubits)
     assert jnp.allclose(measured_dt_true, measured_dt)
     assert jnp.allclose(measured_dt_true, measured_dt_bits)

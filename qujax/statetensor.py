@@ -1,26 +1,9 @@
 from __future__ import annotations
-from typing import Sequence, Union, Callable, Protocol
+from typing import Sequence, Union, Callable
 from jax import numpy as jnp
 
 from qujax import gates
-from qujax.circuit_tools import check_circuit
-
-
-class CallableArrayAndOptionalArray(Protocol):
-    def __call__(self, params: jnp.ndarray, statetensor_in: jnp.ndarray = None) -> jnp.ndarray:
-        ...
-
-
-class CallableOptionalArray(Protocol):
-    def __call__(self, statetensor_in: jnp.ndarray = None) -> jnp.ndarray:
-        ...
-
-
-UnionCallableOptionalArray = Union[CallableArrayAndOptionalArray, CallableOptionalArray]
-gate_type = Union[str,
-                  jnp.ndarray,
-                  Callable[[jnp.ndarray], jnp.ndarray],
-                  Callable[[], jnp.ndarray]]
+from qujax.utils import check_circuit, _arrayify_inds, UnionCallableOptionalArray, gate_type
 
 
 def apply_gate(statetensor: jnp.ndarray, gate_unitary: jnp.ndarray, qubit_inds: Sequence[int]) -> jnp.ndarray:
@@ -72,24 +55,6 @@ def _to_gate_func(gate: gate_type) -> Callable[[jnp.ndarray], jnp.ndarray]:
         raise TypeError(f'Unsupported gate type - gate must be either a string in qujax.gates, an array or '
                         f'callable: {gate}')
     return gate_func
-
-
-def _arrayify_inds(param_inds_seq: Sequence[Union[None, Sequence[int]]]) -> Sequence[jnp.ndarray]:
-    """
-    Ensure each element of param_inds_seq is an array (and therefore valid for jnp.take)
-
-    Args:
-        param_inds_seq: Sequence of sequences representing parameter indices that gates are using,
-            i.e. [[0], [], [5, 2]] tells qujax that the first gate uses the zeroth parameter
-            (the float at position zero in the parameter vector/array), the second gate is not parameterised
-            and the third gates used the parameters at position five and two.
-
-    Returns:
-        Sequence of arrays representing parameter indices.
-    """
-    param_inds_seq = [jnp.array(p) for p in param_inds_seq]
-    param_inds_seq = [jnp.array([]) if jnp.any(jnp.isnan(p)) else p.astype(int) for p in param_inds_seq]
-    return param_inds_seq
 
 
 def _gate_func_to_unitary(gate_func: Callable[[jnp.ndarray], jnp.ndarray],
