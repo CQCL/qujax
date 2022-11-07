@@ -1,0 +1,5 @@
+kraus
+=======================
+
+.. autofunction:: qujax.kraus
+

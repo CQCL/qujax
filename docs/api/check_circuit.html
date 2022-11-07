@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>check_circuit &mdash; qujax 0.2.9 documentation</title>
+  <title>check_circuit &mdash; qujax 0.3.0 documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -29,7 +29,7 @@
             <a href="index.html" class="icon icon-home"> qujax
           </a>
               <div class="version">
-                0.2.9
+                0.3.0
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -50,6 +50,7 @@
 <li class="toctree-l1"><a class="reference internal" href="sample_bitstrings.html">sample_bitstrings</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">check_circuit</a></li>
 <li class="toctree-l1"><a class="reference internal" href="print_circuit.html">print_circuit</a></li>
+<li class="toctree-l1"><a class="reference internal" href="densitytensor.html">densitytensor</a></li>
 <li class="toctree-l1"><a class="reference external" href="https://github.com/CQCL/qujax/blob/main/qujax/gates.py">gates</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Links:</span></p>
@@ -73,8 +74,8 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
-      <li>check_circuit</li>
+      <li><a href="index.html" class="icon icon-home"></a></li>
+      <li class="breadcrumb-item active">check_circuit</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/check_circuit.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -88,22 +89,24 @@
 <h1>check_circuit<a class="headerlink" href="#check-circuit" title="Permalink to this headline"></a></h1>
 <dl class="py function">
 <dt class="sig sig-object py" id="qujax.check_circuit">
-<code class="sig-prename descclassname"><span class="pre">qujax.</span></code><code class="sig-name descname"><span class="pre">check_circuit</span></code><span class="sig-paren">(</span><em><span class="n"><span class="pre">gate_seq</span></span></em>, <em><span class="n"><span class="pre">qubit_inds_seq</span></span></em>, <em><span class="n"><span class="pre">param_inds_seq</span></span></em>, <em><span class="n"><span class="pre">n_qubits</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qujax.check_circuit" title="Permalink to this definition"></a></dt>
+<code class="sig-prename descclassname"><span class="pre">qujax.</span></code><code class="sig-name descname"><span class="pre">check_circuit</span></code><span class="sig-paren">(</span><em><span class="n"><span class="pre">gate_seq</span></span></em>, <em><span class="n"><span class="pre">qubit_inds_seq</span></span></em>, <em><span class="n"><span class="pre">param_inds_seq</span></span></em>, <em><span class="n"><span class="pre">n_qubits</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em><span class="n"><span class="pre">check_unitaries</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qujax.check_circuit" title="Permalink to this definition"></a></dt>
 <dd><p>Basic checks that circuit arguments conform.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>gate_seq</strong> (<em>Sequence</em><em>[</em><em>Union</em><em>[</em><em>str</em><em>, </em><em>jnp.ndarray</em><em>, </em><em>Callable</em><em>[</em><em>[</em><em>jnp.ndarray</em><em>]</em><em>, </em><em>jnp.ndarray</em><em>]</em><em>, </em><em>Callable</em><em>[</em><em>[</em><em>]</em><em>, </em><em>jnp.ndarray</em><em>]</em><em>]</em><em>]</em>) – Sequence of gates.
+<li><strong>gate_seq</strong> (<em>Sequence</em><em>[</em><em>Union</em><em>[</em><em>str</em><em>, </em><em>jax._src.basearray.Array</em><em>, </em><em>Callable</em><em>[</em><em>[</em><em>jax._src.basearray.Array</em><em>]</em><em>, </em><em>jax._src.basearray.Array</em><em>]</em><em>, </em><em>Callable</em><em>[</em><em>[</em><em>]</em><em>, </em><em>jax._src.basearray.Array</em><em>]</em><em>, </em><em>Iterable</em><em>[</em><em>Union</em><em>[</em><em>str</em><em>, </em><em>jax._src.basearray.Array</em><em>, </em><em>Callable</em><em>[</em><em>[</em><em>jax._src.basearray.Array</em><em>]</em><em>, </em><em>jax._src.basearray.Array</em><em>]</em><em>, </em><em>Callable</em><em>[</em><em>[</em><em>]</em><em>, </em><em>jax._src.basearray.Array</em><em>]</em><em>]</em><em>]</em><em>]</em><em>]</em>) – Sequence of gates.
 Each element is either a string matching an array or function in qujax.gates,
 a unitary array (which will be reshaped into a tensor of shape (2,2,2,…) )
-or a function taking parameters and returning gate unitary in tensor form.</li>
+or a function taking parameters and returning gate unitary in tensor form.
+Or alternatively a sequence of the above representing Kraus operators.</li>
 <li><strong>qubit_inds_seq</strong> (<em>Sequence</em><em>[</em><em>Sequence</em><em>[</em><em>int</em><em>]</em><em>]</em>) – Sequences of qubits (ints) that gates are acting on.</li>
 <li><strong>param_inds_seq</strong> (<em>Sequence</em><em>[</em><em>Sequence</em><em>[</em><em>int</em><em>]</em><em>]</em>) – Sequence of parameter indices that gates are using,
 i.e. [[0], [], [5, 2]] tells qujax that the first gate uses the first parameter,
 the second gate is not parameterised and the third gates used the fifth and second parameters.</li>
-<li><strong>n_qubits</strong> (<em>int</em>) – Number of qubits, if fixed.</li>
+<li><strong>n_qubits</strong> (<em>Optional</em><em>[</em><em>int</em><em>]</em>) – Number of qubits, if fixed.</li>
+<li><strong>check_unitaries</strong> (<em>bool</em>) – boolean on whether to check if each gate represents a unitary matrix</li>
 </ul>
 </td>
 </tr>

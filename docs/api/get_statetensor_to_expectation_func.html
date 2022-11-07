@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>get_statetensor_to_expectation_func &mdash; qujax 0.2.9 documentation</title>
+  <title>get_statetensor_to_expectation_func &mdash; qujax 0.3.0 documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -29,7 +29,7 @@
             <a href="index.html" class="icon icon-home"> qujax
           </a>
               <div class="version">
-                0.2.9
+                0.3.0
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -50,6 +50,7 @@
 <li class="toctree-l1"><a class="reference internal" href="sample_bitstrings.html">sample_bitstrings</a></li>
 <li class="toctree-l1"><a class="reference internal" href="check_circuit.html">check_circuit</a></li>
 <li class="toctree-l1"><a class="reference internal" href="print_circuit.html">print_circuit</a></li>
+<li class="toctree-l1"><a class="reference internal" href="densitytensor.html">densitytensor</a></li>
 <li class="toctree-l1"><a class="reference external" href="https://github.com/CQCL/qujax/blob/main/qujax/gates.py">gates</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Links:</span></p>
@@ -73,8 +74,8 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
-      <li>get_statetensor_to_expectation_func</li>
+      <li><a href="index.html" class="icon icon-home"></a></li>
+      <li class="breadcrumb-item active">get_statetensor_to_expectation_func</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/get_statetensor_to_expectation_func.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -88,16 +89,17 @@
 <h1>get_statetensor_to_expectation_func<a class="headerlink" href="#get-statetensor-to-expectation-func" title="Permalink to this headline"></a></h1>
 <dl class="py function">
 <dt class="sig sig-object py" id="qujax.get_statetensor_to_expectation_func">
-<code class="sig-prename descclassname"><span class="pre">qujax.</span></code><code class="sig-name descname"><span class="pre">get_statetensor_to_expectation_func</span></code><span class="sig-paren">(</span><em><span class="n"><span class="pre">gate_seq_seq</span></span></em>, <em><span class="n"><span class="pre">qubits_seq_seq</span></span></em>, <em><span class="n"><span class="pre">coefficients</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qujax.get_statetensor_to_expectation_func" title="Permalink to this definition"></a></dt>
-<dd><p>Converts gate strings (or arrays), qubit indices and coefficients into a function that
-converts statetensor into expected value.</p>
+<code class="sig-prename descclassname"><span class="pre">qujax.</span></code><code class="sig-name descname"><span class="pre">get_statetensor_to_expectation_func</span></code><span class="sig-paren">(</span><em><span class="n"><span class="pre">hermitian_seq_seq</span></span></em>, <em><span class="n"><span class="pre">qubits_seq_seq</span></span></em>, <em><span class="n"><span class="pre">coefficients</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qujax.get_statetensor_to_expectation_func" title="Permalink to this definition"></a></dt>
+<dd><p>Takes strings (or arrays) representing Hermitian matrices, along with qubit indices and
+a list of coefficients and returns a function that converts a statetensor into an expected value.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>gate_seq_seq</strong> (<em>Sequence</em><em>[</em><em>Sequence</em><em>[</em><em>Union</em><em>[</em><em>str</em><em>, </em><em>jnp.ndarray</em><em>]</em><em>]</em><em>]</em>) – Sequence of sequences of gates.
-Each gate is either a tensor (jnp.ndarray) or a string corresponding to an array in qujax.gates.
+<li><strong>hermitian_seq_seq</strong> (<em>Sequence</em><em>[</em><em>Sequence</em><em>[</em><em>Union</em><em>[</em><em>str</em><em>, </em><em>jnp.ndarray</em><em>]</em><em>]</em><em>]</em>) – Sequence of sequences of Hermitian matrices/tensors.
+Each Hermitian matrix is either represented by a tensor (jnp.ndarray)
+or by a list of ‘X’, ‘Y’ or ‘Z’ characters corresponding to the standard Pauli matrices.
 E.g. [[‘Z’, ‘Z’], [‘X’]]</li>
 <li><strong>qubits_seq_seq</strong> (<em>Sequence</em><em>[</em><em>Sequence</em><em>[</em><em>int</em><em>]</em><em>]</em>) – Sequence of sequences of integer qubit indices.
 E.g. [[0,1], [2]]</li>

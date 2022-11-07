@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html class="writer-html4" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>get_densitytensor_to_sampled_expectation_func &mdash; qujax 0.3.0 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="densitytensor_to_measurement_probabilities" href="densitytensor_to_measurement_probabilities.html" />
+    <link rel="prev" title="get_densitytensor_to_expectation_func" href="get_densitytensor_to_expectation_func.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> qujax
+          </a>
+              <div class="version">
+                0.3.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../apply_gate.html">apply_gate</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../get_params_to_statetensor_func.html">get_params_to_statetensor_func</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../get_statetensor_to_expectation_func.html">get_statetensor_to_expectation_func</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../get_statetensor_to_sampled_expectation_func.html">get_statetensor_to_sampled_expectation_func</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../integers_to_bitstrings.html">integers_to_bitstrings</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../bitstrings_to_integers.html">bitstrings_to_integers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../sample_integers.html">sample_integers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../sample_bitstrings.html">sample_bitstrings</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../check_circuit.html">check_circuit</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../print_circuit.html">print_circuit</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../densitytensor.html">densitytensor</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="kraus.html">kraus</a></li>
+<li class="toctree-l2"><a class="reference internal" href="get_params_to_densitytensor_func.html">get_params_to_densitytensor_func</a></li>
+<li class="toctree-l2"><a class="reference internal" href="partial_trace.html">partial_trace</a></li>
+<li class="toctree-l2"><a class="reference internal" href="get_densitytensor_to_expectation_func.html">get_densitytensor_to_expectation_func</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">get_densitytensor_to_sampled_expectation_func</a></li>
+<li class="toctree-l2"><a class="reference internal" href="densitytensor_to_measurement_probabilities.html">densitytensor_to_measurement_probabilities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="densitytensor_to_measured_densitytensor.html">densitytensor_to_measured_densitytensor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="statetensor_to_densitytensor.html">statetensor_to_densitytensor</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/CQCL/qujax/blob/main/qujax/gates.py">gates</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Links:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/CQCL/qujax">GitHub</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/CQCL/qujax/tree/main/examples">Example notebooks</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://pypi.org/project/qujax/">PyPI</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://cqcl.github.io/pytket-qujax/api">pytket-qujax</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">qujax</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="../densitytensor.html">densitytensor</a></li>
+      <li class="breadcrumb-item active">get_densitytensor_to_sampled_expectation_func</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/densitytensor/get_densitytensor_to_sampled_expectation_func.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="section" id="get-densitytensor-to-sampled-expectation-func">
+<h1>get_densitytensor_to_sampled_expectation_func<a class="headerlink" href="#get-densitytensor-to-sampled-expectation-func" title="Permalink to this headline"></a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="qujax.get_densitytensor_to_sampled_expectation_func">
+<code class="sig-prename descclassname"><span class="pre">qujax.</span></code><code class="sig-name descname"><span class="pre">get_densitytensor_to_sampled_expectation_func</span></code><span class="sig-paren">(</span><em><span class="n"><span class="pre">hermitian_seq_seq</span></span></em>, <em><span class="n"><span class="pre">qubits_seq_seq</span></span></em>, <em><span class="n"><span class="pre">coefficients</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qujax.get_densitytensor_to_sampled_expectation_func" title="Permalink to this definition"></a></dt>
+<dd><p>Converts strings (or arrays) representing Hermitian matrices, qubit indices and
+coefficients into a function that converts a densitytensor into a sampled expected value.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>hermitian_seq_seq</strong> (<em>Sequence</em><em>[</em><em>Sequence</em><em>[</em><em>Union</em><em>[</em><em>str</em><em>, </em><em>jnp.ndarray</em><em>]</em><em>]</em><em>]</em>) – Sequence of sequences of Hermitian matrices/tensors.
+Each Hermitian is either a tensor (jnp.ndarray) or a string in (‘X’, ‘Y’, ‘Z’).
+E.g. [[‘Z’, ‘Z’], [‘X’]]</li>
+<li><strong>qubits_seq_seq</strong> (<em>Sequence</em><em>[</em><em>Sequence</em><em>[</em><em>int</em><em>]</em><em>]</em>) – Sequence of sequences of integer qubit indices.
+E.g. [[0,1], [2]]</li>
+<li><strong>coefficients</strong> (<em>Union</em><em>[</em><em>Sequence</em><em>[</em><em>float</em><em>]</em><em>, </em><em>jnp.ndarray</em><em>]</em>) – Sequence of float coefficients to scale the expected values.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Function that takes densitytensor, random key and integer number of shots
+and returns sampled expected value (float).</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">Callable[[jnp.ndarray, random.PRNGKeyArray, int], float]</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="get_densitytensor_to_expectation_func.html" class="btn btn-neutral float-left" title="get_densitytensor_to_expectation_func" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="densitytensor_to_measurement_probabilities.html" class="btn btn-neutral float-right" title="densitytensor_to_measurement_probabilities" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Sam Duffield.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

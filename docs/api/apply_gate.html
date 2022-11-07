@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>apply_gate &mdash; qujax 0.2.9 documentation</title>
+  <title>apply_gate &mdash; qujax 0.3.0 documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -29,7 +29,7 @@
             <a href="index.html" class="icon icon-home"> qujax
           </a>
               <div class="version">
-                0.2.9
+                0.3.0
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -50,6 +50,7 @@
 <li class="toctree-l1"><a class="reference internal" href="sample_bitstrings.html">sample_bitstrings</a></li>
 <li class="toctree-l1"><a class="reference internal" href="check_circuit.html">check_circuit</a></li>
 <li class="toctree-l1"><a class="reference internal" href="print_circuit.html">print_circuit</a></li>
+<li class="toctree-l1"><a class="reference internal" href="densitytensor.html">densitytensor</a></li>
 <li class="toctree-l1"><a class="reference external" href="https://github.com/CQCL/qujax/blob/main/qujax/gates.py">gates</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Links:</span></p>
@@ -73,8 +74,8 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
-      <li>apply_gate</li>
+      <li><a href="index.html" class="icon icon-home"></a></li>
+      <li class="breadcrumb-item active">apply_gate</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/apply_gate.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -90,7 +91,7 @@
 <dt class="sig sig-object py" id="qujax.apply_gate">
 <code class="sig-prename descclassname"><span class="pre">qujax.</span></code><code class="sig-name descname"><span class="pre">apply_gate</span></code><span class="sig-paren">(</span><em><span class="n"><span class="pre">statetensor</span></span></em>, <em><span class="n"><span class="pre">gate_unitary</span></span></em>, <em><span class="n"><span class="pre">qubit_inds</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qujax.apply_gate" title="Permalink to this definition"></a></dt>
 <dd><p>Applies gate to statetensor and returns updated statetensor.
-Gate is represented by a unitary matrix (i.e. not parameterised).</p>
+Gate is represented by a unitary matrix in tensor form.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -100,7 +101,7 @@ Gate is represented by a unitary matrix (i.e. not parameterised).</p>
 <li><strong>gate_unitary</strong> (<em>ndarray</em>) – Unitary array representing gate
 must be in tensor form with shape (2,2,…).</li>
 <li><strong>qubit_inds</strong> (<em>Sequence</em><em>[</em><em>int</em><em>]</em>) – Sequence of indices for gate to be applied to.
-2 * len(qubit_inds) is equal to the dimension of the gate unitary tensor.</li>
+Must have 2 * len(qubit_inds) = gate_unitary.ndim</li>
 </ul>
 </td>
 </tr>

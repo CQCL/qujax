@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>print_circuit &mdash; qujax 0.2.9 documentation</title>
+  <title>print_circuit &mdash; qujax 0.3.0 documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -17,6 +17,7 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="densitytensor" href="densitytensor.html" />
     <link rel="prev" title="check_circuit" href="check_circuit.html" /> 
 </head>
 
@@ -28,7 +29,7 @@
             <a href="index.html" class="icon icon-home"> qujax
           </a>
               <div class="version">
-                0.2.9
+                0.3.0
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -49,6 +50,7 @@
 <li class="toctree-l1"><a class="reference internal" href="sample_bitstrings.html">sample_bitstrings</a></li>
 <li class="toctree-l1"><a class="reference internal" href="check_circuit.html">check_circuit</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">print_circuit</a></li>
+<li class="toctree-l1"><a class="reference internal" href="densitytensor.html">densitytensor</a></li>
 <li class="toctree-l1"><a class="reference external" href="https://github.com/CQCL/qujax/blob/main/qujax/gates.py">gates</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Links:</span></p>
@@ -72,8 +74,8 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
-      <li>print_circuit</li>
+      <li><a href="index.html" class="icon icon-home"></a></li>
+      <li class="breadcrumb-item active">print_circuit</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/print_circuit.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -94,10 +96,11 @@
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>gate_seq</strong> (<em>Sequence</em><em>[</em><em>Union</em><em>[</em><em>str</em><em>, </em><em>jnp.ndarray</em><em>, </em><em>Callable</em><em>[</em><em>[</em><em>jnp.ndarray</em><em>]</em><em>, </em><em>jnp.ndarray</em><em>]</em><em>, </em><em>Callable</em><em>[</em><em>[</em><em>]</em><em>, </em><em>jnp.ndarray</em><em>]</em><em>]</em><em>]</em>) – Sequence of gates.
+<li><strong>gate_seq</strong> (<em>Sequence</em><em>[</em><em>Union</em><em>[</em><em>str</em><em>, </em><em>jax._src.basearray.Array</em><em>, </em><em>Callable</em><em>[</em><em>[</em><em>jax._src.basearray.Array</em><em>]</em><em>, </em><em>jax._src.basearray.Array</em><em>]</em><em>, </em><em>Callable</em><em>[</em><em>[</em><em>]</em><em>, </em><em>jax._src.basearray.Array</em><em>]</em><em>, </em><em>Iterable</em><em>[</em><em>Union</em><em>[</em><em>str</em><em>, </em><em>jax._src.basearray.Array</em><em>, </em><em>Callable</em><em>[</em><em>[</em><em>jax._src.basearray.Array</em><em>]</em><em>, </em><em>jax._src.basearray.Array</em><em>]</em><em>, </em><em>Callable</em><em>[</em><em>[</em><em>]</em><em>, </em><em>jax._src.basearray.Array</em><em>]</em><em>]</em><em>]</em><em>]</em><em>]</em>) – Sequence of gates.
 Each element is either a string matching an array or function in qujax.gates,
 a unitary array (which will be reshaped into a tensor of shape (2,2,2,…) )
-or a function taking parameters and returning gate unitary in tensor form.</li>
+or a function taking parameters and returning gate unitary in tensor form.
+Or alternatively a sequence of the above representing Kraus operators.</li>
 <li><strong>qubit_inds_seq</strong> (<em>Sequence</em><em>[</em><em>Sequence</em><em>[</em><em>int</em><em>]</em><em>]</em>) – Sequences of qubits (ints) that gates are acting on.</li>
 <li><strong>param_inds_seq</strong> (<em>Sequence</em><em>[</em><em>Sequence</em><em>[</em><em>int</em><em>]</em><em>]</em>) – Sequence of parameter indices that gates are using,
 i.e. [[0], [], [5, 2]] tells qujax that the first gate uses the first parameter,
@@ -128,6 +131,7 @@ the second gate is not parameterised and the third gates used the fifth and seco
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="check_circuit.html" class="btn btn-neutral float-left" title="check_circuit" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="densitytensor.html" class="btn btn-neutral float-right" title="densitytensor" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
