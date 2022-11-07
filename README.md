@@ -4,9 +4,7 @@ Represent a (parameterised) quantum circuit as a pure [JAX](https://github.com/g
 takes as input any parameters of the circuit and outputs a _statetensor_. The statetensor encodes all $2^N$ amplitudes
 of the quantum state and can then be used downstream for exact expectations, gradients or sampling.
 
-qujax also supports densitytensor simulations. A densitytensor is a tensor representation of the density matrix,
-which has shape $(2^N, 2^N)$.
-This allows for mixed states and generic Kraus operators.
+qujax also supports densitytensor simulations. A densitytensor is a tensor representation of the density matrix and allows for mixed states and generic Kraus operators.
 
 A JAX implementation of a quantum circuit is useful for runtime speedups, automatic differentiation and support
 for GPUs/TPUs.
