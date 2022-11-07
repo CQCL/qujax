@@ -1,35 +1,22 @@
 from __future__ import annotations
-from typing import Sequence, Union, Callable, Protocol
+from typing import Sequence, Union, Callable
 from jax import numpy as jnp
 
 from qujax import gates
-from qujax.circuit_tools import check_circuit
-
-
-class CallableArrayAndOptionalArray(Protocol):
-    def __call__(self, params: jnp.ndarray, statetensor_in: jnp.ndarray = None) -> jnp.ndarray:
-        ...
-
-
-class CallableOptionalArray(Protocol):
-    def __call__(self, statetensor_in: jnp.ndarray = None) -> jnp.ndarray:
-        ...
-
-
-UnionCallableOptionalArray = Union[CallableArrayAndOptionalArray, CallableOptionalArray]
+from qujax.utils import check_circuit, _arrayify_inds, UnionCallableOptionalArray, gate_type
 
 
 def apply_gate(statetensor: jnp.ndarray, gate_unitary: jnp.ndarray, qubit_inds: Sequence[int]) -> jnp.ndarray:
     """
     Applies gate to statetensor and returns updated statetensor.
-    Gate is represented by a unitary matrix (i.e. not parameterised).
+    Gate is represented by a unitary matrix in tensor form.
 
     Args:
         statetensor: Input statetensor.
         gate_unitary: Unitary array representing gate
             must be in tensor form with shape (2,2,...).
         qubit_inds: Sequence of indices for gate to be applied to.
-            2 * len(qubit_inds) is equal to the dimension of the gate unitary tensor.
+            Must have 2 * len(qubit_inds) = gate_unitary.ndim
 
     Returns:
         Updated statetensor.
@@ -40,57 +27,61 @@ def apply_gate(statetensor: jnp.ndarray, gate_unitary: jnp.ndarray, qubit_inds: 
     return statetensor
 
 
-def _to_gate_funcs(gate_seq: Sequence[Union[str,
-                                            jnp.ndarray,
-                                            Callable[[jnp.ndarray], jnp.ndarray],
-                                            Callable[[], jnp.ndarray]]])\
-        -> Sequence[Callable[[jnp.ndarray], jnp.ndarray]]:
+def _to_gate_func(gate: gate_type) -> Callable[[jnp.ndarray], jnp.ndarray]:
     """
-    Ensures all gate_seq elements are functions that map (possibly empty) parameters
+    Ensures a gate_seq element is a function that map (possibly empty) parameters
     to a unitary tensor.
 
     Args:
-        gate_seq: Sequence of gates.
-            Each element is either a string matching an array or function in qujax.gates,
+        gate: Either a string matching an array or function in qujax.gates,
             a unitary array (which will be reshaped into a tensor of shape (2,2,2,...) )
             or a function taking parameters and returning gate unitary in tensor form.
 
     Returns:
-        Sequence of gate parameter to unitary functions
-
+        Gate parameter to unitary functions
     """
+
     def _array_to_callable(arr: jnp.ndarray) -> Callable[[], jnp.ndarray]:
         return lambda: arr
 
-    gate_seq_callable = []
-    for gate in gate_seq:
-        if isinstance(gate, str):
-            gate = gates.__dict__[gate]
+    if isinstance(gate, str):
+        gate = gates.__dict__[gate]
 
-        if callable(gate):
-            gate_func = gate
-        elif hasattr(gate, '__array__'):
-            gate_func = _array_to_callable(jnp.array(gate))
-        else:
-            raise TypeError(f'Unsupported gate type - gate must be either a string in qujax.gates, an array or '
-                            f'callable: {gate}')
-        gate_seq_callable.append(gate_func)
-
-    return gate_seq_callable
+    if callable(gate):
+        gate_func = gate
+    elif hasattr(gate, '__array__'):
+        gate_func = _array_to_callable(jnp.array(gate))
+    else:
+        raise TypeError(f'Unsupported gate type - gate must be either a string in qujax.gates, an array or '
+                        f'callable: {gate}')
+    return gate_func
 
 
-def _arrayify_inds(param_inds_seq: Sequence[Sequence[int]]) -> Sequence[jnp.ndarray]:
-    param_inds_seq = [jnp.array(p) for p in param_inds_seq]
-    param_inds_seq = [jnp.array([]) if jnp.any(jnp.isnan(p)) else p.astype(int) for p in param_inds_seq]
-    return param_inds_seq
+def _gate_func_to_unitary(gate_func: Callable[[jnp.ndarray], jnp.ndarray],
+                          qubit_inds: Sequence[int],
+                          param_inds: jnp.ndarray,
+                          params: jnp.ndarray) -> jnp.ndarray:
+    """
+    Extract gate unitary.
+
+    Args:
+        gate_func: Function that maps a (possibly empty) parameter array to a unitary tensor (array)
+        qubit_inds: Indices of qubits to apply gate to (only needed to ensure gate is in tensor form)
+        param_inds: Indices of full parameter to extract gate specific parameters
+        params: Full parameter vector
+
+    Returns:
+        Array containing gate unitary in tensor form.
+    """
+    gate_params = jnp.take(params, param_inds)
+    gate_unitary = gate_func(*gate_params)
+    gate_unitary = gate_unitary.reshape((2,) * (2 * len(qubit_inds)))  # Ensure gate is in tensor form
+    return gate_unitary
 
 
-def get_params_to_statetensor_func(gate_seq: Sequence[Union[str,
-                                                            jnp.ndarray,
-                                                            Callable[[jnp.ndarray], jnp.ndarray],
-                                                            Callable[[], jnp.ndarray]]],
+def get_params_to_statetensor_func(gate_seq: Sequence[gate_type],
                                    qubit_inds_seq: Sequence[Sequence[int]],
-                                   param_inds_seq: Sequence[Sequence[int]],
+                                   param_inds_seq: Sequence[Union[None, Sequence[int]]],
                                    n_qubits: int = None) -> UnionCallableOptionalArray:
     """
     Creates a function that maps circuit parameters to a statetensor.
@@ -120,8 +111,8 @@ def get_params_to_statetensor_func(gate_seq: Sequence[Union[str,
     if n_qubits is None:
         n_qubits = max([max(qi) for qi in qubit_inds_seq]) + 1
 
-    gate_seq_callable = _to_gate_funcs(gate_seq)
-    param_inds_seq = _arrayify_inds(param_inds_seq)
+    gate_seq_callable = [_to_gate_func(g) for g in gate_seq]
+    param_inds_array_seq = _arrayify_inds(param_inds_seq)
 
     def params_to_statetensor_func(params: jnp.ndarray,
                                    statetensor_in: jnp.ndarray = None) -> jnp.ndarray:
@@ -143,14 +134,13 @@ def get_params_to_statetensor_func(gate_seq: Sequence[Union[str,
         else:
             statetensor = statetensor_in
         params = jnp.atleast_1d(params)
-        for gate_func, qubit_inds, param_inds in zip(gate_seq_callable, qubit_inds_seq, param_inds_seq):
-            gate_params = jnp.take(params, param_inds)
-            gate_unitary = gate_func(*gate_params)
-            gate_unitary = gate_unitary.reshape((2,) * (2 * len(qubit_inds)))   # Ensure gate is in tensor form
+        for gate_func, qubit_inds, param_inds in zip(gate_seq_callable, qubit_inds_seq, param_inds_array_seq):
+            gate_unitary = _gate_func_to_unitary(gate_func, qubit_inds, param_inds, params)
             statetensor = apply_gate(statetensor, gate_unitary, qubit_inds)
         return statetensor
 
-    if all([pi.size == 0 for pi in param_inds_seq]):
+    non_parameterised = all([pi.size == 0 for pi in param_inds_array_seq])
+    if non_parameterised:
         def no_params_to_statetensor_func(statetensor_in: jnp.ndarray = None) -> jnp.ndarray:
             """
             Applies circuit (series of gates with no parameters) to a statetensor_in (default is |0>^N).
