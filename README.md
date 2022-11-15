@@ -2,13 +2,15 @@
 
 Represent a (parameterised) quantum circuit as a pure [JAX](https://github.com/google/jax) function that
 takes as input any parameters of the circuit and outputs either a _statetensor_ or a _densitytensor_ depending on
-the choice of simulator. The statetensor encodes all $2^N$ amplitudes of the quantum state in a tensor version
-of the statevector, for $N$ qubits. The densitytensor represents a tensor version of the
+the choice of simulator.
+- The statetensor encodes all $2^N$ amplitudes of the quantum state in a tensor version
+of the statevector, for $N$ qubits.
+- The densitytensor represents a tensor version of the
 $2^N \times 2^N$ density matrix (allowing for mixed states and generic Kraus operators).
-Either representation can then be used downstream for exact expectations, gradients or sampling.
 
-A JAX implementation of a quantum circuit is useful for runtime speedups, automatic differentiation and support
-for GPUs/TPUs.
+Either representation can then be used downstream for exact expectations, gradients or sampling. A JAX implementation
+of a quantum circuit is useful for runtime speedups, automatic differentiation, support for GPUs/TPUs and compatibility
+with other JAX code and packages.
 
 Some useful links:
 - [Documentation](https://cqcl.github.io/qujax/api/)
@@ -73,8 +75,6 @@ expectation_and_grad(jnp.array([0.1]))
 ```
 
 ## Densitytensor simulations with qujax
-qujax also supports densitytensor simulations
-
 ```python
 param_to_dt = qujax.get_params_to_densitytensor_func(circuit_gates,
                                                    circuit_qubit_inds,
@@ -83,7 +83,7 @@ dt = param_to_dt(jnp.array([0.1]))
 dt.shape
 # (2, 2, 2, 2)
 ```
-Observe that the densitytensor has shape ```(2,) * 2 * N``` and the density matrix can be obtained
+The densitytensor has shape ```(2,) * 2 * N``` and the density matrix can be obtained
 with ```.reshape(2 * N, 2 * N)```.
 
 Expectations can also be evaluated through the densitytensor
@@ -100,13 +100,13 @@ Again everything is differentiable, jit-able and can be composed with other JAX 
 ## Notes
 + We use the convention where parameters are given in units of π (i.e. in [0,2] rather than [0, 2π]).
 + By default, the simulators are initiated in the all 0 state, however the optional ```statetensor_in```
-+ or ```densitytensor_in``` argument can be used for arbitrary initialisations and combining circuits.
+or ```densitytensor_in``` argument can be used for arbitrary initialisations and combining circuits.
 
 
 ## pytket-qujax
-You can also generate the parameter to statetensor function from a [`pytket`](https://cqcl.github.io/tket/pytket/api/)
-circuit using the [`pytket-qujax`](https://github.com/CQCL/pytket-qujax) extension.
-In particular, the
+You can also generate the parameter to statetensor/densitytensor functions from
+a [`pytket`](https://cqcl.github.io/tket/pytket/api/) circuit using the
+[`pytket-qujax`](https://github.com/CQCL/pytket-qujax) extension. In particular, the
 [`tk_to_qujax`](https://cqcl.github.io/pytket-qujax/api/api.html#pytket.extensions.qujax.qujax_convert.tk_to_qujax) and
 [`tk_to_qujax_symbolic`](https://cqcl.github.io/pytket-qujax/api/api.html#pytket.extensions.qujax.qujax_convert.tk_to_qujax_symbolic)
 functions.
