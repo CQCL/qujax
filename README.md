@@ -76,9 +76,7 @@ expectation_and_grad(jnp.array([0.1]))
 qujax also supports densitytensor simulations
 
 ```python
-import qujax
-
-param_to_dt = qujax.get_params_to_statetensor_func(circuit_gates,
+param_to_dt = qujax.get_params_to_densitytensor_func(circuit_gates,
                                                    circuit_qubit_inds,
                                                    circuit_params_inds)
 dt = param_to_dt(jnp.array([0.1]))
