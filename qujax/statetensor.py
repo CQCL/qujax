@@ -1,5 +1,6 @@
 from __future__ import annotations
 from typing import Sequence, Union, Callable
+from functools import partial
 from jax import numpy as jnp
 
 from qujax import gates
@@ -158,3 +159,40 @@ def get_params_to_statetensor_func(gate_seq: Sequence[gate_type],
         return no_params_to_statetensor_func
 
     return params_to_statetensor_func
+
+
+def get_params_to_unitarytensor_func(gate_seq: Sequence[gate_type],
+                                     qubit_inds_seq: Sequence[Sequence[int]],
+                                     param_inds_seq: Sequence[Union[None, Sequence[int]]],
+                                     n_qubits: int = None) -> UnionCallableOptionalArray:
+    """
+    Creates a function that maps circuit parameters to a unitarytensor.
+    The unitarytensor is a tensor representation with shape (2,) * 2 * n_qubits
+    of the full unitary matrix representing the circuit.
+
+    Args:
+        gate_seq: Sequence of gates.
+            Each element is either a string matching a unitary array or function in qujax.gates,
+            a custom unitary array or a custom function taking parameters and returning a unitary array.
+            Unitary arrays will be reshaped into tensor form (2, 2,...)
+        qubit_inds_seq: Sequences of sequences representing qubit indices (ints) that gates are acting on.
+            i.e. [[0], [0,1], [1]] tells qujax the first gate is a single qubit gate acting on the zeroth qubit,
+            the second gate is a two qubit gate acting on the zeroth and first qubit etc.
+        param_inds_seq: Sequence of sequences representing parameter indices that gates are using,
+            i.e. [[0], [], [5, 2]] tells qujax that the first gate uses the zeroth parameter
+            (the float at position zero in the parameter vector/array), the second gate is not parameterised
+            and the third gates used the parameters at position five and two.
+        n_qubits: Number of qubits, if fixed.
+
+    Returns:
+        Function which maps any parameters to a unitarytensor.
+
+    """
+
+    if n_qubits is None:
+        n_qubits = max([max(qi) for qi in qubit_inds_seq]) + 1
+
+    param_to_st = get_params_to_statetensor_func(gate_seq, qubit_inds_seq, param_inds_seq, n_qubits)
+    identity_unitarytensor = jnp.eye(2 ** n_qubits).reshape((2,) * 2 * n_qubits)
+    return partial(param_to_st, statetensor_in=identity_unitarytensor)
+
