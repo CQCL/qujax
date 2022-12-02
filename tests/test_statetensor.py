@@ -22,8 +22,8 @@ def test_H():
     unitary = param_to_unitary().reshape(2, 2)
     unitary_jit = jit(param_to_unitary)().reshape(2, 2)
     zero_sv = jnp.zeros(2).at[0].set(1)
-    assert jnp.all(jnp.abs(unitary @ zero_sv - true_sv) < 1e-5)
-    assert jnp.all(jnp.abs(unitary_jit @ zero_sv - true_sv) < 1e-5)
+    assert jnp.allclose(unitary @ zero_sv, true_sv)
+    assert jnp.allclose(unitary_jit @ zero_sv, true_sv)
 
 
 def test_H_redundant_qubits():
