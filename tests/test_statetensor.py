@@ -15,8 +15,8 @@ def test_H():
     true_sv = jnp.array([0.70710678 + 0.j, 0.70710678 + 0.j])
 
     assert st.size == true_sv.size
-    assert jnp.allclose(unitary @ zero_sv, true_sv)
-    assert jnp.allclose(unitary_jit @ zero_sv, true_sv)
+    assert jnp.allclose(st.flatten(), true_sv)
+    assert jnp.allclose(st_jit.flatten(), true_sv)
 
     param_to_unitary = qujax.get_params_to_unitarytensor_func(gates, qubits, param_inds)
     unitary = param_to_unitary().reshape(2, 2)
