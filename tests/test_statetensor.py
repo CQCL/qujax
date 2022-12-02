@@ -89,6 +89,6 @@ def test_stacked_circuits():
 
     all_zeros_sv = jnp.array(jnp.arange(st2.size) == 0, dtype=int)
 
-    assert jnp.all(jnp.abs(st2.flatten() - all_zeros_sv) < 1e-5)
-    assert jnp.all(jnp.abs(st2_2.flatten() - all_zeros_sv) < 1e-5)
+    assert jnp.allclose(st2.flatten(), all_zeros_sv)
+    assert jnp.allclose(st2_2.flatten(), all_zeros_sv)
 
