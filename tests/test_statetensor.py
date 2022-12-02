@@ -39,7 +39,7 @@ def test_H_redundant_qubits():
                          0.70710678, 0., 0., 0.])
 
     assert st.size == true_sv.size
-    assert jnp.all(jnp.abs(st.flatten() - true_sv) < 1e-5)
+    assert jnp.allclose(st.flatten(), true_sv)
 
     param_to_unitary = qujax.get_params_to_unitarytensor_func(gates, qubits, param_inds, n_qubits)
     unitary = param_to_unitary().reshape(2 ** n_qubits, 2 ** n_qubits)
