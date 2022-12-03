@@ -183,3 +183,10 @@ def ZZPhase(param: float) -> jnp.ndarray:
     e_m = jnp.exp(-1.j * param_pi_2)
     e_p = jnp.exp(1.j * param_pi_2)
     return jnp.diag(jnp.array([e_m, e_p, e_p, e_m])).reshape((2,) * 4)
+
+
+ZZMax = ZZPhase(0.5)
+
+
+def PhasedX(param0: float, param1: float) -> jnp.ndarray:
+    return Rz(param1) @ Rx(param0) @ Rz(-param1)
