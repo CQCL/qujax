@@ -98,7 +98,7 @@ def get_params_to_statetensor_func(gate_seq: Sequence[gate_type],
         param_inds_seq: Sequence of sequences representing parameter indices that gates are using,
             i.e. [[0], [], [5, 2]] tells qujax that the first gate uses the zeroth parameter
             (the float at position zero in the parameter vector/array), the second gate is not parameterised
-            and the third gates used the parameters at position five and two.
+            and the third gate uses the parameters at position five and two.
         n_qubits: Number of qubits, if fixed.
 
     Returns:
@@ -164,11 +164,12 @@ def get_params_to_statetensor_func(gate_seq: Sequence[gate_type],
 def get_params_to_unitarytensor_func(gate_seq: Sequence[gate_type],
                                      qubit_inds_seq: Sequence[Sequence[int]],
                                      param_inds_seq: Sequence[Union[None, Sequence[int]]],
-                                     n_qubits: int = None) -> UnionCallableOptionalArray:
+                                     n_qubits: int = None)\
+        -> Union[Callable[[], jnp.ndarray], Callable[[jnp.ndarray], jnp.ndarray]]:
     """
     Creates a function that maps circuit parameters to a unitarytensor.
-    The unitarytensor is a tensor representation with shape (2,) * 2 * n_qubits
-    of the full unitary matrix representing the circuit.
+    The unitarytensor is an array with shape (2,) * 2 * n_qubits
+    representing the full unitary matrix of the circuit.
 
     Args:
         gate_seq: Sequence of gates.
@@ -181,7 +182,7 @@ def get_params_to_unitarytensor_func(gate_seq: Sequence[gate_type],
         param_inds_seq: Sequence of sequences representing parameter indices that gates are using,
             i.e. [[0], [], [5, 2]] tells qujax that the first gate uses the zeroth parameter
             (the float at position zero in the parameter vector/array), the second gate is not parameterised
-            and the third gates used the parameters at position five and two.
+            and the third gate uses the parameters at position five and two.
         n_qubits: Number of qubits, if fixed.
 
     Returns:
