@@ -133,7 +133,7 @@ def get_params_to_densitytensor_func(kraus_ops_seq: Sequence[kraus_op_type],
         param_inds_seq: Sequence of sequences representing parameter indices that gates are using,
             i.e. [[0], [], [5, 2]] tells qujax that the first gate uses the zeroth parameter
             (the float at position zero in the parameter vector/array), the second gate is not parameterised
-            and the third gates used the parameters at position five and two.
+            and the third gate uses the parameters at position five and two.
         n_qubits: Number of qubits, if fixed.
 
     Returns:

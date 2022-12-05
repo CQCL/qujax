@@ -4,6 +4,7 @@ from qujax import gates
 
 from qujax.statetensor import apply_gate
 from qujax.statetensor import get_params_to_statetensor_func
+from qujax.statetensor import get_params_to_unitarytensor_func
 
 from qujax.statetensor_observable import statetensor_to_single_expectation
 from qujax.statetensor_observable import get_statetensor_to_expectation_func
