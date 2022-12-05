@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>sample_integers &mdash; qujax 0.3.1 documentation</title>
+  <title>get_params_to_unitarytensor_func &mdash; qujax 0.3.1 documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -17,8 +17,8 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="sample_bitstrings" href="sample_bitstrings.html" />
-    <link rel="prev" title="bitstrings_to_integers" href="bitstrings_to_integers.html" /> 
+    <link rel="next" title="get_statetensor_to_expectation_func" href="get_statetensor_to_expectation_func.html" />
+    <link rel="prev" title="get_params_to_statetensor_func" href="get_params_to_statetensor_func.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -42,12 +42,12 @@
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="apply_gate.html">apply_gate</a></li>
 <li class="toctree-l1"><a class="reference internal" href="get_params_to_statetensor_func.html">get_params_to_statetensor_func</a></li>
-<li class="toctree-l1"><a class="reference internal" href="get_params_to_unitarytensor_func.html">get_params_to_unitarytensor_func</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">get_params_to_unitarytensor_func</a></li>
 <li class="toctree-l1"><a class="reference internal" href="get_statetensor_to_expectation_func.html">get_statetensor_to_expectation_func</a></li>
 <li class="toctree-l1"><a class="reference internal" href="get_statetensor_to_sampled_expectation_func.html">get_statetensor_to_sampled_expectation_func</a></li>
 <li class="toctree-l1"><a class="reference internal" href="integers_to_bitstrings.html">integers_to_bitstrings</a></li>
 <li class="toctree-l1"><a class="reference internal" href="bitstrings_to_integers.html">bitstrings_to_integers</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">sample_integers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sample_integers.html">sample_integers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="sample_bitstrings.html">sample_bitstrings</a></li>
 <li class="toctree-l1"><a class="reference internal" href="check_circuit.html">check_circuit</a></li>
 <li class="toctree-l1"><a class="reference internal" href="print_circuit.html">print_circuit</a></li>
@@ -76,9 +76,9 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="index.html" class="icon icon-home"></a></li>
-      <li class="breadcrumb-item active">sample_integers</li>
+      <li class="breadcrumb-item active">get_params_to_unitarytensor_func</li>
       <li class="wy-breadcrumbs-aside">
-            <a href="_sources/sample_integers.rst.txt" rel="nofollow"> View page source</a>
+            <a href="_sources/get_params_to_unitarytensor_func.rst.txt" rel="nofollow"> View page source</a>
       </li>
   </ul>
   <hr/>
@@ -86,27 +86,38 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <div class="section" id="sample-integers">
-<h1>sample_integers<a class="headerlink" href="#sample-integers" title="Permalink to this headline"></a></h1>
+  <div class="section" id="get-params-to-unitarytensor-func">
+<h1>get_params_to_unitarytensor_func<a class="headerlink" href="#get-params-to-unitarytensor-func" title="Permalink to this headline"></a></h1>
 <dl class="py function">
-<dt class="sig sig-object py" id="qujax.sample_integers">
-<code class="sig-prename descclassname"><span class="pre">qujax.</span></code><code class="sig-name descname"><span class="pre">sample_integers</span></code><span class="sig-paren">(</span><em><span class="n"><span class="pre">random_key</span></span></em>, <em><span class="n"><span class="pre">statetensor</span></span></em>, <em><span class="n"><span class="pre">n_samps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qujax.sample_integers" title="Permalink to this definition"></a></dt>
-<dd><p>Generate random integer samples according to statetensor.</p>
+<dt class="sig sig-object py" id="qujax.get_params_to_unitarytensor_func">
+<code class="sig-prename descclassname"><span class="pre">qujax.</span></code><code class="sig-name descname"><span class="pre">get_params_to_unitarytensor_func</span></code><span class="sig-paren">(</span><em><span class="n"><span class="pre">gate_seq</span></span></em>, <em><span class="n"><span class="pre">qubit_inds_seq</span></span></em>, <em><span class="n"><span class="pre">param_inds_seq</span></span></em>, <em><span class="n"><span class="pre">n_qubits</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qujax.get_params_to_unitarytensor_func" title="Permalink to this definition"></a></dt>
+<dd><p>Creates a function that maps circuit parameters to a unitarytensor.
+The unitarytensor is an array with shape (2,) * 2 * n_qubits
+representing the full unitary matrix of the circuit.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>random_key</strong> (<em>jax.random.PRNGKeyArray</em>) – JAX random key to seed samples.</li>
-<li><strong>statetensor</strong> (<em>ndarray</em>) – Statetensor encoding sampling probabilities (in the form of amplitudes).</li>
-<li><strong>n_samps</strong> (<em>Optional</em><em>[</em><em>int</em><em>]</em>) – Number of samples to generate. Defaults to 1.</li>
+<li><strong>gate_seq</strong> (<em>Sequence</em><em>[</em><em>gate_type</em><em>]</em>) – Sequence of gates.
+Each element is either a string matching a unitary array or function in qujax.gates,
+a custom unitary array or a custom function taking parameters and returning a unitary array.
+Unitary arrays will be reshaped into tensor form (2, 2,…)</li>
+<li><strong>qubit_inds_seq</strong> (<em>Sequence</em><em>[</em><em>Sequence</em><em>[</em><em>int</em><em>]</em><em>]</em>) – Sequences of sequences representing qubit indices (ints) that gates are acting on.
+i.e. [[0], [0,1], [1]] tells qujax the first gate is a single qubit gate acting on the zeroth qubit,
+the second gate is a two qubit gate acting on the zeroth and first qubit etc.</li>
+<li><strong>param_inds_seq</strong> (<em>Sequence</em><em>[</em><em>Union</em><em>[</em><em>None</em><em>, </em><em>Sequence</em><em>[</em><em>int</em><em>]</em><em>]</em><em>]</em>) – Sequence of sequences representing parameter indices that gates are using,
+i.e. [[0], [], [5, 2]] tells qujax that the first gate uses the zeroth parameter
+(the float at position zero in the parameter vector/array), the second gate is not parameterised
+and the third gate uses the parameters at position five and two.</li>
+<li><strong>n_qubits</strong> (<em>int</em>) – Number of qubits, if fixed.</li>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Array with sampled integers, shape=(n_samps,).</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Function which maps any parameters to a unitarytensor.</p>
 </td>
 </tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">ndarray</p>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">Union[Callable[[], jnp.ndarray], Callable[[jnp.ndarray], jnp.ndarray]]</p>
 </td>
 </tr>
 </tbody>
@@ -119,8 +130,8 @@
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="bitstrings_to_integers.html" class="btn btn-neutral float-left" title="bitstrings_to_integers" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="sample_bitstrings.html" class="btn btn-neutral float-right" title="sample_bitstrings" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="get_params_to_statetensor_func.html" class="btn btn-neutral float-left" title="get_params_to_statetensor_func" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="get_statetensor_to_expectation_func.html" class="btn btn-neutral float-right" title="get_statetensor_to_expectation_func" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
