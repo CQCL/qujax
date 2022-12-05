@@ -284,7 +284,7 @@ def print_circuit(gate_seq: Sequence[kraus_op_type],
     if n_qubits_disp > 1:
         for i in range(qubit_min + 1, qubit_max + 1):
             rows += [' ', f'q{i}: '.ljust(3) + '-' * sep_length]
-    rows, qubits_free = _pad_rows(rows)
+    rows, rows_free = _pad_rows(rows)
 
     for gate_ind in range(gate_ind_min, gate_ind_max + 1):
         g = gate_str_seq[gate_ind]
@@ -292,22 +292,23 @@ def print_circuit(gate_seq: Sequence[kraus_op_type],
 
         qi_min = min(qi)
         qi_max = max(qi)
+        ri_min = 2 * qi_min
+        ri_max = 2 * qi_max + 1
 
-        if not all([qubits_free[i] for i in range(qi_min, qi_max)]):
-            rows, qubits_free = _pad_rows(rows)
+        if not all([rows_free[i] for i in range(ri_min, ri_max)]):
+            rows, rows_free = _pad_rows(rows)
 
-        for row_ind in range(2 * qi_min, 2 * qi_max + 1):
+        for row_ind in range(ri_min, ri_max):
             if row_ind == 2 * qi[-1]:
                 rows[row_ind] += '-' * sep_length + g
-                qubits_free[row_ind // 2] = False
             elif row_ind % 2 == 1:
                 rows[row_ind] += ' ' * sep_length + '   ' + '|' + '   '
             elif row_ind / 2 in qi:
                 rows[row_ind] += '-' * sep_length + '---' + '◯' + '---'
-                qubits_free[row_ind // 2] = False
             else:
                 rows[row_ind] += '-' * sep_length + '---' + '|' + '---'
-                qubits_free[row_ind // 2] = False
+
+            rows_free[row_ind] = False
 
     rows, _ = _pad_rows(rows)
 
