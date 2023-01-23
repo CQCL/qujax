@@ -4,7 +4,7 @@ from functools import partial
 from jax import numpy as jnp
 
 from qujax import gates
-from qujax.utils import check_circuit, _arrayify_inds, UnionCallableOptionalArray, gate_type
+from qujax.utils import check_circuit, _arrayify_inds, UnionCallableOptionalArray, Gate
 
 
 def apply_gate(statetensor: jnp.ndarray, gate_unitary: jnp.ndarray, qubit_inds: Sequence[int]) -> jnp.ndarray:
@@ -28,7 +28,7 @@ def apply_gate(statetensor: jnp.ndarray, gate_unitary: jnp.ndarray, qubit_inds: 
     return statetensor
 
 
-def _to_gate_func(gate: gate_type) -> Callable[[jnp.ndarray], jnp.ndarray]:
+def _to_gate_func(gate: Gate) -> Callable[[jnp.ndarray], jnp.ndarray]:
     """
     Ensures a gate_seq element is a function that map (possibly empty) parameters
     to a unitary tensor.
@@ -80,7 +80,7 @@ def _gate_func_to_unitary(gate_func: Callable[[jnp.ndarray], jnp.ndarray],
     return gate_unitary
 
 
-def get_params_to_statetensor_func(gate_seq: Sequence[gate_type],
+def get_params_to_statetensor_func(gate_seq: Sequence[Gate],
                                    qubit_inds_seq: Sequence[Sequence[int]],
                                    param_inds_seq: Sequence[Union[None, Sequence[int]]],
                                    n_qubits: int = None) -> UnionCallableOptionalArray:
@@ -161,7 +161,7 @@ def get_params_to_statetensor_func(gate_seq: Sequence[gate_type],
     return params_to_statetensor_func
 
 
-def get_params_to_unitarytensor_func(gate_seq: Sequence[gate_type],
+def get_params_to_unitarytensor_func(gate_seq: Sequence[Gate],
                                      qubit_inds_seq: Sequence[Sequence[int]],
                                      param_inds_seq: Sequence[Union[None, Sequence[int]]],
                                      n_qubits: int = None)\

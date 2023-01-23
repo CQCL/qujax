@@ -20,14 +20,13 @@ class CallableOptionalArray(Protocol):
 
 
 UnionCallableOptionalArray = Union[CallableArrayAndOptionalArray, CallableOptionalArray]
-gate_type = Union[str,
-                  jnp.ndarray,
-                  Callable[[jnp.ndarray], jnp.ndarray],
-                  Callable[[], jnp.ndarray]]
-kraus_op_type = Union[gate_type, Iterable[gate_type]]
+Gate = Union[
+    str, jnp.ndarray, Callable[[jnp.ndarray], jnp.ndarray], Callable[[], jnp.ndarray]
+]
+KrausOp = Union[Gate, Iterable[Gate]]
 
 
-def check_unitary(gate: gate_type):
+def check_unitary(gate: Gate):
     """
     Checks whether a matrix or tensor is unitary.
 
@@ -97,7 +96,7 @@ def _arrayify_inds(param_inds_seq: Sequence[Union[None, Sequence[int]]]) -> Sequ
     return param_inds_seq
 
 
-def check_circuit(gate_seq: Sequence[kraus_op_type],
+def check_circuit(gate_seq: Sequence[KrausOp],
                   qubit_inds_seq: Sequence[Sequence[int]],
                   param_inds_seq: Sequence[Sequence[int]],
                   n_qubits: int = None,
@@ -143,7 +142,7 @@ def check_circuit(gate_seq: Sequence[kraus_op_type],
             check_unitary(g)
 
 
-def _get_gate_str(gate_obj: kraus_op_type,
+def _get_gate_str(gate_obj: KrausOp,
                   param_inds: Union[None, Sequence[int], Sequence[Sequence[int]]]) -> str:
     """
     Maps single gate object to a four character string representation
@@ -230,7 +229,7 @@ def _pad_rows(rows: List[str]) -> Tuple[List[str], List[bool]]:
     return out_rows, [True] * len(rows)
 
 
-def print_circuit(gate_seq: Sequence[kraus_op_type],
+def print_circuit(gate_seq: Sequence[KrausOp],
                   qubit_inds_seq: Sequence[Sequence[int]],
                   param_inds_seq: Sequence[Sequence[int]],
                   n_qubits: Optional[int] = None,
@@ -266,7 +265,7 @@ def print_circuit(gate_seq: Sequence[kraus_op_type],
     check_circuit(gate_seq, qubit_inds_seq, param_inds_seq, n_qubits, False)
 
     gate_ind_max = min(len(gate_seq) - 1, gate_ind_max)
-    if gate_ind_max < gate_ind_min:
+    if gate_ind_min > gate_ind_max:
         raise TypeError('gate_ind_max must be larger or equal to gate_ind_min')
 
     if n_qubits is None:
@@ -292,13 +291,13 @@ def print_circuit(gate_seq: Sequence[kraus_op_type],
 
         qi_min = min(qi)
         qi_max = max(qi)
-        ri_min = 2 * qi_min
-        ri_max = 2 * qi_max + 1
+        ri_min = 2 * qi_min         # index of top row used by gate
+        ri_max = 2 * qi_max         # index of bottom row used by gate
 
         if not all([rows_free[i] for i in range(ri_min, ri_max)]):
             rows, rows_free = _pad_rows(rows)
 
-        for row_ind in range(ri_min, ri_max):
+        for row_ind in range(ri_min, ri_max + 1):
             if row_ind == 2 * qi[-1]:
                 rows[row_ind] += '-' * sep_length + g
             elif row_ind % 2 == 1:

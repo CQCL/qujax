@@ -5,7 +5,7 @@ from jax.lax import scan
 
 from qujax.statetensor import apply_gate, UnionCallableOptionalArray
 from qujax.statetensor import _to_gate_func, _arrayify_inds, _gate_func_to_unitary
-from qujax.utils import check_circuit, kraus_op_type
+from qujax.utils import check_circuit, KrausOp
 
 
 def _kraus_single(densitytensor: jnp.ndarray,
@@ -61,7 +61,7 @@ def kraus(densitytensor: jnp.ndarray,
     return new_densitytensor
 
 
-def _to_kraus_operator_seq_funcs(kraus_op: kraus_op_type,
+def _to_kraus_operator_seq_funcs(kraus_op: KrausOp,
                                  param_inds: Union[None, Sequence[int], Sequence[Sequence[int]]]) \
         -> Tuple[Sequence[Callable[[jnp.ndarray], jnp.ndarray]],
                  Sequence[jnp.ndarray]]:
@@ -113,7 +113,7 @@ def partial_trace(densitytensor: jnp.ndarray,
     return densitytensor
 
 
-def get_params_to_densitytensor_func(kraus_ops_seq: Sequence[kraus_op_type],
+def get_params_to_densitytensor_func(kraus_ops_seq: Sequence[KrausOp],
                                      qubit_inds_seq: Sequence[Sequence[int]],
                                      param_inds_seq: Sequence[Union[None, Sequence[int], Sequence[Sequence[int]]]],
                                      n_qubits: int = None) -> UnionCallableOptionalArray:
