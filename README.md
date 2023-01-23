@@ -48,14 +48,14 @@ param_to_st = qujax.get_params_to_statetensor_func(circuit_gates,
 We now have a pure JAX function that generates the statetensor for given parameters
 ```python
 param_to_st(jnp.array([0.1]))
-# DeviceArray([[0.58778524+0.j, 0.        +0.j],
-#              [0.80901706+0.j, 0.        +0.j]], dtype=complex64)
+# Array([[0.58778524+0.j, 0.        +0.j],
+#        [0.80901706+0.j, 0.        +0.j]], dtype=complex64)
 ```
 
 The statevector can be obtained from the statetensor via ```.flatten()```.
 ```python
 param_to_st(jnp.array([0.1])).flatten()
-# DeviceArray([0.58778524+0.j, 0.+0.j, 0.80901706+0.j, 0.+0.j], dtype=complex64)
+# Array([0.58778524+0.j, 0.+0.j, 0.80901706+0.j, 0.+0.j], dtype=complex64)
 ```
 
 We can also use qujax to map the statetensor to an expected value
@@ -70,8 +70,8 @@ from jax import value_and_grad
 param_to_expectation = lambda param: st_to_expectation(param_to_st(param))
 expectation_and_grad = value_and_grad(param_to_expectation)
 expectation_and_grad(jnp.array([0.1]))
-# (DeviceArray(-0.3090171, dtype=float32),
-#    DeviceArray([-2.987832], dtype=float32))
+# (Array(-0.3090171, dtype=float32),
+#    Array([-2.987832], dtype=float32))
 ```
 
 ## Densitytensor simulations with qujax
@@ -91,7 +91,7 @@ Expectations can also be evaluated through the densitytensor
 ```python
 dt_to_expectation = qujax.get_densitytensor_to_expectation_func([['Z']], [[0]], [1.])
 dt_to_expectation(dt)
-# DeviceArray(-0.3090171, dtype=float32)
+# Array(-0.3090171, dtype=float32)
 ```
 Again everything is differentiable, jit-able and can be composed with other JAX code.
 
