@@ -71,8 +71,8 @@ def _to_kraus_operator_seq_funcs(kraus_op: KrausOp,
     of each Kraus operator.
 
     Args:
-        kraus_op: Either a normal gate_type or a sequence of gate_types representing Kraus operators.
-        param_inds: If kraus_op is a normal gate_type then a sequence of parameter indices,
+        kraus_op: Either a normal Gate or a sequence of Gates representing Kraus operators.
+        param_inds: If kraus_op is a normal Gate then a sequence of parameter indices,
             if kraus_op is a sequence of Kraus operators then a sequence of sequences of parameter indices
 
     Returns:
