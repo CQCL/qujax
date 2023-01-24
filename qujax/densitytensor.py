@@ -5,7 +5,7 @@ from jax.lax import scan
 
 from qujax.statetensor import apply_gate, UnionCallableOptionalArray
 from qujax.statetensor import _to_gate_func, _arrayify_inds, _gate_func_to_unitary
-from qujax.utils import check_circuit, kraus_op_type
+from qujax.utils import check_circuit, KrausOp
 
 
 def _kraus_single(densitytensor: jnp.ndarray,
@@ -61,7 +61,7 @@ def kraus(densitytensor: jnp.ndarray,
     return new_densitytensor
 
 
-def _to_kraus_operator_seq_funcs(kraus_op: kraus_op_type,
+def _to_kraus_operator_seq_funcs(kraus_op: KrausOp,
                                  param_inds: Union[None, Sequence[int], Sequence[Sequence[int]]]) \
         -> Tuple[Sequence[Callable[[jnp.ndarray], jnp.ndarray]],
                  Sequence[jnp.ndarray]]:
@@ -71,8 +71,8 @@ def _to_kraus_operator_seq_funcs(kraus_op: kraus_op_type,
     of each Kraus operator.
 
     Args:
-        kraus_op: Either a normal gate_type or a sequence of gate_types representing Kraus operators.
-        param_inds: If kraus_op is a normal gate_type then a sequence of parameter indices,
+        kraus_op: Either a normal Gate or a sequence of Gates representing Kraus operators.
+        param_inds: If kraus_op is a normal Gate then a sequence of parameter indices,
             if kraus_op is a sequence of Kraus operators then a sequence of sequences of parameter indices
 
     Returns:
@@ -113,7 +113,7 @@ def partial_trace(densitytensor: jnp.ndarray,
     return densitytensor
 
 
-def get_params_to_densitytensor_func(kraus_ops_seq: Sequence[kraus_op_type],
+def get_params_to_densitytensor_func(kraus_ops_seq: Sequence[KrausOp],
                                      qubit_inds_seq: Sequence[Sequence[int]],
                                      param_inds_seq: Sequence[Union[None, Sequence[int], Sequence[Sequence[int]]]],
                                      n_qubits: int = None) -> UnionCallableOptionalArray:
