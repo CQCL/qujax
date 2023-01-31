@@ -1,0 +1,33 @@
+name: Lint python projects
+
+on:
+  pull_request:
+    branches:
+      - main
+      - develop
+  push:
+    branches:
+      - main
+      - develop
+
+jobs:
+  lint:
+
+    runs-on: ubuntu-22.04
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up Python 3.x
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.x'
+    - name: Update pip
+      run: pip install --upgrade pip
+    - name: Install black and pylint
+      run: pip install black pylint
+    - name: Check files are formatted with black
+      run: |
+        black --check .
+    - name: Run pylint
+      run: |        
+        pylint */

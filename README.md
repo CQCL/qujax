@@ -121,7 +121,8 @@ Pull requests are welcomed!
 2. Add your code.
 3. Add your tests.
 4. Update the documentation if required.
-5. Issue a pull request into [`develop`](https://github.com/CQCL/qujax/tree/develop).
+5. Check the code lints (run `black . --check` and `pylint */`)
+6. Issue a pull request into [`develop`](https://github.com/CQCL/qujax/tree/develop).
 
 New commits on [`develop`](https://github.com/CQCL/qujax/tree/develop) will then be merged into
 [`main`](https://github.com/CQCL/qujax/tree/main) on the next release.

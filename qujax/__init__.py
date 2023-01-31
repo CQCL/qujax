@@ -1,3 +1,8 @@
+"""
+Simulating quantum circuits with JAX
+"""
+
+
 from qujax.version import __version__
 
 from qujax import gates
@@ -32,10 +37,10 @@ from qujax.utils import sample_integers
 from qujax.utils import sample_bitstrings
 from qujax.utils import statetensor_to_densitytensor
 
+# pylint: disable=undefined-variable
 del version
 del statetensor
 del statetensor_observable
 del densitytensor
 del densitytensor_observable
 del utils
-
