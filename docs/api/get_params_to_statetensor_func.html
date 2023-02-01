@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>get_params_to_statetensor_func &mdash; qujax 0.3.2 documentation</title>
+  <title>get_params_to_statetensor_func &mdash; qujax 0.3.3 documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -29,7 +29,7 @@
             <a href="index.html" class="icon icon-home"> qujax
           </a>
               <div class="version">
-                0.3.2
+                0.3.3
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -99,15 +99,17 @@
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>gate_seq</strong> (<em>Sequence</em><em>[</em><em>Union</em><em>[</em><em>str</em><em>, </em><em>jax.Array</em><em>, </em><em>Callable</em><em>[</em><em>[</em><em>jax.Array</em><em>]</em><em>, </em><em>jax.Array</em><em>]</em><em>, </em><em>Callable</em><em>[</em><em>[</em><em>]</em><em>, </em><em>jax.Array</em><em>]</em><em>]</em><em>]</em>) – Sequence of gates.
 Each element is either a string matching a unitary array or function in qujax.gates,
-a custom unitary array or a custom function taking parameters and returning a unitary array.
-Unitary arrays will be reshaped into tensor form (2, 2,…)</li>
-<li><strong>qubit_inds_seq</strong> (<em>Sequence</em><em>[</em><em>Sequence</em><em>[</em><em>int</em><em>]</em><em>]</em>) – Sequences of sequences representing qubit indices (ints) that gates are acting on.
-i.e. [[0], [0,1], [1]] tells qujax the first gate is a single qubit gate acting on the zeroth qubit,
-the second gate is a two qubit gate acting on the zeroth and first qubit etc.</li>
+a custom unitary array or a custom function taking parameters and returning a
+unitary array. Unitary arrays will be reshaped into tensor form (2, 2,…)</li>
+<li><strong>qubit_inds_seq</strong> (<em>Sequence</em><em>[</em><em>Sequence</em><em>[</em><em>int</em><em>]</em><em>]</em>) – Sequences of sequences representing qubit indices (ints) that gates are
+acting on.
+i.e. [[0], [0,1], [1]] tells qujax the first gate is a single qubit gate acting on the
+zeroth qubit, the second gate is a two qubit gate acting on the zeroth and first qubit
+etc.</li>
 <li><strong>param_inds_seq</strong> (<em>Sequence</em><em>[</em><em>Union</em><em>[</em><em>None</em><em>, </em><em>Sequence</em><em>[</em><em>int</em><em>]</em><em>]</em><em>]</em>) – Sequence of sequences representing parameter indices that gates are using,
 i.e. [[0], [], [5, 2]] tells qujax that the first gate uses the zeroth parameter
-(the float at position zero in the parameter vector/array), the second gate is not parameterised
-and the third gate uses the parameters at position five and two.</li>
+(the float at position zero in the parameter vector/array), the second gate is not
+parameterised and the third gate uses the parameters at position five and two.</li>
 <li><strong>n_qubits</strong> (<em>Optional</em><em>[</em><em>int</em><em>]</em>) – Number of qubits, if fixed.</li>
 </ul>
 </td>
