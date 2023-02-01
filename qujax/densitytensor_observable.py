@@ -1,16 +1,23 @@
 from __future__ import annotations
-from typing import Sequence, Union, Callable
-from jax import numpy as jnp, random
+
+from typing import Callable, Sequence, Union
+
+from jax import numpy as jnp
+from jax import random
 from jax.lax import fori_loop
 
 from qujax.densitytensor import _kraus_single, partial_trace
 from qujax.statetensor_observable import _get_tensor_to_expectation_func
-from qujax.utils import sample_integers, statetensor_to_densitytensor, bitstrings_to_integers
+from qujax.utils import (
+    bitstrings_to_integers,
+    sample_integers,
+    statetensor_to_densitytensor,
+)
 
 
-def densitytensor_to_single_expectation(densitytensor: jnp.ndarray,
-                                        hermitian: jnp.ndarray,
-                                        qubit_inds: Sequence[int]) -> float:
+def densitytensor_to_single_expectation(
+    densitytensor: jnp.ndarray, hermitian: jnp.ndarray, qubit_inds: Sequence[int]
+) -> float:
     """
     Evaluates expectation value of an observable represented by a Hermitian matrix (in tensor form).
 
@@ -32,13 +39,15 @@ def densitytensor_to_single_expectation(densitytensor: jnp.ndarray,
     return jnp.einsum(densitytensor, dt_indices, hermitian, hermitian_indices).real
 
 
-def get_densitytensor_to_expectation_func(hermitian_seq_seq: Sequence[Sequence[Union[str, jnp.ndarray]]],
-                                          qubits_seq_seq: Sequence[Sequence[int]],
-                                          coefficients: Union[Sequence[float], jnp.ndarray]) \
-        -> Callable[[jnp.ndarray], float]:
+def get_densitytensor_to_expectation_func(
+    hermitian_seq_seq: Sequence[Sequence[Union[str, jnp.ndarray]]],
+    qubits_seq_seq: Sequence[Sequence[int]],
+    coefficients: Union[Sequence[float], jnp.ndarray],
+) -> Callable[[jnp.ndarray], float]:
     """
     Takes strings (or arrays) representing Hermitian matrices, along with qubit indices and
-    a list of coefficients and returns a function that converts a densitytensor into an expected value.
+    a list of coefficients and returns a function that converts a densitytensor into an
+    expected value.
 
     Args:
         hermitian_seq_seq: Sequence of sequences of Hermitian matrices/tensors.
@@ -53,14 +62,19 @@ def get_densitytensor_to_expectation_func(hermitian_seq_seq: Sequence[Sequence[U
         Function that takes densitytensor and returns expected value (float).
     """
 
-    return _get_tensor_to_expectation_func(hermitian_seq_seq, qubits_seq_seq, coefficients,
-                                           densitytensor_to_single_expectation)
+    return _get_tensor_to_expectation_func(
+        hermitian_seq_seq,
+        qubits_seq_seq,
+        coefficients,
+        densitytensor_to_single_expectation,
+    )
 
 
-def get_densitytensor_to_sampled_expectation_func(hermitian_seq_seq: Sequence[Sequence[Union[str, jnp.ndarray]]],
-                                                  qubits_seq_seq: Sequence[Sequence[int]],
-                                                  coefficients: Union[Sequence[float], jnp.ndarray]) \
-        -> Callable[[jnp.ndarray, random.PRNGKeyArray, int], float]:
+def get_densitytensor_to_sampled_expectation_func(
+    hermitian_seq_seq: Sequence[Sequence[Union[str, jnp.ndarray]]],
+    qubits_seq_seq: Sequence[Sequence[int]],
+    coefficients: Union[Sequence[float], jnp.ndarray],
+) -> Callable[[jnp.ndarray, random.PRNGKeyArray, int], float]:
     """
     Converts strings (or arrays) representing Hermitian matrices, qubit indices and
     coefficients into a function that converts a densitytensor into a sampled expected value.
@@ -77,13 +91,13 @@ def get_densitytensor_to_sampled_expectation_func(hermitian_seq_seq: Sequence[Se
         Function that takes densitytensor, random key and integer number of shots
         and returns sampled expected value (float).
     """
-    densitytensor_to_expectation_func = get_densitytensor_to_expectation_func(hermitian_seq_seq,
-                                                                              qubits_seq_seq,
-                                                                              coefficients)
+    densitytensor_to_expectation_func = get_densitytensor_to_expectation_func(
+        hermitian_seq_seq, qubits_seq_seq, coefficients
+    )
 
-    def densitytensor_to_sampled_expectation_func(statetensor: jnp.ndarray,
-                                                  random_key: random.PRNGKeyArray,
-                                                  n_samps: int) -> float:
+    def densitytensor_to_sampled_expectation_func(
+        statetensor: jnp.ndarray, random_key: random.PRNGKeyArray, n_samps: int
+    ) -> float:
         """
         Maps statetensor to sampled expected value.
 
@@ -97,22 +111,28 @@ def get_densitytensor_to_sampled_expectation_func(hermitian_seq_seq: Sequence[Se
 
         """
         sampled_integers = sample_integers(random_key, statetensor, n_samps)
-        sampled_probs = fori_loop(0, n_samps,
-                                  lambda i, sv: sv.at[sampled_integers[i]].add(1),
-                                  jnp.zeros(statetensor.size))
+        sampled_probs = fori_loop(
+            0,
+            n_samps,
+            lambda i, sv: sv.at[sampled_integers[i]].add(1),
+            jnp.zeros(statetensor.size),
+        )
 
         sampled_probs /= n_samps
-        sampled_dt = statetensor_to_densitytensor(jnp.sqrt(sampled_probs).reshape(statetensor.shape))
+        sampled_dt = statetensor_to_densitytensor(
+            jnp.sqrt(sampled_probs).reshape(statetensor.shape)
+        )
         return densitytensor_to_expectation_func(sampled_dt)
 
     return densitytensor_to_sampled_expectation_func
 
 
-def densitytensor_to_measurement_probabilities(densitytensor: jnp.ndarray,
-                                               qubit_inds: Sequence[int]) -> jnp.ndarray:
+def densitytensor_to_measurement_probabilities(
+    densitytensor: jnp.ndarray, qubit_inds: Sequence[int]
+) -> jnp.ndarray:
     """
-    Extract array of measurement probabilities given a densitytensor and some qubit indices to measure
-    (in the computational basis).
+    Extract array of measurement probabilities given a densitytensor and some qubit indices to
+    measure (in the computational basis).
     I.e. the ith element of the array corresponds to the probability of observing the bitstring
     represented by the integer i on the measured qubits.
 
@@ -126,13 +146,18 @@ def densitytensor_to_measurement_probabilities(densitytensor: jnp.ndarray,
     n_qubits = densitytensor.ndim // 2
     n_qubits_measured = len(qubit_inds)
     qubit_inds_trace_out = [i for i in range(n_qubits) if i not in qubit_inds]
-    return jnp.diag(partial_trace(densitytensor, qubit_inds_trace_out).reshape(2 * n_qubits_measured,
-                                                                               2 * n_qubits_measured)).real
+    return jnp.diag(
+        partial_trace(densitytensor, qubit_inds_trace_out).reshape(
+            2 * n_qubits_measured, 2 * n_qubits_measured
+        )
+    ).real
 
 
-def densitytensor_to_measured_densitytensor(densitytensor: jnp.ndarray,
-                                            qubit_inds: Sequence[int],
-                                            measurement: Union[int, jnp.ndarray]) -> jnp.ndarray:
+def densitytensor_to_measured_densitytensor(
+    densitytensor: jnp.ndarray,
+    qubit_inds: Sequence[int],
+    measurement: Union[int, jnp.ndarray],
+) -> jnp.ndarray:
     """
     Returns the post-measurement densitytensor assuming that qubit_inds are measured
     (in the computational basis) and the given measurement (integer or bitstring) is observed.
@@ -146,12 +171,19 @@ def densitytensor_to_measured_densitytensor(densitytensor: jnp.ndarray,
         Post-measurement densitytensor (same shape as input densitytensor).
     """
     measurement = jnp.array(measurement)
-    measured_int = bitstrings_to_integers(measurement) if measurement.ndim == 1 else measurement
+    measured_int = (
+        bitstrings_to_integers(measurement) if measurement.ndim == 1 else measurement
+    )
 
     n_qubits = densitytensor.ndim // 2
     n_qubits_measured = len(qubit_inds)
-    qubit_inds_projector = jnp.diag(jnp.zeros(2 ** n_qubits_measured).at[measured_int].set(1)) \
-        .reshape((2,) * 2 * n_qubits_measured)
-    unnorm_densitytensor = _kraus_single(densitytensor, qubit_inds_projector, qubit_inds)
-    norm_const = jnp.trace(unnorm_densitytensor.reshape(2 ** n_qubits, 2 ** n_qubits)).real
+    qubit_inds_projector = jnp.diag(
+        jnp.zeros(2**n_qubits_measured).at[measured_int].set(1)
+    ).reshape((2,) * 2 * n_qubits_measured)
+    unnorm_densitytensor = _kraus_single(
+        densitytensor, qubit_inds_projector, qubit_inds
+    )
+    norm_const = jnp.trace(
+        unnorm_densitytensor.reshape(2**n_qubits, 2**n_qubits)
+    ).real
     return unnorm_densitytensor / norm_const

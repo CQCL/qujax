@@ -1,10 +1,11 @@
-from jax import numpy as jnp, jit
+from jax import jit
+from jax import numpy as jnp
 
 import qujax
 
 
 def test_H():
-    gates = ['H']
+    gates = ["H"]
     qubits = [[0]]
     param_inds = [[]]
 
@@ -12,7 +13,7 @@ def test_H():
     st = param_to_st()
     st_jit = jit(param_to_st)()
 
-    true_sv = jnp.array([0.70710678 + 0.j, 0.70710678 + 0.j])
+    true_sv = jnp.array([0.70710678 + 0.0j, 0.70710678 + 0.0j])
 
     assert st.size == true_sv.size
     assert jnp.allclose(st.flatten(), true_sv)
@@ -27,30 +28,33 @@ def test_H():
 
 
 def test_H_redundant_qubits():
-    gates = ['H']
+    gates = ["H"]
     qubits = [[0]]
     param_inds = [[]]
     n_qubits = 3
 
-    param_to_st = qujax.get_params_to_statetensor_func(gates, qubits, param_inds, n_qubits)
+    param_to_st = qujax.get_params_to_statetensor_func(
+        gates, qubits, param_inds, n_qubits
+    )
     st = param_to_st(statetensor_in=None)
 
-    true_sv = jnp.array([0.70710678, 0., 0., 0.,
-                         0.70710678, 0., 0., 0.])
+    true_sv = jnp.array([0.70710678, 0.0, 0.0, 0.0, 0.70710678, 0.0, 0.0, 0.0])
 
     assert st.size == true_sv.size
     assert jnp.allclose(st.flatten(), true_sv)
 
-    param_to_unitary = qujax.get_params_to_unitarytensor_func(gates, qubits, param_inds, n_qubits)
-    unitary = param_to_unitary().reshape(2 ** n_qubits, 2 ** n_qubits)
-    unitary_jit = jit(param_to_unitary)().reshape(2 ** n_qubits, 2 ** n_qubits)
-    zero_sv = jnp.zeros(2 ** n_qubits).at[0].set(1)
+    param_to_unitary = qujax.get_params_to_unitarytensor_func(
+        gates, qubits, param_inds, n_qubits
+    )
+    unitary = param_to_unitary().reshape(2**n_qubits, 2**n_qubits)
+    unitary_jit = jit(param_to_unitary)().reshape(2**n_qubits, 2**n_qubits)
+    zero_sv = jnp.zeros(2**n_qubits).at[0].set(1)
     assert jnp.allclose(unitary @ zero_sv, true_sv)
     assert jnp.allclose(unitary_jit @ zero_sv, true_sv)
 
 
 def test_CX_Rz_CY():
-    gates = ['H', 'H', 'H', 'CX', 'Rz', 'CY']
+    gates = ["H", "H", "H", "CX", "Rz", "CY"]
     qubits = [[0], [1], [2], [0, 1], [1], [1, 2]]
     param_inds = [[], [], [], None, [0], []]
 
@@ -58,25 +62,36 @@ def test_CX_Rz_CY():
     param = jnp.array(0.1)
     st = param_to_st(param)
 
-    true_sv = jnp.array([0.34920055 - 0.05530793j, 0.34920055 - 0.05530793j,
-                         0.05530793 - 0.34920055j, -0.05530793 + 0.34920055j,
-                         0.34920055 - 0.05530793j, 0.34920055 - 0.05530793j,
-                         0.05530793 - 0.34920055j, -0.05530793 + 0.34920055j], dtype='complex64')
+    true_sv = jnp.array(
+        [
+            0.34920055 - 0.05530793j,
+            0.34920055 - 0.05530793j,
+            0.05530793 - 0.34920055j,
+            -0.05530793 + 0.34920055j,
+            0.34920055 - 0.05530793j,
+            0.34920055 - 0.05530793j,
+            0.05530793 - 0.34920055j,
+            -0.05530793 + 0.34920055j,
+        ],
+        dtype="complex64",
+    )
 
     assert st.size == true_sv.size
     assert jnp.allclose(st.flatten(), true_sv)
 
     n_qubits = 3
-    param_to_unitary = qujax.get_params_to_unitarytensor_func(gates, qubits, param_inds, n_qubits)
-    unitary = param_to_unitary(param).reshape(2 ** n_qubits, 2 ** n_qubits)
-    unitary_jit = jit(param_to_unitary)(param).reshape(2 ** n_qubits, 2 ** n_qubits)
-    zero_sv = jnp.zeros(2 ** n_qubits).at[0].set(1)
-    assert jnp.allclose(unitary @ zero_sv, true_sv) 
+    param_to_unitary = qujax.get_params_to_unitarytensor_func(
+        gates, qubits, param_inds, n_qubits
+    )
+    unitary = param_to_unitary(param).reshape(2**n_qubits, 2**n_qubits)
+    unitary_jit = jit(param_to_unitary)(param).reshape(2**n_qubits, 2**n_qubits)
+    zero_sv = jnp.zeros(2**n_qubits).at[0].set(1)
+    assert jnp.allclose(unitary @ zero_sv, true_sv)
     assert jnp.allclose(unitary_jit @ zero_sv, true_sv)
 
 
 def test_stacked_circuits():
-    gates = ['H']
+    gates = ["H"]
     qubits = [[0]]
     param_inds = [[]]
 
@@ -91,4 +106,3 @@ def test_stacked_circuits():
 
     assert jnp.allclose(st2.flatten(), all_zeros_sv, atol=1e-7)
     assert jnp.allclose(st2_2.flatten(), all_zeros_sv, atol=1e-7)
-

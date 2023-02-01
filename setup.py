@@ -1,6 +1,6 @@
-from setuptools import setup, find_packages
+from setuptools import find_packages, setup
 
-exec(open('qujax/version.py').read())
+exec(open("qujax/version.py").read())
 
 setup(
     name="qujax",
@@ -22,5 +22,5 @@ setup(
     ],
     include_package_data=True,
     platforms="any",
-    version=__version__
+    version=__version__,
 )
