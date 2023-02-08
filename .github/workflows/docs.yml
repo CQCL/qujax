@@ -15,7 +15,7 @@ jobs:
       with:
         fetch-depth: '0'
     - name: Set up Python 3.9
-      uses: actions/setup-python@v3
+      uses: actions/setup-python@v4
       with:
         python-version: '3.9'
     - name: Upgrade pip and install wheel
@@ -31,19 +31,7 @@ jobs:
       run: |
         cd .github/workflows/docs        
         sphinx-build ../../../docs . -a
-    - name: Configure git
-      run: |
-        git config --global user.email "qujax-bot@cambridgequantum.com"
-        git config --global user.name  "«$GITHUB_WORKFLOW» github action"
-    - name: Check out gh-pages branch
-      run: git checkout gh-pages
-    - name: Remove old docs
-      run: git rm -r --ignore-unmatch docs/api
-    - name: Add generated docs to repository
-      run: |
-        mkdir -p docs
-        mv .github/workflows/docs docs/api
-        git add -f docs/api
-        git commit --allow-empty -m "Add generated documentation."
-    - name: Publish docs
-      run:  git push origin gh-pages:gh-pages
+    - name: Upload docs as artefact
+      uses: actions/upload-pages-artifact@v1
+      with:
+        path: .github/workflows/docs
