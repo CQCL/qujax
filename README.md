@@ -121,7 +121,7 @@ Pull requests are welcomed!
 2. Add your code.
 3. Add your tests.
 4. Update the documentation if required.
-5. Check the code lints (run `black . --check` and `pylint */`)
+5. Check the code lints (run `black . --check` and `pylint */` from the root directory).
 6. Issue a pull request into [`develop`](https://github.com/CQCL/qujax/tree/develop).
 
 New commits on [`develop`](https://github.com/CQCL/qujax/tree/develop) will then be merged into
@@ -130,10 +130,10 @@ New commits on [`develop`](https://github.com/CQCL/qujax/tree/develop) will then
 
 ## Cite
 ```
-@software{qujax2022,
-  author = {Samuel Duffield and Kirill Plekhanov and Gabriel Matos and Melf Johannsen},
+@software{qujax2023,
+  author = {Samuel Duffield and Gabriel Matos and Melf Johannsen},
   title = {qujax: Simulating quantum circuits with JAX},
   url = {https://github.com/CQCL/qujax},
-  year = {2022},
+  year = {2023},
 }
 ```
