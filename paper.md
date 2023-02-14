@@ -46,17 +46,15 @@ TODO: Different simulators (statetensor, densitytensor, unitarytensor)
 
 TODO: Observables
 
-TODO: Explain why no tensor networks (they represent different paradigm, more involved API)
-
 
 # Statement of need
 
 There already exists an array of quantum computation resources in Python
-including circ [@cirq], pytket [@pytket], qiskit [@jax2018github], Qulacs [@qulacs],
+including cirq [@cirq], pytket [@pytket], qiskit [@jax2018github], Qulacs [@qulacs],
 TensorFlow Quantum [@tensorflowquantum] as well as 
 Pennylane [@pennylane] and Quimb [@quimb] which support JAX as a backend.
 
-However, unlike all of the aforementioned, `qujax` is a pure JAX library and is purely functional.
+However, unlike all of the aforementioned, `qujax` is written entirely in JAX and is purely functional.
 JAX is emerging as the state-of-the-art library for high-perfomance scientific computation in Python 
 due to is composability, automatic differentiation and support for GPUs/TPUs as well as adopting 
 a NumPy [@numpy] API resulting in a low barrier to entry. Being a pure JAX library makes 
@@ -66,7 +64,7 @@ Additionally, the purely functional syntax of `qujax` makes it more readable as 
 easier to debug and compose with existing code.
 
 There is also an active area of research investigating tensor networks as a tool for classical 
-simulation of quantum circuits with software including DisCoPy [@discopy], Quimb [@quimb] and 
+simulation of quantum circuits with software including DisCoPy [@discopy], quimb [@quimb] and 
 TensorCircuit [@tensorcircuit]. Tensor networks represent a very promising field of research 
 however come with a significantly more sophisticed API (since with tensor networks one is 
 typically interested in a single quantity such as an amplitude or expectation value rather 
@@ -86,8 +84,6 @@ We acknowledge notable support from Kirill Plekhanov as well as Gabriel Marin an
 
 
 # References
-
-
 
 
 
