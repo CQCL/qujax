@@ -59,9 +59,9 @@ It emphasises clarity and readability, making it easy to debug, reducing the bar
  and decreasing the overhead when integrating with existing code or extending it to meet specific
   research needs.
 
-These characteristics contrast with the already existing array of excellent quantum computation resources in Python
-supporting JAX as a backend, such as cirq [@cirq], pytket [@pytket], qiskit [@jax2018github], Qulacs [@qulacs],
-TensorFlow Quantum [@tensorflowquantum], Pennylane [@pennylane] or quimb [@quimb]. 
+These characteristics contrast with the already existing array of excellent quantum computation resources in Python, such as cirq [@cirq], pytket [@pytket], qiskit [@jax2018github], Qulacs [@qulacs],
+TensorFlow Quantum [@tensorflowquantum], Pennylane [@pennylane] or quimb [@quimb], 
+the latter two supporting JAX as a backend. 
 These represent complex full-fledged frameworks which supply their own abstractions, being either wider 
 in scope or specializing in specific use-cases.
 
