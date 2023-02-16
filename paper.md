@@ -49,27 +49,28 @@ TODO: Observables
 
 # Statement of need
 
-There already exists an array of quantum computation resources in Python
-including cirq [@cirq], pytket [@pytket], qiskit [@jax2018github], Qulacs [@qulacs],
-TensorFlow Quantum [@tensorflowquantum] as well as 
-Pennylane [@pennylane] and Quimb [@quimb] which support JAX as a backend.
+JAX is emerging as a state-of-the-art library for high-perfomance scientific computation in Python 
+due to is composability, automatic differentiation and support for GPUs/TPUs, as well as adopting 
+the NumPy [@numpy] API resulting in a low barrier to entry.
 
-However, unlike all of the aforementioned, `qujax` is written entirely in JAX and is purely functional.
-JAX is emerging as the state-of-the-art library for high-perfomance scientific computation in Python 
-due to is composability, automatic differentiation and support for GPUs/TPUs as well as adopting 
-a NumPy [@numpy] API resulting in a low barrier to entry. Being a pure JAX library makes 
-`qujax` very lightweight and therefore easy to pick up and contribute to, it also 
-composes seamlessly with the ever expanding JAX ecosystem (e.g. @deepmindjax, @blackjax, @mocat). 
-Additionally, the purely functional syntax of `qujax` makes it more readable as well as being 
-easier to debug and compose with existing code.
+`qujax` is a lightweight, purely functional library written entirely in JAX, 
+composing seamlessly with the ever-expanding JAX ecosystem (e.g. @deepmindjax, @blackjax, @mocat). 
+It emphasises clarity and readability, making it easy to debug, reducing the barrier to entry,
+ and decreasing the overhead when integrating with existing code or extending it to meet specific
+  research needs.
 
-There is also an active area of research investigating tensor networks as a tool for classical 
+These characteristics contrast with the already existing array of excellent quantum computation resources in Python, such as cirq [@cirq], pytket [@pytket], qiskit [@jax2018github], Qulacs [@qulacs],
+TensorFlow Quantum [@tensorflowquantum], Pennylane [@pennylane] or quimb [@quimb], 
+the latter two supporting JAX as a backend. 
+These represent complex full-fledged frameworks which supply their own abstractions, being either wider 
+in scope or specializing in specific use-cases.
+
+There is an active area of research investigating tensor networks as a tool for classical 
 simulation of quantum circuits with software including DisCoPy [@discopy], quimb [@quimb] and 
-TensorCircuit [@tensorcircuit]. Tensor networks represent a very promising field of research 
-however come with a significantly more sophisticed API (since with tensor networks one is 
-typically interested in a single quantity such as an amplitude or expectation value rather 
-than a complete characterisation of the state as provided by `qujax`) - thus tensor network 
-computation is currently seen as beyond the scope of `qujax`.
+TensorCircuit [@tensorcircuit]. While tensor networks represent a very promising field of research, 
+their implementation entails a more sophisticated API (in tensor networks, the representation
+of a quantum state can be considerably more elaborate), greatly increasing the complexity of the
+package. Thus, tensor network computation is currently seen as being beyond the scope of `qujax`.
 
 
 # `pytket-qujax`
