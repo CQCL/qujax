@@ -61,8 +61,8 @@ It emphasises clarity and readability, making it easy to debug, reducing the bar
 
 These characteristics contrast with the already existing array of excellent quantum computation resources in Python
 supporting JAX as a backend, such as cirq [@cirq], pytket [@pytket], qiskit [@jax2018github], Qulacs [@qulacs],
-TensorFlow Quantum [@tensorflowquantum], Pennylane [@pennylane] or Quimb [@quimb]. 
-These represent complex full-fledged frameworks which supply their own abstractions, being either much wider 
+TensorFlow Quantum [@tensorflowquantum], Pennylane [@pennylane] or quimb [@quimb]. 
+These represent complex full-fledged frameworks which supply their own abstractions, being either wider 
 in scope or specializing in specific use-cases.
 
 There is an active area of research investigating tensor networks as a tool for classical 
