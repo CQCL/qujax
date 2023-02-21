@@ -11,9 +11,7 @@ from qujax.utils import check_hermitian, paulis
 
 
 def statetensor_to_single_expectation(
-    statetensor: jnp.ndarray,
-    hermitian: jnp.ndarray,
-    qubit_inds: Sequence[int]
+    statetensor: jnp.ndarray, hermitian: jnp.ndarray, qubit_inds: Sequence[int]
 ) -> float:
     """
     Evaluates expectation value of an observable represented by a Hermitian matrix (in tensor form).
@@ -91,9 +89,7 @@ def _get_tensor_to_expectation_func(
 
     hermitian_tensors = [get_hermitian_tensor(h_seq) for h_seq in hermitian_seq_seq]
 
-    def tensor_to_expectation_func(
-        tensor: jnp.ndarray
-    ) -> float:
+    def tensor_to_expectation_func(tensor: jnp.ndarray) -> float:
         """
         Maps tensor to expected value.
 
@@ -107,9 +103,7 @@ def _get_tensor_to_expectation_func(
         for hermitian, qubit_inds, coeff in zip(
             hermitian_tensors, qubits_seq_seq, coefficients
         ):
-            out += coeff * contraction_function(
-                tensor, hermitian, qubit_inds
-            )
+            out += coeff * contraction_function(tensor, hermitian, qubit_inds)
         return out
 
     return tensor_to_expectation_func
@@ -187,7 +181,10 @@ def get_statetensor_to_sampled_expectation_func(
         """
         measure_probs = jnp.abs(statetensor) ** 2
         sampled_probs = sample_probs(measure_probs, random_key, n_samps)
-        return statetensor_to_expectation_func(statetensor * sampled_probs / measure_probs)
+
+        return statetensor_to_expectation_func(
+            statetensor * sampled_probs / measure_probs
+        )
 
     return statetensor_to_sampled_expectation_func
 
@@ -208,7 +205,10 @@ def sample_probs(
     """
     measure_probs_flat = measure_probs.flatten()
     sampled_integers = random.choice(
-        random_key, a=jnp.arange(measure_probs.size), shape=(n_samps,), p=measure_probs_flat
+        random_key,
+        a=jnp.arange(measure_probs.size),
+        shape=(n_samps,),
+        p=measure_probs_flat,
     )
     sampled_probs = fori_loop(
         0,

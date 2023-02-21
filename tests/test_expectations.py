@@ -155,16 +155,16 @@ def _test_hermitian_observable(
     st_to_samp_exp = qujax.get_statetensor_to_sampled_expectation_func(
         hermitian_str_seq_seq, qubit_inds_seq, coefs
     )
-    dt_to_samp_exp = qujax.get_statetensor_to_sampled_expectation_func(
+    dt_to_samp_exp = qujax.get_densitytensor_to_sampled_expectation_func(
         hermitian_str_seq_seq, qubit_inds_seq, coefs
     )
     qujax_samp_exp = st_to_samp_exp(st_in, random.PRNGKey(1), 1000000)
     qujax_samp_exp_jit = jit(st_to_samp_exp, static_argnums=2)(
-        st_in, random.PRNGKey(2), 1000000
+        st_in, random.PRNGKey(1), 1000000
     )
-    qujax_samp_exp_dt = dt_to_samp_exp(st_in, random.PRNGKey(1), 1000000)
+    qujax_samp_exp_dt = dt_to_samp_exp(dt_in, random.PRNGKey(1), 1000000)
     qujax_samp_exp_dt_jit = jit(dt_to_samp_exp, static_argnums=2)(
-        st_in, random.PRNGKey(2), 1000000
+        dt_in, random.PRNGKey(1), 1000000
     )
     assert jnp.array(qujax_samp_exp).shape == ()
     assert jnp.array(qujax_samp_exp).dtype.name[:5] == "float"
@@ -174,12 +174,35 @@ def _test_hermitian_observable(
     assert jnp.isclose(true_exp, qujax_samp_exp_dt_jit, atol=1e-2)
 
 
+def test_X():
+    hermitian_str_seq_seq = ["X"]
+    qubit_inds_seq = [[0]]
+    coefs = [1]
+
+    gates = ["H", "Rz"]
+    qubit = [[0], [0]]
+    param_ind = [[], [0]]
+    st_in = qujax.get_params_to_statetensor_func(gates, qubit, param_ind)(0.3)
+
+    _test_hermitian_observable(hermitian_str_seq_seq, qubit_inds_seq, coefs, st_in)
+
+
 def test_Y():
     n_qubits = 1
 
     hermitian_str_seq_seq = ["Y"] * n_qubits
     qubit_inds_seq = [[i] for i in range(n_qubits)]
     coefs = jnp.ones(len(hermitian_str_seq_seq))
+
+    _test_hermitian_observable(hermitian_str_seq_seq, qubit_inds_seq, coefs)
+
+
+def test_Z():
+    n_qubits = 1
+
+    hermitian_str_seq_seq = ["Z"] * n_qubits
+    qubit_inds_seq = [[i] for i in range(n_qubits)]
+    coefs = random.normal(random.PRNGKey(0), shape=(len(hermitian_str_seq_seq),))
 
     _test_hermitian_observable(hermitian_str_seq_seq, qubit_inds_seq, coefs)
 

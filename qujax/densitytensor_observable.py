@@ -4,15 +4,10 @@ from typing import Callable, Sequence, Union
 
 from jax import numpy as jnp
 from jax import random
-from jax.lax import fori_loop
 
 from qujax.densitytensor import _kraus_single, partial_trace
-from qujax.statetensor_observable import _get_tensor_to_expectation_func
-from qujax.utils import (
-    bitstrings_to_integers,
-    sample_integers,
-    statetensor_to_densitytensor,
-)
+from qujax.statetensor_observable import _get_tensor_to_expectation_func, sample_probs
+from qujax.utils import bitstrings_to_integers
 
 
 def densitytensor_to_single_expectation(
@@ -96,13 +91,13 @@ def get_densitytensor_to_sampled_expectation_func(
     )
 
     def densitytensor_to_sampled_expectation_func(
-        statetensor: jnp.ndarray, random_key: random.PRNGKeyArray, n_samps: int
+        densitytensor: jnp.ndarray, random_key: random.PRNGKeyArray, n_samps: int
     ) -> float:
         """
-        Maps statetensor to sampled expected value.
+        Maps densitytensor to sampled expected value.
 
         Args:
-            statetensor: Input statetensor.
+            densitytensor: Input densitytensor.
             random_key: JAX random key
             n_samps: Number of samples contributing to sampled expectation.
 
@@ -110,19 +105,14 @@ def get_densitytensor_to_sampled_expectation_func(
             Sampled expected value (float).
 
         """
-        sampled_integers = sample_integers(random_key, statetensor, n_samps)
-        sampled_probs = fori_loop(
-            0,
-            n_samps,
-            lambda i, sv: sv.at[sampled_integers[i]].add(1),
-            jnp.zeros(statetensor.size),
+        n_qubits = densitytensor.ndim // 2
+        dm = densitytensor.reshape((2**n_qubits, 2**n_qubits))
+        measure_probs = jnp.diag(dm).real
+        sampled_probs = sample_probs(measure_probs, random_key, n_samps)
+        iweights = sampled_probs / measure_probs
+        return densitytensor_to_expectation_func(
+            densitytensor * jnp.outer(iweights, iweights).reshape(densitytensor.shape)
         )
-
-        sampled_probs /= n_samps
-        sampled_dt = statetensor_to_densitytensor(
-            jnp.sqrt(sampled_probs).reshape(statetensor.shape)
-        )
-        return densitytensor_to_expectation_func(sampled_dt)
 
     return densitytensor_to_sampled_expectation_func
 
