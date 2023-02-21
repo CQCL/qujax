@@ -134,7 +134,7 @@ def _test_hermitian_observable(hermitian_str_seq_seq, qubit_inds_seq, coefs, st_
     assert jnp.allclose(sum_big_hs, sum_big_hs.conj().T)
 
     sv = st_in.flatten()
-    true_exp = jnp.dot(sv, sum_big_hs @ sv.conj()).real
+    true_exp = jnp.dot(sv.conj(), sum_big_hs @ sv).real
 
     qujax_exp = st_to_exp(st_in)
     qujax_dt_exp = dt_to_exp(dt_in)
@@ -175,7 +175,7 @@ def test_Y():
 
     hermitian_str_seq_seq = ["Y"] * n_qubits
     qubit_inds_seq = [[i] for i in range(n_qubits)]
-    coefs = random.normal(random.PRNGKey(0), shape=(len(hermitian_str_seq_seq),))
+    coefs = jnp.ones(len(hermitian_str_seq_seq))
 
     _test_hermitian_observable(hermitian_str_seq_seq, qubit_inds_seq, coefs)
 
@@ -185,7 +185,7 @@ def test_XYZ():
 
     hermitian_str_seq_seq = ["X", "Y", "Z"] * n_qubits
     qubit_inds_seq = [[i] for _ in range(3) for i in range(n_qubits)]
-    coefs = random.normal(random.PRNGKey(1), shape=(len(hermitian_str_seq_seq),))
+    coefs = random.normal(random.PRNGKey(0), shape=(len(hermitian_str_seq_seq),))
 
     _test_hermitian_observable(hermitian_str_seq_seq, qubit_inds_seq, coefs)
 
@@ -199,7 +199,7 @@ def test_ZZ_Y():
     qubit_inds_seq = [[i, i + 1] for i in range(n_qubits - 1)] + [
         [i] for i in range(n_qubits)
     ]
-    coefs = random.normal(random.PRNGKey(2), shape=(len(hermitian_str_seq_seq),))
+    coefs = random.normal(random.PRNGKey(1), shape=(len(hermitian_str_seq_seq),))
 
     _test_hermitian_observable(hermitian_str_seq_seq, qubit_inds_seq, coefs)
 
