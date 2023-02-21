@@ -109,7 +109,7 @@ def get_densitytensor_to_sampled_expectation_func(
         dm = densitytensor.reshape((2**n_qubits, 2**n_qubits))
         measure_probs = jnp.diag(dm).real
         sampled_probs = sample_probs(measure_probs, random_key, n_samps)
-        iweights = sampled_probs / measure_probs
+        iweights = jnp.sqrt(sampled_probs / measure_probs)
         return densitytensor_to_expectation_func(
             densitytensor * jnp.outer(iweights, iweights).reshape(densitytensor.shape)
         )

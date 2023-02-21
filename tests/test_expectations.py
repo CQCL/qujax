@@ -168,10 +168,10 @@ def _test_hermitian_observable(
     )
     assert jnp.array(qujax_samp_exp).shape == ()
     assert jnp.array(qujax_samp_exp).dtype.name[:5] == "float"
-    assert jnp.isclose(true_exp, qujax_samp_exp, atol=1e-2)
-    assert jnp.isclose(true_exp, qujax_samp_exp_jit, atol=1e-2)
-    assert jnp.isclose(true_exp, qujax_samp_exp_dt, atol=1e-2)
-    assert jnp.isclose(true_exp, qujax_samp_exp_dt_jit, atol=1e-2)
+    assert jnp.isclose(true_exp, qujax_samp_exp, rtol=1e-2)
+    assert jnp.isclose(true_exp, qujax_samp_exp_jit, rtol=1e-2)
+    assert jnp.isclose(true_exp, qujax_samp_exp_dt, rtol=1e-2)
+    assert jnp.isclose(true_exp, qujax_samp_exp_dt_jit, rtol=1e-2)
 
 
 def test_X():
