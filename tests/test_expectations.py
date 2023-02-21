@@ -9,7 +9,7 @@ def test_pauli_hermitian():
     for p_str in ("X", "Y", "Z"):
         qujax.check_hermitian(p_str)
         qujax.check_hermitian(qujax.gates.__dict__[p_str])
-    
+
 
 def test_single_expectation():
     Z = qujax.gates.Z
@@ -91,24 +91,28 @@ def test_bitstring_expectation():
     assert jnp.allclose(true_expectation_grad, expectation_grad_jit, atol=1e-5)
 
 
-def _test_hermitian_observable(hermitian_str_seq_seq, qubit_inds_seq, coefs, st_in=None):
+def _test_hermitian_observable(
+    hermitian_str_seq_seq, qubit_inds_seq, coefs, st_in=None
+):
     n_qubits = max([max(qi) for qi in qubit_inds_seq]) + 1
 
     if st_in is None:
-        state = random.uniform(random.PRNGKey(2), shape=(2**n_qubits,)) * 2\
-            + 1.j * random.uniform(random.PRNGKey(1), shape=(2**n_qubits,)) * 2
+        state = (
+            random.uniform(random.PRNGKey(2), shape=(2**n_qubits,)) * 2
+            + 1.0j * random.uniform(random.PRNGKey(1), shape=(2**n_qubits,)) * 2
+        )
         state /= jnp.linalg.norm(state)
         st_in = state.reshape((2,) * n_qubits)
 
     dt_in = qujax.statetensor_to_densitytensor(st_in)
-    
+
     st_to_exp = qujax.get_statetensor_to_expectation_func(
         hermitian_str_seq_seq, qubit_inds_seq, coefs
     )
     dt_to_exp = qujax.get_densitytensor_to_expectation_func(
         hermitian_str_seq_seq, qubit_inds_seq, coefs
     )
-    
+
     def big_hermitian_matrix(hermitian_str_seq, qubit_inds):
         qubit_arrs = [getattr(qujax.gates, s) for s in hermitian_str_seq]
         hermitian_arrs = []
