@@ -70,8 +70,7 @@ def check_unitary(gate: Gate):
         raise TypeError(f"Gate not unitary: {gate}")
 
 
-def check_hermitian(hermitian: Union[str, jnp.ndarray],
-                    check_z_commutes: bool = False):
+def check_hermitian(hermitian: Union[str, jnp.ndarray], check_z_commutes: bool = False):
     """
     Checks whether a matrix or tensor is Hermitian.
 
@@ -88,22 +87,24 @@ def check_hermitian(hermitian: Union[str, jnp.ndarray],
             )
         n_qubits = 1
         hermitian_mat = paulis[hermitian]
-        
+
     else:
         n_qubits = hermitian.ndim // 2
         hermitian_mat = hermitian.reshape(2 * n_qubits, 2 * n_qubits)
         if not jnp.allclose(hermitian_mat, hermitian_mat.T.conj()):
             raise TypeError(f"Array not Hermitian: {hermitian}")
-    
+
     if check_z_commutes:
-        big_z = jnp.diag(jnp.where(jnp.arange(2 ** n_qubits) % 2 == 0, 1, -1))
+        big_z = jnp.diag(jnp.where(jnp.arange(2**n_qubits) % 2 == 0, 1, -1))
         z_commutes = jnp.allclose(hermitian_mat @ big_z, big_z @ hermitian_mat)
         if not z_commutes:
-            warn('Hermitian matrix does not commute with Z. \n'
-                 'For sampled expectation values, this may lead to unexpected results, '
-                 'measurements on a quantum device are always taken in the computational basis. '
-                 'Additional gates can be applied in the circuit to change the basis such '
-                 'that an observable that commutes with Z can be measured.')
+            warn(
+                "Hermitian matrix does not commute with Z. \n"
+                "For sampled expectation values, this may lead to unexpected results, "
+                "measurements on a quantum device are always taken in the computational basis. "
+                "Additional gates can be applied in the circuit to change the basis such "
+                "that an observable that commutes with Z can be measured."
+            )
 
 
 def _arrayify_inds(

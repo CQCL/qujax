@@ -71,18 +71,18 @@ def get_densitytensor_to_sampled_expectation_func(
     coefficients: Union[Sequence[float], jnp.ndarray],
 ) -> Callable[[jnp.ndarray, random.PRNGKeyArray, int], float]:
     """
-    Converts strings (or arrays) representing Hermitian matrices, qubit indices and 
+    Converts strings (or arrays) representing Hermitian matrices, qubit indices and
     coefficients into a function that converts a densitytensor into a sampled expected value.
 
-    On a quantum device, measurements are always taken in the computational basis, as such 
-    sampled expectation values should be taken with respect to an observable that commutes 
+    On a quantum device, measurements are always taken in the computational basis, as such
+    sampled expectation values should be taken with respect to an observable that commutes
     with the Pauli Z - a warning will be raised if it does not.
-    
-    qujax applies an importance sampling heuristic for sampled expectation values that only 
-    reflects the physical notion of measurement in the case that the observable commutes with Z. 
-    In the case that it does not, the expectation value will still be asymptotically unbiased 
+
+    qujax applies an importance sampling heuristic for sampled expectation values that only
+    reflects the physical notion of measurement in the case that the observable commutes with Z.
+    In the case that it does not, the expectation value will still be asymptotically unbiased
     but not representative of an experiment on a real quantum device.
-    
+
     Args:
         hermitian_seq_seq: Sequence of sequences of Hermitian matrices/tensors.
             Each Hermitian is either a tensor (jnp.ndarray) or a string in ('X', 'Y', 'Z').
@@ -98,7 +98,7 @@ def get_densitytensor_to_sampled_expectation_func(
     densitytensor_to_expectation_func = get_densitytensor_to_expectation_func(
         hermitian_seq_seq, qubits_seq_seq, coefficients
     )
-    
+
     for hermitian_seq in hermitian_seq_seq:
         for h in hermitian_seq:
             check_hermitian(h, check_z_commutes=True)

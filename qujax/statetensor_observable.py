@@ -148,14 +148,14 @@ def get_statetensor_to_sampled_expectation_func(
     """
     Converts strings (or arrays) representing Hermitian matrices, qubit indices and
     coefficients into a function that converts a statetensor into a sampled expected value.
-    
-    On a quantum device, measurements are always taken in the computational basis, as such 
-    sampled expectation values should be taken with respect to an observable that commutes 
+
+    On a quantum device, measurements are always taken in the computational basis, as such
+    sampled expectation values should be taken with respect to an observable that commutes
     with the Pauli Z - a warning will be raised if it does not.
-    
-    qujax applies an importance sampling heuristic for sampled expectation values that only 
-    reflects the physical notion of measurement in the case that the observable commutes with Z. 
-    In the case that it does not, the expectation value will still be asymptotically unbiased 
+
+    qujax applies an importance sampling heuristic for sampled expectation values that only
+    reflects the physical notion of measurement in the case that the observable commutes with Z.
+    In the case that it does not, the expectation value will still be asymptotically unbiased
     but not representative of an experiment on a real quantum device.
 
     Args:
@@ -173,11 +173,10 @@ def get_statetensor_to_sampled_expectation_func(
     statetensor_to_expectation_func = get_statetensor_to_expectation_func(
         hermitian_seq_seq, qubits_seq_seq, coefficients
     )
-    
+
     for hermitian_seq in hermitian_seq_seq:
         for h in hermitian_seq:
             check_hermitian(h, check_z_commutes=True)
-    
 
     def statetensor_to_sampled_expectation_func(
         statetensor: jnp.ndarray, random_key: random.PRNGKeyArray, n_samps: int
