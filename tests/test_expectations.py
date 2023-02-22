@@ -22,8 +22,8 @@ def test_single_expectation():
     dt2 = qujax.statetensor_to_densitytensor(st2)
     ZZ = jnp.kron(Z, Z).reshape(2, 2, 2, 2)
 
-    est1 = qujax.statetensor_to_single_expectation(dt1, ZZ, [0, 1])
-    est2 = qujax.statetensor_to_single_expectation(dt2, ZZ, [0, 1])
+    est1 = qujax.statetensor_to_single_expectation(st1, ZZ, [0, 1])
+    est2 = qujax.statetensor_to_single_expectation(st2, ZZ, [0, 1])
     edt1 = qujax.densitytensor_to_single_expectation(dt1, ZZ, [0, 1])
     edt2 = qujax.densitytensor_to_single_expectation(dt2, ZZ, [0, 1])
 
@@ -91,28 +91,27 @@ def test_bitstring_expectation():
     assert jnp.allclose(true_expectation_grad, expectation_grad_jit, atol=1e-5)
 
 
-def test_ZZ_Y():
-    config.update("jax_enable_x64", True)  # Run this test with 64 bit precision
+def _test_hermitian_observable(
+    hermitian_str_seq_seq, qubit_inds_seq, coefs, st_in=None
+):
+    n_qubits = max([max(qi) for qi in qubit_inds_seq]) + 1
 
-    n_qubits = 4
+    if st_in is None:
+        state = (
+            random.uniform(random.PRNGKey(2), shape=(2**n_qubits,)) * 2
+            + 1.0j * random.uniform(random.PRNGKey(1), shape=(2**n_qubits,)) * 2
+        )
+        state /= jnp.linalg.norm(state)
+        st_in = state.reshape((2,) * n_qubits)
 
-    hermitian_str_seq_seq = [["Z", "Z"]] * (n_qubits - 1) + [["Y"]] * n_qubits
-    coefs = random.normal(random.PRNGKey(0), shape=(len(hermitian_str_seq_seq),))
+    dt_in = qujax.statetensor_to_densitytensor(st_in)
 
-    qubit_inds_seq = [[i, i + 1] for i in range(n_qubits - 1)] + [
-        [i] for i in range(n_qubits)
-    ]
     st_to_exp = qujax.get_statetensor_to_expectation_func(
         hermitian_str_seq_seq, qubit_inds_seq, coefs
     )
-    dt_to_exp = qujax.get_statetensor_to_expectation_func(
+    dt_to_exp = qujax.get_densitytensor_to_expectation_func(
         hermitian_str_seq_seq, qubit_inds_seq, coefs
     )
-
-    state = random.uniform(random.PRNGKey(0), shape=(2**n_qubits,)) * 2
-    state /= jnp.linalg.norm(state)
-    st_in = state.reshape((2,) * n_qubits)
-    dt_in = qujax.statetensor_to_densitytensor(st_in)
 
     def big_hermitian_matrix(hermitian_str_seq, qubit_inds):
         qubit_arrs = [getattr(qujax.gates, s) for s in hermitian_str_seq]
@@ -139,7 +138,7 @@ def test_ZZ_Y():
     assert jnp.allclose(sum_big_hs, sum_big_hs.conj().T)
 
     sv = st_in.flatten()
-    true_exp = jnp.dot(sv, sum_big_hs @ sv.conj()).real
+    true_exp = jnp.dot(sv.conj(), sum_big_hs @ sv).real
 
     qujax_exp = st_to_exp(st_in)
     qujax_dt_exp = dt_to_exp(dt_in)
@@ -156,16 +155,16 @@ def test_ZZ_Y():
     st_to_samp_exp = qujax.get_statetensor_to_sampled_expectation_func(
         hermitian_str_seq_seq, qubit_inds_seq, coefs
     )
-    dt_to_samp_exp = qujax.get_statetensor_to_sampled_expectation_func(
+    dt_to_samp_exp = qujax.get_densitytensor_to_sampled_expectation_func(
         hermitian_str_seq_seq, qubit_inds_seq, coefs
     )
     qujax_samp_exp = st_to_samp_exp(st_in, random.PRNGKey(1), 1000000)
     qujax_samp_exp_jit = jit(st_to_samp_exp, static_argnums=2)(
-        st_in, random.PRNGKey(2), 1000000
+        st_in, random.PRNGKey(1), 1000000
     )
-    qujax_samp_exp_dt = dt_to_samp_exp(st_in, random.PRNGKey(1), 1000000)
+    qujax_samp_exp_dt = dt_to_samp_exp(dt_in, random.PRNGKey(1), 1000000)
     qujax_samp_exp_dt_jit = jit(dt_to_samp_exp, static_argnums=2)(
-        st_in, random.PRNGKey(2), 1000000
+        dt_in, random.PRNGKey(1), 1000000
     )
     assert jnp.array(qujax_samp_exp).shape == ()
     assert jnp.array(qujax_samp_exp).dtype.name[:5] == "float"
@@ -173,6 +172,63 @@ def test_ZZ_Y():
     assert jnp.isclose(true_exp, qujax_samp_exp_jit, rtol=1e-2)
     assert jnp.isclose(true_exp, qujax_samp_exp_dt, rtol=1e-2)
     assert jnp.isclose(true_exp, qujax_samp_exp_dt_jit, rtol=1e-2)
+
+
+def test_X():
+    hermitian_str_seq_seq = ["X"]
+    qubit_inds_seq = [[0]]
+    coefs = [1]
+
+    gates = ["H", "Rz"]
+    qubit = [[0], [0]]
+    param_ind = [[], [0]]
+    st_in = qujax.get_params_to_statetensor_func(gates, qubit, param_ind)(0.3)
+
+    _test_hermitian_observable(hermitian_str_seq_seq, qubit_inds_seq, coefs, st_in)
+
+
+def test_Y():
+    n_qubits = 1
+
+    hermitian_str_seq_seq = ["Y"] * n_qubits
+    qubit_inds_seq = [[i] for i in range(n_qubits)]
+    coefs = jnp.ones(len(hermitian_str_seq_seq))
+
+    _test_hermitian_observable(hermitian_str_seq_seq, qubit_inds_seq, coefs)
+
+
+def test_Z():
+    n_qubits = 1
+
+    hermitian_str_seq_seq = ["Z"] * n_qubits
+    qubit_inds_seq = [[i] for i in range(n_qubits)]
+    coefs = random.normal(random.PRNGKey(0), shape=(len(hermitian_str_seq_seq),))
+
+    _test_hermitian_observable(hermitian_str_seq_seq, qubit_inds_seq, coefs)
+
+
+def test_XYZ():
+    n_qubits = 1
+
+    hermitian_str_seq_seq = ["X", "Y", "Z"] * n_qubits
+    qubit_inds_seq = [[i] for _ in range(3) for i in range(n_qubits)]
+    coefs = random.normal(random.PRNGKey(0), shape=(len(hermitian_str_seq_seq),))
+
+    _test_hermitian_observable(hermitian_str_seq_seq, qubit_inds_seq, coefs)
+
+
+def test_ZZ_Y():
+    config.update("jax_enable_x64", True)  # Run this test with 64 bit precision
+
+    n_qubits = 4
+
+    hermitian_str_seq_seq = [["Z", "Z"]] * (n_qubits - 1) + [["Y"]] * n_qubits
+    qubit_inds_seq = [[i, i + 1] for i in range(n_qubits - 1)] + [
+        [i] for i in range(n_qubits)
+    ]
+    coefs = random.normal(random.PRNGKey(1), shape=(len(hermitian_str_seq_seq),))
+
+    _test_hermitian_observable(hermitian_str_seq_seq, qubit_inds_seq, coefs)
 
 
 def test_sampling():

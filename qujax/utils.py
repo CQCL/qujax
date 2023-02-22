@@ -3,6 +3,7 @@ from __future__ import annotations
 import collections.abc
 from inspect import signature
 from typing import Callable, Iterable, List, Optional, Protocol, Sequence, Tuple, Union
+from warnings import warn
 
 from jax import numpy as jnp
 from jax import random
@@ -69,12 +70,13 @@ def check_unitary(gate: Gate):
         raise TypeError(f"Gate not unitary: {gate}")
 
 
-def check_hermitian(hermitian: Union[str, jnp.ndarray]):
+def check_hermitian(hermitian: Union[str, jnp.ndarray], check_z_commutes: bool = False):
     """
     Checks whether a matrix or tensor is Hermitian.
 
     Args:
         hermitian: array containing potentially Hermitian matrix or tensor
+        check_z_commutes: boolean on whether to check if the matrix commutes with Z
 
     """
     if isinstance(hermitian, str):
@@ -83,11 +85,26 @@ def check_hermitian(hermitian: Union[str, jnp.ndarray]):
                 f"qujax only accepts {tuple(paulis.keys())} as Hermitian strings,"
                 "received: {hermitian}"
             )
+        n_qubits = 1
+        hermitian_mat = paulis[hermitian]
+
     else:
         n_qubits = hermitian.ndim // 2
         hermitian_mat = hermitian.reshape(2 * n_qubits, 2 * n_qubits)
         if not jnp.allclose(hermitian_mat, hermitian_mat.T.conj()):
             raise TypeError(f"Array not Hermitian: {hermitian}")
+
+    if check_z_commutes:
+        big_z = jnp.diag(jnp.where(jnp.arange(2**n_qubits) % 2 == 0, 1, -1))
+        z_commutes = jnp.allclose(hermitian_mat @ big_z, big_z @ hermitian_mat)
+        if not z_commutes:
+            warn(
+                "Hermitian matrix does not commute with Z. \n"
+                "For sampled expectation values, this may lead to unexpected results, "
+                "measurements on a quantum device are always taken in the computational basis. "
+                "Additional gates can be applied in the circuit to change the basis such "
+                "that an observable that commutes with Z can be measured."
+            )
 
 
 def _arrayify_inds(

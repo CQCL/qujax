@@ -7,7 +7,7 @@ from jax import random
 from jax.lax import fori_loop
 
 from qujax.statetensor import apply_gate
-from qujax.utils import check_hermitian, paulis, sample_integers
+from qujax.utils import check_hermitian, paulis
 
 
 def statetensor_to_single_expectation(
@@ -89,12 +89,12 @@ def _get_tensor_to_expectation_func(
 
     hermitian_tensors = [get_hermitian_tensor(h_seq) for h_seq in hermitian_seq_seq]
 
-    def statetensor_to_expectation_func(statetensor: jnp.ndarray) -> float:
+    def tensor_to_expectation_func(tensor: jnp.ndarray) -> float:
         """
-        Maps statetensor to expected value.
+        Maps tensor to expected value.
 
         Args:
-            statetensor: Input statetensor.
+            tensor: Input tensor.
 
         Returns:
             Expected value (float).
@@ -103,10 +103,10 @@ def _get_tensor_to_expectation_func(
         for hermitian, qubit_inds, coeff in zip(
             hermitian_tensors, qubits_seq_seq, coefficients
         ):
-            out += coeff * contraction_function(statetensor, hermitian, qubit_inds)
+            out += coeff * contraction_function(tensor, hermitian, qubit_inds)
         return out
 
-    return statetensor_to_expectation_func
+    return tensor_to_expectation_func
 
 
 def get_statetensor_to_expectation_func(
@@ -149,6 +149,15 @@ def get_statetensor_to_sampled_expectation_func(
     Converts strings (or arrays) representing Hermitian matrices, qubit indices and
     coefficients into a function that converts a statetensor into a sampled expected value.
 
+    On a quantum device, measurements are always taken in the computational basis, as such
+    sampled expectation values should be taken with respect to an observable that commutes
+    with the Pauli Z - a warning will be raised if it does not.
+
+    qujax applies an importance sampling heuristic for sampled expectation values that only
+    reflects the physical notion of measurement in the case that the observable commutes with Z.
+    In the case that it does not, the expectation value will still be asymptotically unbiased
+    but not representative of an experiment on a real quantum device.
+
     Args:
         hermitian_seq_seq: Sequence of sequences of Hermitian matrices/tensors.
             Each Hermitian is either a tensor (jnp.ndarray) or a string in ('X', 'Y', 'Z').
@@ -165,6 +174,10 @@ def get_statetensor_to_sampled_expectation_func(
         hermitian_seq_seq, qubits_seq_seq, coefficients
     )
 
+    for hermitian_seq in hermitian_seq_seq:
+        for h in hermitian_seq:
+            check_hermitian(h, check_z_commutes=True)
+
     def statetensor_to_sampled_expectation_func(
         statetensor: jnp.ndarray, random_key: random.PRNGKeyArray, n_samps: int
     ) -> float:
@@ -179,16 +192,39 @@ def get_statetensor_to_sampled_expectation_func(
         Returns:
             Sampled expected value (float).
         """
-        sampled_integers = sample_integers(random_key, statetensor, n_samps)
-        sampled_probs = fori_loop(
-            0,
-            n_samps,
-            lambda i, sv: sv.at[sampled_integers[i]].add(1),
-            jnp.zeros(statetensor.size),
-        )
-
-        sampled_probs /= n_samps
-        sampled_st = jnp.sqrt(sampled_probs).reshape(statetensor.shape)
-        return statetensor_to_expectation_func(sampled_st)
+        measure_probs = jnp.abs(statetensor) ** 2
+        sampled_probs = sample_probs(measure_probs, random_key, n_samps)
+        iweights = jnp.sqrt(sampled_probs / measure_probs)
+        return statetensor_to_expectation_func(statetensor * iweights)
 
     return statetensor_to_sampled_expectation_func
+
+
+def sample_probs(
+    measure_probs: jnp.ndarray, random_key: random.PRNGKeyArray, n_samps: int
+):
+    """
+    Generate an empirical distribution from a probability distribution.
+
+    Args:
+        measure_probs: Probability distribution.
+        random_key: JAX random key
+        n_samps: Number of samples contributing to empirical distribution.
+
+    Returns:
+        Empirical distribution (jnp.ndarray).
+    """
+    measure_probs_flat = measure_probs.flatten()
+    sampled_integers = random.choice(
+        random_key,
+        a=jnp.arange(measure_probs.size),
+        shape=(n_samps,),
+        p=measure_probs_flat,
+    )
+    sampled_probs = fori_loop(
+        0,
+        n_samps,
+        lambda i, sv: sv.at[sampled_integers[i]].add(1 / n_samps),
+        jnp.zeros_like(measure_probs_flat),
+    )
+    return sampled_probs.reshape(measure_probs.shape)
