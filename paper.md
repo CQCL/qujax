@@ -36,14 +36,25 @@ a host of other tools within the JAX ecosystem.
 
 
 `qujax` represents a quantum circuit as a collection of three equal length Python iterables: 
+
 - a series of gate identifiers specifying the sequence of quantum gates to be applied to the qubits as part of the circuit. Each element can be either 
   - a string referring to a gate in `qujax.gates` e.g. `"Z"`, `"Rx"`
   - a JAX array representing a unitary matrix
   - a function that returns such an array
 - a series indicating which qubits in the circuit each gate should be applied to 
-- a series of indices indicating which entries of a parameter vector (which is provided when later evaluating the circuit) correspond to parameters of the gate (e.g. rotation gates such as `"Rx"` take one parameter).
+- a series of indices indicating which entries of a parameter vector (which is provided 
+when later evaluating the circuit) correspond to parameters of the gate (e.g. rotation gates such as `"Rx"` take one parameter).
 
-A valid quantum circuit specification would be, for instance, `["X", "Rz", "Rz", "CRz"], [[0], [1], [0], [0, 1]], [[], [0], [1], [1]]` (TODO: add pictorial representation of circuit here).
+For example, a valid quantum circuit specification would be the following
+```python
+qujax.print_circuit(["X", "Rz", "Rz", "CRz"],
+                    [[0], [1], [0], [0, 1]],
+                    [[], [0], [1], [1]])
+
+# q0: -----X-----Rz[1]-----◯---
+#                          |   
+# q1: ---Rz[0]-----------CRz[1]
+```
 
 In quantum mechanics, a *pure state* is fully specified by a statevector
 $$
