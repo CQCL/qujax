@@ -50,7 +50,7 @@ $$
 |\psi\rangle = \sum_{i=1}^{2^N} \alpha_i |i\rangle \in \mathbb{C}^{2^N},
 $$
 where $n$ is the number 
-of qubits and $\alpha_i$ is a complex scalar number called the $i$th *amplitude*. We work in the computational basis, where 
+of qubits and $\alpha_i$ is a complex scalar number referred to as the $i$th *amplitude*. We work in the computational basis, where 
 $|i\rangle$ is represented as a vector of zeros with a one in the $i$th position (e.g. for $N=2$, $|2\rangle$ is represented as `[0 1 0 0]`). In `qujax`, we represent such vectors as a
 *statetensor*, where a pure state is encoded in a tensor of complex numbers with 
 shape `(2,) * N` (TODO: maybe elaborate a bit on this or include an appendix on numerical representation of tensors). The statetensor representation is convenient for quantum arithmetic (such as 
@@ -64,7 +64,7 @@ $$
 |\psi_\theta \rangle = U_\theta |\phi\rangle,
 $$
 where $\theta$ is a parameter 
-vector and $|\phi\rangle$ is an initial quantum state that be provided as the optional argument `statetensor_in` (that defaults to $|0\rangle$). 
+vector and $|\phi\rangle$ is an initial quantum state that can be provided via the optional argument `statetensor_in` (that defaults to $|0\rangle$). 
 
 Alternatively, one can call `qujax.get_params_to_unitarytensor_func` to get a function returning a tensor representation of 
 the unitary $U_\theta$ with shape `(2,) * 2 * N`.
@@ -78,7 +78,7 @@ which can be interpreted as classical statistical mixture of pure states, obtain
 $p_k \in [0,1]$ and $\sum_{k} p_k =1$ (TODO: expand on this or include suitable reference). 
 
 Density matrices are also supported in `qujax` in the form 
-of a *densitytensors* - complex tensors of shape `(2,) * 2 * N`. Similar to the statetensor 
+of *densitytensors* - complex tensors of shape `(2,) * 2 * N`. Similar to the statetensor 
 simulator, parameterised evolution of a densitytensor can be implemented via general Kraus 
 operations (TODO: elaborate on Kraus operations) with `qujax.get_params_to_densitytensor_func`.
 
