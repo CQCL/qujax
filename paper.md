@@ -35,38 +35,55 @@ a host of other tools within the JAX ecosystem.
 [example notebooks](https://github.com/CQCL/qujax/tree/main/examples).
 
 
-`qujax` represents a quantum circuit by a collection of three native Python iterables: a series of gate
-identifiers (either a string pointing to an object in `qujax.gates`, a unitary array or a function that
-outputs a unitary array), a series indicating which qubits to apply the gates to and finally a series
-of parameter indices indicating where, if any, to extract parameters for said gate from a single
-parameter vector.
+`qujax` represents a quantum circuit as a collection of three equal length Python iterables: 
+* a series of gate identifiers specifying the sequence of quantum gates to be applied to the qubits as part of the circuit. Each element can be either 
+  * a string referring to a gate in `qujax.gates` e.g. `"Z"`, `"Rx"`
+  * a JAX array representing a unitary matrix
+  * a function that returns such an array
+* a series indicating which qubits in the circuit each gate should be applied to 
+* a series of indices indicating which entries of a parameter vector (which is provided when later evaluating the circuit) correspond to parameters of the gate (e.g. rotation gates such as `"Rx"` take one parameter).
+
+A valid quantum circuit specification would be, for instance, `["X", "Rz", "Rz", "CRz"], [[0], [1], [0], [0, 1]], [[], [0], [1], [1]]` (TODO: add pictorial representation of circuit here).
 
 In quantum mechanics, a *pure state* is fully specified by a statevector
-$|\psi\rangle = \sum_{i=1}^{2^N} \alpha_i |i\rangle \in \mathbb{C}^{2^N}$ where $n$ is the number 
-of qubits and $\alpha_i$ is the $i$th *amplitude*. We assume the computational basis where 
-$|i\rangle$ is a vector of zeros and a one in the $i$th position. In `qujax`, we adopt the 
-*statetensor* notation where a pure state is encoded in a tensor of complex numbers with 
-shape `(2,) * N`. The statetensor representation is convenient for quantum arithmetic (such as 
-applying gates and sampling bitstrings) and the statevector can always be obtained by 
-calling `statevector = statetensor.flatten()`. One can then use 
+$$
+|\psi\rangle = \sum_{i=1}^{2^N} \alpha_i |i\rangle \in \mathbb{C}^{2^N},
+$$
+where $n$ is the number 
+of qubits and $\alpha_i$ is a complex scalar number called the $i$th *amplitude*. We work in the computational basis, where 
+$|i\rangle$ is represented as a vector of zeros with a one in the $i$th position (e.g. for $N=2$, $|2\rangle$ is represented as `[0 1 0 0]`). In `qujax`, we represent such vectors as a
+*statetensor*, where a pure state is encoded in a tensor of complex numbers with 
+shape `(2,) * N` (TODO: maybe elaborate a bit on this or include an appendix on numerical representation of tensors). The statetensor representation is convenient for quantum arithmetic (such as 
+applying gates and sampling bitstrings), and the statevector can always be obtained by 
+calling `statevector = statetensor.flatten()`. 
+
+One can use 
 `qujax.get_params_to_statetensor_func` to generate a pure JAX function encoding a parameterised 
-quantum state $|\psi_\theta \rangle = U_\theta |\phi\rangle$ where $\theta$ is a parameter 
-vector and $|\phi\rangle$ is an optional `statetensor_in` (that defaults to $|0\rangle$). 
-Alternatively, one can call `qujax.get_params_to_unitarytensor_func` to get a tensor version of 
+quantum state 
+$$
+|\psi_\theta \rangle = U_\theta |\phi\rangle,
+$$
+where $\theta$ is a parameter 
+vector and $|\phi\rangle$ is an initial quantum state that be provided as the optional argument `statetensor_in` (that defaults to $|0\rangle$). 
+
+Alternatively, one can call `qujax.get_params_to_unitarytensor_func` to get a function returning a tensor representation of 
 the unitary $U_\theta$ with shape `(2,) * 2 * N`.
 
-A second representation of quantum states is that of *density matrices*. A density matrix 
-can store a quantum state via the outer product 
-$\rho = |\psi \rangle \langle \psi| \in \mathbb{C}^{2^N \times 2^N}$, but more 
+The quantum states that can be represented as above are called pure quantum states. More general quantum states can be represented by using a *density matrix*. The density matrix representation of a pure quantum state $|\psi\rangle$ can be obtained via the outer product $\rho = |\psi \rangle \langle \psi| \in \mathbb{C}^{2^N \times 2^N}$. More 
 generally a density matrix encodes a *mixed state* 
-$\rho = \sum_{k} p_k|\psi_k \rangle \langle \psi_k|$ (a classical mixture of pure states with 
-$p_k \in [0,1]$ and $\sum_{k} p_k =1$). Density matrices are also supported in `qujax` in the form 
+$$
+\rho = \sum_{k} p_k|\psi_k \rangle \langle \psi_k|,
+$$
+which can be interpreted as classical statistical mixture of pure states, obtained as a convex combination with
+$p_k \in [0,1]$ and $\sum_{k} p_k =1$ (TODO: expand on this or include suitable reference). 
+
+Density matrices are also supported in `qujax` in the form 
 of a *densitytensors* - complex tensors of shape `(2,) * 2 * N`. Similar to the statetensor 
-simulator, parameterised evolution of a densitytensor can be implemented via very general Kraus 
-operations with `qujax.get_params_to_densitytensor_func`.
+simulator, parameterised evolution of a densitytensor can be implemented via general Kraus 
+operations (TODO: elaborate on Kraus operations) with `qujax.get_params_to_densitytensor_func`.
 
 Expectation values can also be calculated conveniently with `qujax`. In simple cases, such as 
-combinatorial optimisation like maxcut, this can be done by extracting measurement probabilities 
+a combinatorial optimisation problem like MaxCut, this can be done by extracting measurement probabilities 
 from the statetensor or densitytensor and calculating the expected value of a cost function. For 
 more sophisticated bases, `qujax.get_statetensor_to_expectation_func` and 
 `qujax.get_densitytensor_to_expectation_func` generate functions that map to the expected value 
