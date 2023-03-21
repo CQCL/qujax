@@ -67,7 +67,7 @@ of qubits and $\alpha_i$ is a complex scalar number referred to as the $i$th *am
 $|i\rangle$ is represented as a vector of zeros with a one in the $i$th position (e.g. for $N=2$, $|2\rangle$ is represented as `[0 1 0 0]`). In `qujax`, we represent such vectors as a
 *statetensor*, where a pure state is encoded in a tensor of complex numbers with 
 shape `(2,) * N`. The statetensor representation is convenient for quantum arithmetic (such as 
-applying gates, marginalising out qubits and sampling bitstrings). For example, the amplitude corresponding to the bitstring `[0 1 0 0]` can be accessed with `statetensor[0, 1, 0, 0]`.
+applying gates, tracing out qubits and sampling bitstrings). For example, the amplitude corresponding to the bitstring `[0 1 0 0]` can be accessed with `statetensor[0, 1, 0, 0]`.
 The statevector can always be obtained by calling `statevector = statetensor.flatten()`. 
 
 One can use 
