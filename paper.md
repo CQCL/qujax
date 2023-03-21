@@ -63,7 +63,7 @@ $$
 |\psi\rangle = \sum_{i=1}^{2^N} \alpha_i |i\rangle \in \mathbb{C}^{2^N},
 $$
 where $n$ is the number 
-of qubits and $\alpha_i$ is a complex scalar number referred to as the $i$th *amplitude*. We work in the computational basis, where 
+of qubits and $\alpha_i$ is a complex scalar number referred to as the $i$th *amplitude*. Quantum states are also normalised such that $\langle \psi | \psi \rangle = \sum_{i=1}^{2^N} |\alpha_i|^2 = 1$. We work in the computational basis, where 
 $|i\rangle$ is represented as a vector of zeros with a one in the $i$th position (e.g. for $N=2$, $|2\rangle$ is represented as `[0 1 0 0]`). In `qujax`, we represent such vectors as a
 *statetensor*, where a pure state is encoded in a tensor of complex numbers with 
 shape `(2,) * N`. The statetensor representation is convenient for quantum arithmetic (such as 
