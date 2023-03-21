@@ -56,6 +56,8 @@ qujax.print_circuit(["X", "Rz", "Rz", "CRz"],
 # q1: ---Rz[0]-----------CRz[1]
 ```
 
+### Statetensor
+
 In quantum mechanics, a *pure state* is fully specified by a statevector
 $$
 |\psi\rangle = \sum_{i=1}^{2^N} \alpha_i |i\rangle \in \mathbb{C}^{2^N},
@@ -64,9 +66,9 @@ where $n$ is the number
 of qubits and $\alpha_i$ is a complex scalar number referred to as the $i$th *amplitude*. We work in the computational basis, where 
 $|i\rangle$ is represented as a vector of zeros with a one in the $i$th position (e.g. for $N=2$, $|2\rangle$ is represented as `[0 1 0 0]`). In `qujax`, we represent such vectors as a
 *statetensor*, where a pure state is encoded in a tensor of complex numbers with 
-shape `(2,) * N` (TODO: maybe elaborate a bit on this or include an appendix on numerical representation of tensors). The statetensor representation is convenient for quantum arithmetic (such as 
-applying gates and sampling bitstrings), and the statevector can always be obtained by 
-calling `statevector = statetensor.flatten()`. 
+shape `(2,) * N`. The statetensor representation is convenient for quantum arithmetic (such as 
+applying gates, marginalising out qubits and sampling bitstrings). For example, the amplitude corresponding to the bitstring `[0 1 0 0]` can be accessed with `statetensor[0, 1, 0, 0]`.
+The statevector can always be obtained by calling `statevector = statetensor.flatten()`. 
 
 One can use 
 `qujax.get_params_to_statetensor_func` to generate a pure JAX function encoding a parameterised 
@@ -77,28 +79,32 @@ $$
 where $\theta$ is a parameter 
 vector and $|\phi\rangle$ is an initial quantum state that can be provided via the optional argument `statetensor_in` (that defaults to $|0\rangle$). 
 
+### Unitarytensor
 Alternatively, one can call `qujax.get_params_to_unitarytensor_func` to get a function returning a tensor representation of 
 the unitary $U_\theta$ with shape `(2,) * 2 * N`.
 
+### Densitytensor
 The quantum states that can be represented as above are called pure quantum states. More general quantum states can be represented by using a *density matrix*. The density matrix representation of a pure quantum state $|\psi\rangle$ can be obtained via the outer product $\rho = |\psi \rangle \langle \psi| \in \mathbb{C}^{2^N \times 2^N}$. More 
 generally a density matrix encodes a *mixed state* 
 $$
 \rho = \sum_{k} p_k|\psi_k \rangle \langle \psi_k|,
 $$
-which can be interpreted as classical statistical mixture of pure states, obtained as a convex combination with
-$p_k \in [0,1]$ and $\sum_{k} p_k =1$ (TODO: expand on this or include suitable reference). 
+which can be interpreted as classical statistical mixture of pure states, with
+$p_k \in [0,1]$ and $\sum_{k} p_k =1$.
 
 Density matrices are also supported in `qujax` in the form 
 of *densitytensors* - complex tensors of shape `(2,) * 2 * N`. Similar to the statetensor 
 simulator, parameterised evolution of a densitytensor can be implemented via general Kraus 
-operations (TODO: elaborate on Kraus operations) with `qujax.get_params_to_densitytensor_func`.
+operations with `qujax.get_params_to_densitytensor_func`. For more details on density matrices and Kraus operators see the [documentation](https://cqcl.github.io/qujax/api/densitytensor.html) or 2.4 in [@Nielsen2002]. 
 
+
+### Expectation values
 Expectation values can also be calculated conveniently with `qujax`. In simple cases, such as 
-a combinatorial optimisation problem like MaxCut, this can be done by extracting measurement probabilities 
-from the statetensor or densitytensor and calculating the expected value of a cost function. For 
+a combinatorial optimisation problems (e.g. MaxCut), this can be done by extracting measurement probabilities 
+from the statetensor or densitytensor and calculating the expected value of a cost function directly. For 
 more sophisticated bases, `qujax.get_statetensor_to_expectation_func` and 
 `qujax.get_densitytensor_to_expectation_func` generate functions that map to the expected value 
-of a given series of Hermitian tensors.
+of a given series of Hermitian tensors. Sampled expectation values (which replicate so-called shot noise for a given number of shots) are also supported in `qujax`.
 
 
 # Statement of need
