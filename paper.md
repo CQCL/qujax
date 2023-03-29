@@ -133,7 +133,7 @@ difference is that `qujax` is designed to purely functional.
 
 While generic circuit simulation is within scope, `qujax` does not support
 tensor network simulation. 
-There is an active area of research investigating tensor networks as a tool for classical 
+There is an active area of research investigating this as a tool for classical 
 simulation of quantum circuits with software including DisCoPy [@discopy], quimb [@quimb] and 
 TensorCircuit [@tensorcircuit]. While tensor networks represent a very promising field of research, 
 their implementation entails a more sophisticated API (in tensor networks, the representation
