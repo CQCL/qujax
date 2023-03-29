@@ -145,6 +145,8 @@ package. Thus, tensor network computation is currently seen as being beyond the 
 
 `qujax` is accompanied by an extension package `pytket-qujax` supporting easy conversion to and 
 from `pytket.Circuit` objects, thus providing a convenient bridge between pytket and JAX ecosystems.
+It possible to use the other pytket extensions to convert from and to qiskit [@jax2018github],
+Qulacs [@qulacs], cirq [@cirq] and Pennylane [@pennylane] as well.
 
 
 # Acknowledgements
