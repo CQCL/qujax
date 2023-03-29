@@ -56,14 +56,18 @@ qujax.print_circuit(["X", "Rz", "Rz", "CRz"],
 # q1: ---Rz[0]-----------CRz[1]
 ```
 
+Note that for angular parameters, the default parameterised gates in `qujax.gates` assume 
+**angles are specified in half-turns** (i.e. $\theta \in [0, 2)$) as opposed to radians.
+
+
 ### Statetensor
 
 In quantum mechanics, a *pure state* is fully specified by a statevector
 $$
 |\psi\rangle = \sum_{i=1}^{2^N} \alpha_i |i\rangle \in \mathbb{C}^{2^N},
 $$
-where $n$ is the number 
-of qubits and $\alpha_i$ is a complex scalar number referred to as the $i$th *amplitude*. We work in the computational basis, where 
+where $N$ is the number 
+of qubits and each $\alpha_i$ is a complex scalar number referred to as the $i$th *amplitude*. Quantum states are also normalised such that $\langle \psi | \psi \rangle = \sum_{i=1}^{2^N} |\alpha_i|^2 = 1$. We work in the computational basis, where 
 $|i\rangle$ is represented as a vector of zeros with a one in the $i$th position (e.g. for $N=2$, $|2\rangle$ is represented as `[0 1 0 0]`). In `qujax`, we represent such vectors as a
 *statetensor*, where a pure state is encoded in a tensor of complex numbers with 
 shape `(2,) * N`. The statetensor representation is convenient for quantum arithmetic (such as 
@@ -77,7 +81,7 @@ $$
 |\psi_\theta \rangle = U_\theta |\phi\rangle,
 $$
 where $\theta$ is a parameter 
-vector and $|\phi\rangle$ is an initial quantum state that can be provided via the optional argument `statetensor_in` (that defaults to $|0\rangle$). 
+vector and $|\phi\rangle$ is an initial quantum state that can be provided via the optional argument `statetensor_in` (that defaults to $|0\rangle=$`[1 0 ... 0]`). 
 
 ### Unitarytensor
 Alternatively, one can call `qujax.get_params_to_unitarytensor_func` to get a function returning a tensor representation of 
@@ -102,7 +106,7 @@ operations with `qujax.get_params_to_densitytensor_func`. For more details on de
 Expectation values can also be calculated conveniently with `qujax`. In simple cases, such as 
 a combinatorial optimisation problems (e.g. MaxCut), this can be done by extracting measurement probabilities 
 from the statetensor or densitytensor and calculating the expected value of a cost function directly. For 
-more sophisticated bases, `qujax.get_statetensor_to_expectation_func` and 
+more sophisticated bases, `qujax.get_statetensor_to_expectation_func` and \
 `qujax.get_densitytensor_to_expectation_func` generate functions that map to the expected value 
 of a given series of Hermitian tensors. Sampled expectation values (which replicate so-called shot noise for a given number of shots) are also supported in `qujax`.
 
@@ -110,22 +114,26 @@ of a given series of Hermitian tensors. Sampled expectation values (which replic
 # Statement of need
 
 JAX is emerging as a state-of-the-art library for high-perfomance scientific computation in Python 
-due to is composability, automatic differentiation and support for GPUs/TPUs, as well as adopting 
+due to its composability, automatic differentiation and support for GPUs/TPUs, as well as adopting 
 the NumPy [@numpy] API resulting in a low barrier to entry.
 
 `qujax` is a lightweight, purely functional library written entirely in JAX, 
 composing seamlessly with the ever-expanding JAX ecosystem (e.g. @deepmindjax, @blackjax, @mocat). 
-It emphasises clarity and readability, making it easy to debug, reducing the barrier to entry,
- and decreasing the overhead when integrating with existing code or extending it to meet specific
-  research needs.
+It emphasises clarity and readability, making it easy to debug, reducing the barrier to entry, and 
+decreasing the overhead when integrating with existing code or extending it to meet specific 
+research needs.
 
-These characteristics contrast with the already existing array of excellent quantum computation resources in Python, such as cirq [@cirq], pytket [@pytket], qiskit [@jax2018github], Qulacs [@qulacs],
-TensorFlow Quantum [@tensorflowquantum], Pennylane [@pennylane] or quimb [@quimb], 
-the latter two supporting JAX as a backend. 
-These represent complex full-fledged frameworks which supply their own abstractions, being either wider 
-in scope or specializing in specific use-cases.
+These characteristics contrast with the already existing array of excellent quantum computation 
+resources in Python, such as cirq [@cirq], pytket [@pytket], 
+qiskit [@jax2018github], Qulacs [@qulacs], TensorFlow Quantum [@tensorflowquantum], 
+DisCoPy [@discopy], Pennylane [@pennylane] or quimb [@quimb], the latter three supporting 
+JAX as a backend. These represent complex full-fledged frameworks which supply their own 
+abstractions, being either wider in scope or specializing in specific use-cases. The core 
+difference is that `qujax` is designed to purely functional.
 
-There is an active area of research investigating tensor networks as a tool for classical 
+While generic circuit simulation is within scope, `qujax` does not support
+tensor network simulation. 
+There is an active area of research investigating this as a tool for classical 
 simulation of quantum circuits with software including DisCoPy [@discopy], quimb [@quimb] and 
 TensorCircuit [@tensorcircuit]. While tensor networks represent a very promising field of research, 
 their implementation entails a more sophisticated API (in tensor networks, the representation
@@ -137,11 +145,14 @@ package. Thus, tensor network computation is currently seen as being beyond the 
 
 `qujax` is accompanied by an extension package `pytket-qujax` supporting easy conversion to and 
 from `pytket.Circuit` objects, thus providing a convenient bridge between pytket and JAX ecosystems.
+It possible to use the other pytket extensions to convert from and to qiskit [@jax2018github],
+Qulacs [@qulacs], cirq [@cirq] and Pennylane [@pennylane] as well.
 
 
 # Acknowledgements
 
-We acknowledge notable support from Kirill Plekhanov as well as Gabriel Marin and Enrico Rinaldi.
+We acknowledge notable support from Kirill Plekhanov as well as Gabriel Marin, Enrico Rinaldi 
+and Richie Yeung.
 
 
 # References
