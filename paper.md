@@ -66,8 +66,8 @@ In quantum mechanics, a *pure state* is fully specified by a statevector
 $$
 |\psi\rangle = \sum_{i=1}^{2^N} \alpha_i |i\rangle \in \mathbb{C}^{2^N},
 $$
-where $n$ is the number 
-of qubits and $\alpha_i$ is a complex scalar number referred to as the $i$th *amplitude*. Quantum states are also normalised such that $\langle \psi | \psi \rangle = \sum_{i=1}^{2^N} |\alpha_i|^2 = 1$. We work in the computational basis, where 
+where $N$ is the number 
+of qubits and each $\alpha_i$ is a complex scalar number referred to as the $i$th *amplitude*. Quantum states are also normalised such that $\langle \psi | \psi \rangle = \sum_{i=1}^{2^N} |\alpha_i|^2 = 1$. We work in the computational basis, where 
 $|i\rangle$ is represented as a vector of zeros with a one in the $i$th position (e.g. for $N=2$, $|2\rangle$ is represented as `[0 1 0 0]`). In `qujax`, we represent such vectors as a
 *statetensor*, where a pure state is encoded in a tensor of complex numbers with 
 shape `(2,) * N`. The statetensor representation is convenient for quantum arithmetic (such as 
@@ -81,7 +81,7 @@ $$
 |\psi_\theta \rangle = U_\theta |\phi\rangle,
 $$
 where $\theta$ is a parameter 
-vector and $|\phi\rangle$ is an initial quantum state that can be provided via the optional argument `statetensor_in` (that defaults to $|0\rangle$). 
+vector and $|\phi\rangle$ is an initial quantum state that can be provided via the optional argument `statetensor_in` (that defaults to $|0\rangle=$`[1 0 ... 0]`). 
 
 ### Unitarytensor
 Alternatively, one can call `qujax.get_params_to_unitarytensor_func` to get a function returning a tensor representation of 
@@ -114,7 +114,7 @@ of a given series of Hermitian tensors. Sampled expectation values (which replic
 # Statement of need
 
 JAX is emerging as a state-of-the-art library for high-perfomance scientific computation in Python 
-due to is composability, automatic differentiation and support for GPUs/TPUs, as well as adopting 
+due to its composability, automatic differentiation and support for GPUs/TPUs, as well as adopting 
 the NumPy [@numpy] API resulting in a low barrier to entry.
 
 `qujax` is a lightweight, purely functional library written entirely in JAX, 
@@ -131,6 +131,8 @@ JAX as a backend. These represent complex full-fledged frameworks which supply t
 abstractions, being either wider in scope or specializing in specific use-cases. The core 
 difference is that `qujax` is designed to purely functional.
 
+While generic circuit simulation is within scope, `qujax` does not support
+tensor network simulation. 
 There is an active area of research investigating tensor networks as a tool for classical 
 simulation of quantum circuits with software including DisCoPy [@discopy], quimb [@quimb] and 
 TensorCircuit [@tensorcircuit]. While tensor networks represent a very promising field of research, 
