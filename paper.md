@@ -129,7 +129,7 @@ qiskit [@jax2018github], Qulacs [@qulacs], TensorFlow Quantum [@tensorflowquantu
 DisCoPy [@discopy], Pennylane [@pennylane] or quimb [@quimb], the latter three supporting 
 JAX as a backend. These represent complex full-fledged frameworks which supply their own 
 abstractions, being either wider in scope or specializing in specific use-cases. The core 
-difference is that `qujax` is designed to purely functional.
+difference is that `qujax` is designed to be purely functional.
 
 While generic circuit simulation is within scope, `qujax` does not support
 tensor network simulation. 
