@@ -99,7 +99,7 @@ $p_k \in [0,1]$ and $\sum_{k} p_k =1$.
 Density matrices are also supported in `qujax` in the form 
 of *densitytensors* - complex tensors of shape `(2,) * 2 * N`. Similar to the statetensor 
 simulator, parameterised evolution of a densitytensor can be implemented via general Kraus 
-operations with `qujax.get_params_to_densitytensor_func`. For more details on density matrices and Kraus operators see the [documentation](https://cqcl.github.io/qujax/api/densitytensor.html) or 2.4 in @Nielsen2002. 
+operations with `qujax.get_params_to_densitytensor_func`. Further details on density matrices and Kraus operators are available in the [documentation](https://cqcl.github.io/qujax/api/densitytensor.html) or published literature [@Nielsen2002, p.X]. 
 
 
 ### Expectation values
@@ -118,7 +118,7 @@ due to its composability, automatic differentiation and support for GPUs/TPUs, a
 the NumPy [@numpy] API resulting in a low barrier to entry.
 
 `qujax` is a lightweight, purely functional library written entirely in JAX, 
-composing seamlessly with the ever-expanding JAX ecosystem (e.g. @deepmindjax, @blackjax, @mocat). 
+composing seamlessly with the ever-expanding JAX ecosystem (e.g. [@deepmindjax; @blackjax; @mocat]). 
 It emphasises clarity and readability, making it easy to debug, reducing the barrier to entry, and 
 decreasing the overhead when integrating with existing code or extending it to meet specific 
 research needs.
