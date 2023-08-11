@@ -99,7 +99,7 @@ $p_k \in [0,1]$ and $\sum_{k} p_k =1$.
 Density matrices are also supported in `qujax` in the form 
 of *densitytensors* - complex tensors of shape `(2,) * 2 * N`. Similar to the statetensor 
 simulator, parameterised evolution of a densitytensor can be implemented via general Kraus 
-operations with `qujax.get_params_to_densitytensor_func`. Further details on density matrices and Kraus operators are available in the [documentation](https://cqcl.github.io/qujax/api/densitytensor.html) or published literature [@Nielsen2002, p.X]. 
+operations with `qujax.get_params_to_densitytensor_func`. Further details on density matrices and Kraus operators are available in the [documentation](https://cqcl.github.io/qujax/api/densitytensor.html) or published literature [@Nielsen2010, p.98-105]. 
 
 
 ### Expectation values
