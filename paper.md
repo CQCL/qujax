@@ -118,7 +118,7 @@ due to its composability, automatic differentiation and support for GPUs/TPUs, a
 the NumPy [@numpy] API resulting in a low barrier to entry.
 
 `qujax` is a lightweight, purely functional library written entirely in JAX, 
-composing seamlessly with the ever-expanding JAX ecosystem (e.g. [@deepmindjax; @blackjax; @mocat]). 
+composing seamlessly with the ever-expanding JAX ecosystem [@deepmindjax; @blackjax; @mocat]. 
 It emphasises clarity and readability, making it easy to debug, reducing the barrier to entry, and 
 decreasing the overhead when integrating with existing code or extending it to meet specific 
 research needs.
