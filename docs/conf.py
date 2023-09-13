@@ -9,8 +9,8 @@ from qujax.version import __version__
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 project = "qujax"
-project_copyright = "2022, Sam Duffield"
-author = "Sam Duffield"
+project_copyright = "2023, The qujax authors"
+author = "Sam Duffield, Gabriel Matos, Melf Johannsen"
 version = __version__
 release = __version__
 
@@ -33,8 +33,6 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 html_theme = "sphinx_rtd_theme"
 
 autodoc_typehints = "description"
-
-html4_writer = True
 
 autodoc_type_aliases = {
     "jnp.ndarray": "ndarray",
