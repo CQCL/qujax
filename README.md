@@ -70,7 +70,7 @@ param_to_st(jnp.array([0.1]))
 
 The optional initial state can be passed to `param_to_st` using the `statetensor_in` argument. When it is not provided, the initial state defaults to $\ket{0...0}$.
 
-Note that qujax represents quantum states as _statetensors_. For example, for $N=2$ qubits, the corresponding vector space has $2^4$ dimensions, and a quantum state in this space is represented by an array with shape `(2,2,2,2)`. The usual statevector representation with shape `(16,)` can be obtained by calling `.flatten()` or `.reshape(-1)` or `.reshape(N)` on this array. 
+Note that qujax represents quantum states as _statetensors_. For example, for $N=4$ qubits, the corresponding vector space has $2^4$ dimensions, and a quantum state in this space is represented by an array with shape `(2,2,2,2)`. The usual statevector representation with shape `(16,)` can be obtained by calling `.flatten()` or `.reshape(-1)` or `.reshape(N)` on this array. 
 
 In the statetensor representation, the coefficient associated with e.g. basis state $\ket{0101}$ is given by `arr[0,1,0,1]`; each axis corresponds to one qubit.
 
