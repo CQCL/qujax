@@ -1,5 +1,8 @@
 # qujax
 
+[![PyPI - Version](https://img.shields.io/pypi/v/qujax)](https://pypi.org/project/qujax/)
+[![DOI](https://joss.theoj.org/papers/10.21105/joss.05504/status.svg)](https://doi.org/10.21105/joss.05504)
+
 * [Installation](#installation)
 * [Quick start](#quick-start)
   + [Pure state simulation](#pure-state-simulations)
@@ -10,9 +13,9 @@
 * [Citing qujax](#citing-qujax)
 * [API Reference](https://cqcl.github.io/qujax/api/)
 
-qujax is a [JAX](https://github.com/google/jax)-based Python library for the classical simulation of gate-based quantum computation. It is designed to be *simple*, *fast* and *flexible*.
+qujax is a [JAX](https://github.com/google/jax)-based Python library for the classical simulation of quantum circuits. It is designed to be *simple*, *fast* and *flexible*.
 
-It follows a functional programming design by translating quantum circuits into pure functions. This allows qujax to [seamlessly and directly interface with JAX](https://jax.readthedocs.io/en/latest/notebooks/Common_Gotchas_in_JAX.html#pure-functions), enabling access to its powerful automatic differentiation tools, just-in-time compiler, vectorization capabilities, GPU/TPU integration and growing ecosystem of packages.
+It follows a functional programming design by translating circuits into pure functions. This allows qujax to [seamlessly and directly interface with JAX](https://jax.readthedocs.io/en/latest/notebooks/Common_Gotchas_in_JAX.html#pure-functions), enabling direct access to its powerful automatic differentiation tools, just-in-time compiler, vectorization capabilities, GPU/TPU integration and growing ecosystem of packages.
 
 qujax can be used for both pure and mixed quantum state simulation. It supports both the standard gate set and user-defined custom operations, including general quantum channels, allowing one to model device noise and errors. 
 
@@ -163,9 +166,15 @@ If you have used qujax in your code or research, we kindly ask that you cite it.
 
 ```bibtex
 @article{qujax2023,
-  author = {Samuel Duffield, Gabriel Matos and Melf Johannsen},
-  title = {qujax: Simulating quantum circuits with JAX},
+  author = {Duffield, Samuel and Matos, Gabriel and Johannsen, Melf},
+  doi = {10.21105/joss.05504},
   journal = {Journal of Open Source Software},
-  year = {2023},
+  month = sep,
+  number = {89},
+  pages = {5504},
+  title = {{qujax: Simulating quantum circuits with JAX}},
+  url = {https://joss.theoj.org/papers/10.21105/joss.05504},
+  volume = {8},
+  year = {2023}
 }
 ```
