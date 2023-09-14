@@ -4,11 +4,11 @@ Welcome to qujax's documentation!
 
 ``qujax`` is a `JAX <https://github.com/google/jax>`_-based Python library for the classical simulation of quantum circuits. It is designed to be *simple*, *fast* and *flexible*.
 
-It follows a functional programming design by translating circuits into pure functions. This allows qujax to `seamlessly and directly interface with JAX <https://jax.readthedocs.io/en/latest/notebooks/Common_Gotchas_in_JAX.html#pure-functions>`_
+It follows a functional programming design by translating circuits into pure functions. This allows qujax to `seamlessly and directly interface with JAX <https://jax.readthedocs.io/en/latest/notebooks/Common_Gotchas_in_JAX.html#pure-functions>`_.
 
 Source code can be found on `GitHub <https://github.com/CQCL/qujax>`_, including a suite of `example notebooks <https://github.com/CQCL/qujax#examples>`_.
 
-The `pytket-qujax <https://github.com/CQCL/pytket-qujax>`_, extension can be used to directly translate a `tket <https://github.com/CQCL/pytket>`_ circuit directly into ``qujax``.
+The `pytket-qujax <https://github.com/CQCL/pytket-qujax>`_ extension can be used to translate a `tket <https://github.com/CQCL/pytket>`_ circuit directly into ``qujax``.
 
 Note that ``qujax`` assumes parameters are given in units of π (i.e. in [0,2] rather than [0, 2π]).
 
