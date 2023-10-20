@@ -2,9 +2,11 @@ from __future__ import annotations
 
 from typing import Callable, Iterable, Sequence, Tuple, Union
 
+import jax
 from jax import numpy as jnp
 from jax.lax import scan
-
+from jax._src.dtypes import canonicalize_dtype
+from jax._src.typing import DTypeLike
 from qujax.statetensor import (
     UnionCallableOptionalArray,
     _arrayify_inds,
@@ -127,6 +129,13 @@ def partial_trace(
     densitytensor = jnp.einsum(densitytensor, einsum_indices)
     return densitytensor
 
+def all_zeros_densitytensor(n_qubits : int, dtype : DTypeLike = complex) -> jax.Array:
+    """
+    Returns a densitytensor representation of the all-zeros state |00...0> on `n_qubits` qubits
+    """
+    densitytensor = jnp.zeros((2,) * 2 * n_qubits, canonicalize_dtype(dtype))
+    densitytensor = densitytensor.at[(0,) * 2 * n_qubits].set(1.0)
+    return densitytensor
 
 def get_params_to_densitytensor_func(
     kraus_ops_seq: Sequence[KrausOp],
@@ -194,8 +203,7 @@ def get_params_to_densitytensor_func(
 
         """
         if densitytensor_in is None:
-            densitytensor = jnp.zeros((2,) * 2 * n_qubits)
-            densitytensor = densitytensor.at[(0,) * 2 * n_qubits].set(1.0)
+            densitytensor = all_zeros_densitytensor(n_qubits)
         else:
             densitytensor = densitytensor_in
         params = jnp.atleast_1d(params)
