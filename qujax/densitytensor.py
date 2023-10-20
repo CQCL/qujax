@@ -129,13 +129,15 @@ def partial_trace(
     densitytensor = jnp.einsum(densitytensor, einsum_indices)
     return densitytensor
 
-def all_zeros_densitytensor(n_qubits : int, dtype : DTypeLike = complex) -> jax.Array:
+
+def all_zeros_densitytensor(n_qubits: int, dtype: DTypeLike = complex) -> jax.Array:
     """
     Returns a densitytensor representation of the all-zeros state |00...0> on `n_qubits` qubits
     """
     densitytensor = jnp.zeros((2,) * 2 * n_qubits, canonicalize_dtype(dtype))
     densitytensor = densitytensor.at[(0,) * 2 * n_qubits].set(1.0)
     return densitytensor
+
 
 def get_params_to_densitytensor_func(
     kraus_ops_seq: Sequence[KrausOp],

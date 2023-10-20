@@ -492,8 +492,10 @@ def statetensor_to_densitytensor(statetensor: jnp.ndarray) -> jnp.ndarray:
     )
     return dt
 
-def repeat_circuit(circuit : Callable[[jax.Array, jax.Array], jax.Array],
-                   nr_of_parameters : int) -> Callable[[jax.Array, jax.Array], jax.Array]:
+
+def repeat_circuit(
+    circuit: Callable[[jax.Array, jax.Array], jax.Array], nr_of_parameters: int
+) -> Callable[[jax.Array, jax.Array], jax.Array]:
     """
     Repeats circuit encoded by `circuit` an arbitrary number of times.
     Avoids compilation overhead with increasing circuit depth.
@@ -503,13 +505,18 @@ def repeat_circuit(circuit : Callable[[jax.Array, jax.Array], jax.Array],
         nr_of_parameters: The number of parameters that `circuit` takes.
 
     Returns:
-        A function taking an arbitrary number of parameters and returning as many applications of `circuit` as the number of parameters allows.
-        An exception is thrown if this function is supplied with a parameter array of size not divisible by `nr_of_parameters`.
+        A function taking an arbitrary number of parameters and returning as
+        many applications of `circuit` as the number of parameters allows.
+        An exception is thrown if this function is supplied with a parameter array
+        of size not divisible by `nr_of_parameters`.
     """
-    def repeated_circuit(params : jax.Array, statetensor_in : jax.Array) -> jax.Array:
+
+    def repeated_circuit(params: jax.Array, statetensor_in: jax.Array) -> jax.Array:
         def f(state, p):
             return circuit(p, state), None
+
         reshaped_parameters = params.reshape(-1, nr_of_parameters)
         result, _ = jax.lax.scan(f, statetensor_in, reshaped_parameters)
         return result
+
     return repeated_circuit

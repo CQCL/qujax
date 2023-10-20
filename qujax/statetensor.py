@@ -94,13 +94,15 @@ def _gate_func_to_unitary(
     )  # Ensure gate is in tensor form
     return gate_unitary
 
-def all_zeros_statetensor(n_qubits : int, dtype: DTypeLike = complex) -> jax.Array:
+
+def all_zeros_statetensor(n_qubits: int, dtype: DTypeLike = complex) -> jax.Array:
     """
     Returns a statetensor representation of the all-zeros state |00...0> on `n_qubits` qubits
     """
-    statetensor = jnp.zeros((2,) * n_qubits, dtype = canonicalize_dtype(dtype))
+    statetensor = jnp.zeros((2,) * n_qubits, dtype=canonicalize_dtype(dtype))
     statetensor = statetensor.at[(0,) * n_qubits].set(1.0)
     return statetensor
+
 
 def get_params_to_statetensor_func(
     gate_seq: Sequence[Gate],
