@@ -98,6 +98,13 @@ def _gate_func_to_unitary(
 def all_zeros_statetensor(n_qubits: int, dtype: DTypeLike = complex) -> jax.Array:
     """
     Returns a statetensor representation of the all-zeros state |00...0> on `n_qubits` qubits
+
+    Args:
+        n_qubits: Number of qubits that the state is defined on.
+        dtype: Data type of the statetensor returned.
+
+    Returns:
+        Statetensor representing the state having all qubits set to zero.
     """
     statetensor = jnp.zeros((2,) * n_qubits, dtype=canonicalize_dtype(dtype))
     statetensor = statetensor.at[(0,) * n_qubits].set(1.0)
