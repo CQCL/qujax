@@ -129,7 +129,7 @@ def _test_hermitian_observable(
             big_h = jnp.kron(big_h, hermitian_arrs[k])
         return big_h
 
-    sum_big_hs = jnp.zeros((2**n_qubits, 2**n_qubits), dtype="complex")
+    sum_big_hs = jnp.zeros((2**n_qubits, 2**n_qubits), dtype=complex)
     for i in range(len(hermitian_str_seq_seq)):
         sum_big_hs += coefs[i] * big_hermitian_matrix(
             hermitian_str_seq_seq[i], qubit_inds_seq[i]
