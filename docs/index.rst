@@ -10,7 +10,7 @@ Source code can be found on `GitHub <https://github.com/CQCL/qujax>`_, including
 
 The `pytket-qujax <https://github.com/CQCL/pytket-qujax>`_ extension can be used to translate a `tket <https://github.com/CQCL/pytket>`_ circuit directly into ``qujax``.
 
-Note that ``qujax`` assumes parameters are given in units of π (i.e. in [0,2] rather than [0, 2π]).
+**Note that ``qujax`` assumes parameters are given in units of π (i.e. in [0,2] rather than [0, 2π]).**
 
 Install
 =================================
@@ -39,25 +39,16 @@ If you have used qujax in your code or research, we kindly ask that you cite it.
      year = {2023}
    }
 
-Docs
+Contents
 =================================
 
 .. toctree::
+   :caption: API Reference:
 
-    apply_gate
-    get_params_to_statetensor_func
-    get_params_to_unitarytensor_func
-    get_statetensor_to_expectation_func
-    get_statetensor_to_sampled_expectation_func
-    integers_to_bitstrings
-    bitstrings_to_integers
-    sample_integers
-    sample_bitstrings
-    check_circuit
-    print_circuit
-    densitytensor
-    gates <https://github.com/CQCL/qujax/blob/main/qujax/gates.py>
-
+    Pure state simulation <statetensor>
+    Mixed state simulation <densitytensor>
+    Utility functions <utils>
+    List of gates <https://github.com/CQCL/qujax/blob/main/qujax/gates.py>
 
 .. toctree::
     :caption: Links:
@@ -68,7 +59,3 @@ Docs
     Example notebooks <https://github.com/CQCL/qujax#examples>
     PyPI <https://pypi.org/project/qujax/>
     pytket-qujax <https://cqcl.github.io/pytket-qujax/api>
-
-
-
-

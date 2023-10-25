@@ -3,6 +3,7 @@ densitytensor
 
 .. toctree::
 
+    densitytensor/all_zeros_densitytensor
     densitytensor/kraus
     densitytensor/get_params_to_densitytensor_func
     densitytensor/partial_trace
