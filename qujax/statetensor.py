@@ -3,7 +3,10 @@ from __future__ import annotations
 from functools import partial
 from typing import Callable, Sequence, Union
 
+import jax
 from jax import numpy as jnp
+from jax._src.dtypes import canonicalize_dtype
+from jax._src.typing import DTypeLike
 
 from qujax import gates
 from qujax.utils import Gate, UnionCallableOptionalArray, _arrayify_inds, check_circuit
@@ -92,6 +95,22 @@ def _gate_func_to_unitary(
     return gate_unitary
 
 
+def all_zeros_statetensor(n_qubits: int, dtype: DTypeLike = complex) -> jax.Array:
+    """
+    Returns a statetensor representation of the all-zeros state |00...0> on `n_qubits` qubits
+
+    Args:
+        n_qubits: Number of qubits that the state is defined on.
+        dtype: Data type of the statetensor returned.
+
+    Returns:
+        Statetensor representing the state having all qubits set to zero.
+    """
+    statetensor = jnp.zeros((2,) * n_qubits, dtype=canonicalize_dtype(dtype))
+    statetensor = statetensor.at[(0,) * n_qubits].set(1.0)
+    return statetensor
+
+
 def get_params_to_statetensor_func(
     gate_seq: Sequence[Gate],
     qubit_inds_seq: Sequence[Sequence[int]],
@@ -147,8 +166,7 @@ def get_params_to_statetensor_func(
 
         """
         if statetensor_in is None:
-            statetensor = jnp.zeros((2,) * n_qubits)
-            statetensor = statetensor.at[(0,) * n_qubits].set(1.0)
+            statetensor = all_zeros_statetensor(n_qubits)
         else:
             statetensor = statetensor_in
         params = jnp.atleast_1d(params)
