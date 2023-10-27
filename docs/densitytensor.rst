@@ -1,7 +1,8 @@
-densitytensor
+Mixed state simulation
 =======================
 
 .. toctree::
+    :titlesonly:
 
     densitytensor/all_zeros_densitytensor
     densitytensor/kraus
