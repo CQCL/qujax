@@ -42,3 +42,5 @@ autodoc_type_aliases = {
 }
 
 latex_engine = "pdflatex"
+
+titles_only = True
