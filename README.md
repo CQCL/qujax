@@ -11,7 +11,7 @@
 * [Examples](#examples)
 * [Contributing](#contributing)
 * [Citing qujax](#citing-qujax)
-* [API Reference](https://cqcl.github.io/qujax/api/)
+* [API Reference](https://cqcl.github.io/qujax/)
 
 qujax is a [JAX](https://github.com/google/jax)-based Python library for the classical simulation of quantum circuits. It is designed to be *simple*, *fast* and *flexible*.
 
@@ -37,7 +37,7 @@ pip install qujax
 
 We start by defining the quantum gates making up the circuit, along with the qubits that they act on and the indices of the parameters for each gate. 
 
-A list of all gates can be found [here](https://github.com/CQCL/qujax/blob/main/qujax/gates.py) (custom operations can be included by [passing an array or function](https://cqcl.github.io/qujax/api/get_params_to_statetensor_func.html) instead of a string).
+A list of all gates can be found [here](https://github.com/CQCL/qujax/blob/main/qujax/gates.py) (custom operations can be included by [passing an array or function](https://cqcl.github.io/qujax/statetensor/get_params_to_statetensor_func.html) instead of a string).
 
 ```python
 from jax import numpy as jnp
