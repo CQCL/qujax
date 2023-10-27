@@ -1,14 +1,17 @@
 name: Qujax Docs
 
 on:
+  pull_request:
+    branches:
+      - main
+      - develop
   push:
     branches:
       - main
 
 jobs:
-  docs:
+  build_docs:
     name: Build and publish docs
-    if: github.event_name == 'push'
     runs-on: ubuntu-20.04
     steps:
     - uses: actions/checkout@v4
@@ -29,9 +32,26 @@ jobs:
     - name: Build docs
       timeout-minutes: 20
       run: |
-        cd .github/workflows/docs        
-        sphinx-build ../../../docs . -a
+        cd .github/workflows/docs
+        mkdir qujax
+        cd qujax
+        sphinx-build ../../../../docs . -a
     - name: Upload docs as artefact
       uses: actions/upload-pages-artifact@v2
       with:
-        path: .github/workflows/docs
+        path: .github/workflows/docs/qujax
+
+  publish_docs:
+    name: Publish docs
+    needs: build_docs
+    runs-on: ubuntu-22.04
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+    - name: Deploy to GitHub Pages
+      id: deployment
+      uses: actions/deploy-pages@v2
