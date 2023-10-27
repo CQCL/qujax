@@ -1,7 +1,8 @@
-utils
+Utility functions
 =======================
 
 .. toctree::
+    :titlesonly:
 
     utils/bitstrings_to_integers
     utils/check_circuit
@@ -10,4 +11,3 @@ utils
     utils/repeat_circuit
     utils/sample_bitstrings
     utils/sample_integers
-

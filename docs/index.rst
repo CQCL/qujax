@@ -44,6 +44,7 @@ Contents
 
 .. toctree::
    :caption: API Reference:
+   :titlesonly:
 
     Pure state simulation <statetensor>
     Mixed state simulation <densitytensor>

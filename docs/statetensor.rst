@@ -1,7 +1,8 @@
-statetensor
+Pure state simulation
 =======================
 
 .. toctree::
+    :titlesonly:
 
     statetensor/all_zeros_statetensor
     statetensor/apply_gate
