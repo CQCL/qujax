@@ -43,6 +43,7 @@ jobs:
 
   publish_docs:
     name: Publish docs
+    if: github.event_name == 'push' && contains(github.ref_name, 'main')
     needs: build_docs
     runs-on: ubuntu-22.04
     permissions:
