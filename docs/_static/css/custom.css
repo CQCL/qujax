@@ -7,10 +7,6 @@
     background-color: white;
 }
 
-h1, h2, h3, h4, h5, h6 {
-    color: #203847
-}
-
 .icon.icon-home{
     color: #000000
 }
@@ -46,6 +42,10 @@ html.writer-html4 .rst-content dl:not(.docutils) > dt, html.writer-html5 .rst-co
 
 #examples ul li, ul.simple li {
     margin-bottom: 10px;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    color: #203847
 }
 
 div.toctree-wrapper .caption-text{
