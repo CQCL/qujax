@@ -22,6 +22,7 @@ extensions = [
     "sphinx_rtd_theme",
     "sphinx.ext.napoleon",
     "sphinx.ext.mathjax",
+    "myst_parser",
 ]
 
 templates_path = ["_templates"]
@@ -42,3 +43,22 @@ autodoc_type_aliases = {
 }
 
 latex_engine = "pdflatex"
+
+titles_only = True
+
+rst_prolog = """
+.. role:: python(code)
+   :language: python
+"""
+
+html_logo = "logo.svg"
+
+html_static_path = ["_static"]
+html_css_files = [
+    "css/custom.css",
+]
+
+html_theme_options = {
+    "collapse_navigation": False,
+    "prev_next_buttons_location": "None",
+}

@@ -4,13 +4,14 @@ Welcome to qujax's documentation!
 
 ``qujax`` is a `JAX <https://github.com/google/jax>`_-based Python library for the classical simulation of quantum circuits. It is designed to be *simple*, *fast* and *flexible*.
 
-It follows a functional programming design by translating circuits into pure functions. This allows qujax to `seamlessly and directly interface with JAX <https://jax.readthedocs.io/en/latest/notebooks/Common_Gotchas_in_JAX.html#pure-functions>`_.
 
-Source code can be found on `GitHub <https://github.com/CQCL/qujax>`_, including a suite of `example notebooks <https://github.com/CQCL/qujax#examples>`_.
+It follows a functional programming design by translating circuits into pure functions. This allows qujax to `seamlessly and directly interface with JAX <https://jax.readthedocs.io/en/latest/notebooks/Common_Gotchas_in_JAX.html#pure-functions>`_, enabling direct access to its powerful automatic differentiation tools, just-in-time compiler, vectorization capabilities, GPU/TPU integration and growing ecosystem of packages.
 
-The `pytket-qujax <https://github.com/CQCL/pytket-qujax>`_ extension can be used to translate a `tket <https://github.com/CQCL/pytket>`_ circuit directly into ``qujax``.
+If you are new to the library, we recommend that you head to the :doc:`getting_started` section of the documentation. More advanced use-cases, including the training of parameterised quantum circuits, can be found in :doc:`examples`.
 
-**Note that ``qujax`` assumes parameters are given in units of π (i.e. in [0,2] rather than [0, 2π]).**
+The source code can be found on `GitHub <https://github.com/CQCL/qujax>`_. The `pytket-qujax <https://github.com/CQCL/pytket-qujax>`_ extension can be used to translate a `tket <https://github.com/CQCL/pytket>`_ circuit directly into ``qujax``.
+
+**Important note**: qujax circuit parameters are expressed in units of :math:`\pi` (e.g. in the range :math:`[0,2]` as opposed to :math:`[0, 2\pi]`).
 
 Install
 =================================
@@ -43,13 +44,21 @@ Contents
 =================================
 
 .. toctree::
+   :caption: Documentation:
+   :titlesonly:
+    
+    Getting started <getting_started>
+    Examples <examples>
+    List of gates <gates>
+
+.. toctree::
    :caption: API Reference:
    :titlesonly:
+   :maxdepth: 1
 
     Pure state simulation <statetensor>
     Mixed state simulation <densitytensor>
     Utility functions <utils>
-    List of gates <https://github.com/CQCL/qujax/blob/main/qujax/gates.py>
 
 .. toctree::
     :caption: Links:
@@ -57,6 +66,5 @@ Contents
 
     GitHub <https://github.com/CQCL/qujax>
     Paper <https://doi.org/10.21105/joss.05504>
-    Example notebooks <https://github.com/CQCL/qujax#examples>
     PyPI <https://pypi.org/project/qujax/>
     pytket-qujax <https://cqcl.github.io/pytket-qujax/api>
