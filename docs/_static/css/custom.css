@@ -1,0 +1,53 @@
+
+.wy-nav-top{
+    background-color: #203847
+}
+
+.wy-side-nav-search{
+    background-color: white;
+}
+
+.icon.icon-home{
+    color: #000000
+}
+
+.wy-menu-vertical p.caption{
+    color: #85cfcb;
+}
+
+.wy-side-nav-search > a{
+    color: #000000;
+}
+
+.wy-side-nav-search > div.version{
+    color: #000000;
+}
+
+.sig {
+    background: #85cfcb;
+}
+
+.wy-nav-content {
+    max-width: 1000px;
+}
+
+html.writer-html4 .rst-content dl:not(.docutils) > dt, html.writer-html5 .rst-content dl[class]:not(.option-list):not(.field-list):not(.footnote):not(.citation):not(.glossary):not(.simple) > dt {
+    display:block;
+    background-color: #ebeef1;
+}
+
+#examples ul, ul.simple {
+    list-style: none;
+}
+
+#examples ul li, ul.simple li {
+    margin-bottom: 10px;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    color: #203847
+}
+
+div.toctree-wrapper .caption-text{
+    color: #203847;
+}
