@@ -1,7 +1,12 @@
 # qujax
 
 <div align="center">
-<a href="https://cqcl.github.io/qujax/"><img src="docs/logo.svg" alt="logo"></img></a>
+<a href="https://cqcl.github.io/qujax/">
+<picture>
+    <source srcset="docs/logo_dark_mode.svg"  media="(prefers-color-scheme: dark)">
+    <img src="docs/logo.svg">
+</picture>
+</a>
 </div>
 
 [![PyPI - Version](https://img.shields.io/pypi/v/qujax)](https://pypi.org/project/qujax/)
