@@ -1,5 +1,8 @@
 import os
 import sys
+import importlib
+import inspect
+import pathlib
 
 sys.path.insert(0, os.path.abspath(".."))  # pylint: disable=wrong-import-position
 
@@ -22,6 +25,7 @@ extensions = [
     "sphinx_rtd_theme",
     "sphinx.ext.napoleon",
     "sphinx.ext.mathjax",
+    "sphinx.ext.linkcode",
     "myst_parser",
 ]
 
@@ -62,3 +66,24 @@ html_theme_options = {
     "collapse_navigation": False,
     "prev_next_buttons_location": "None",
 }
+
+
+def linkcode_resolve(domain, info):
+    github_url = f"https://github.com/CQCL/qujax/tree/develop/qujax"
+
+    if domain != "py":
+        return
+
+    module = importlib.import_module(info["module"])
+    obj = getattr(module, info["fullname"])
+
+    try:
+        path = pathlib.Path(inspect.getsourcefile(obj))
+        file_name = path.name
+        lines = inspect.getsourcelines(obj)
+    except TypeError:
+        return
+
+    start_line, end_line = lines[1], lines[1] + len(lines[0]) - 1
+
+    return f"{github_url}/{file_name}#L{start_line}-L{end_line}"
