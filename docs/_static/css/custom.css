@@ -27,8 +27,10 @@
     background: #85cfcb;
 }
 
-.wy-nav-content {
-    max-width: 1000px;
+@media screen and (min-width: 1000px) {
+    .wy-nav-content {
+        max-width: 1000px;
+    }
 }
 
 html.writer-html4 .rst-content dl:not(.docutils) > dt, html.writer-html5 .rst-content dl[class]:not(.option-list):not(.field-list):not(.footnote):not(.citation):not(.glossary):not(.simple) > dt {
@@ -50,4 +52,8 @@ h1, h2, h3, h4, h5, h6 {
 
 div.toctree-wrapper .caption-text{
     color: #203847;
+}
+
+.rst-content .viewcode-back, .rst-content .viewcode-link {
+    padding-left: 6px;
 }
