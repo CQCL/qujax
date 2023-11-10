@@ -69,6 +69,17 @@ html_theme_options = {
 
 
 def linkcode_resolve(domain, info):
+    """
+    Called by sphinx's linkcode extension, which adds links directing the user to the
+    source code of the API objects being documented. The `domain` argument specifies which
+    programming language the object belongs to. The `info` argument is a dictionary with
+    information specific to the programming language of the object.
+
+    For Python objects, this dictionary contains a `module` key with the module the object is in
+    and a `fullname` key with the name of the object. This function uses this information to find
+    the source file and range of lines the object is defined in and to generate a link pointing to
+    those lines on GitHub.
+    """
     github_url = f"https://github.com/CQCL/qujax/tree/develop/qujax"
 
     if domain != "py":
