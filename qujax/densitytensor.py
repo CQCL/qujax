@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Callable, Iterable, Sequence, Tuple, Union
+from typing import Callable, Iterable, Sequence, Tuple, Union, Optional
 
 import jax
 from jax import numpy as jnp
@@ -18,8 +18,8 @@ from qujax.utils import KrausOp, check_circuit
 
 
 def _kraus_single(
-    densitytensor: jnp.ndarray, array: jnp.ndarray, qubit_inds: Sequence[int]
-) -> jnp.ndarray:
+    densitytensor: jax.Array, array: jax.Array, qubit_inds: Sequence[int]
+) -> jax.Array:
     r"""
     Performs single Kraus operation
 
@@ -44,8 +44,8 @@ def _kraus_single(
 
 
 def kraus(
-    densitytensor: jnp.ndarray, arrays: Iterable[jnp.ndarray], qubit_inds: Sequence[int]
-) -> jnp.ndarray:
+    densitytensor: jax.Array, arrays: Iterable[jax.Array], qubit_inds: Sequence[int]
+) -> jax.Array:
     r"""
     Performs Kraus operation.
 
@@ -79,7 +79,7 @@ def kraus(
 
 def _to_kraus_operator_seq_funcs(
     kraus_op: KrausOp, param_inds: Union[None, Sequence[int], Sequence[Sequence[int]]]
-) -> Tuple[Sequence[Callable[[jnp.ndarray], jnp.ndarray]], Sequence[jnp.ndarray]]:
+) -> Tuple[Sequence[Callable[[jax.Array], jax.Array]], Sequence[jax.Array]]:
     """
     Ensures Kraus operators are a sequence of functions that map (possibly empty) parameters to
     tensors and that each element of param_inds_seq is a sequence of arrays that correspond to the
@@ -108,8 +108,8 @@ def _to_kraus_operator_seq_funcs(
 
 
 def partial_trace(
-    densitytensor: jnp.ndarray, indices_to_trace: Sequence[int]
-) -> jnp.ndarray:
+    densitytensor: jax.Array, indices_to_trace: Sequence[int]
+) -> jax.Array:
     """
     Traces out (discards) specified qubits, resulting in a densitytensor
     representing the mixed quantum state on the remaining qubits.
@@ -150,7 +150,7 @@ def get_params_to_densitytensor_func(
     kraus_ops_seq: Sequence[KrausOp],
     qubit_inds_seq: Sequence[Sequence[int]],
     param_inds_seq: Sequence[Union[None, Sequence[int], Sequence[Sequence[int]]]],
-    n_qubits: int = None,
+    n_qubits: Optional[int] = None,
 ) -> UnionCallableOptionalArray:
     """
     Creates a function that maps circuit parameters to a density tensor (a density matrix in
@@ -195,8 +195,8 @@ def get_params_to_densitytensor_func(
     param_inds_array_seq = [ko_pi[1] for ko_pi in kraus_ops_seq_callable_and_param_inds]
 
     def params_to_densitytensor_func(
-        params: jnp.ndarray, densitytensor_in: jnp.ndarray = None
-    ) -> jnp.ndarray:
+        params: jax.Array, densitytensor_in: Optional[jax.Array] = None
+    ) -> jax.Array:
         """
         Applies parameterised circuit (series of gates) to a densitytensor_in
         (default is |0>^N <0|^N).
@@ -232,8 +232,8 @@ def get_params_to_densitytensor_func(
     if non_parameterised:
 
         def no_params_to_densitytensor_func(
-            densitytensor_in: jnp.ndarray = None,
-        ) -> jnp.ndarray:
+            densitytensor_in: Optional[jax.Array] = None,
+        ) -> jax.Array:
             """
             Applies circuit (series of gates with no parameters) to a densitytensor_in
             (default is |0>^N <0|^N).

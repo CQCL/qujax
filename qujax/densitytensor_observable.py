@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import Callable, Sequence, Union
 
+import jax
 from jax import numpy as jnp
 from jax import random
 
@@ -11,7 +12,7 @@ from qujax.utils import bitstrings_to_integers, check_hermitian
 
 
 def densitytensor_to_single_expectation(
-    densitytensor: jnp.ndarray, hermitian: jnp.ndarray, qubit_inds: Sequence[int]
+    densitytensor: jax.Array, hermitian: jax.Array, qubit_inds: Sequence[int]
 ) -> float:
     """
     Evaluates expectation value of an observable represented by a Hermitian matrix (in tensor form).
@@ -35,10 +36,10 @@ def densitytensor_to_single_expectation(
 
 
 def get_densitytensor_to_expectation_func(
-    hermitian_seq_seq: Sequence[Sequence[Union[str, jnp.ndarray]]],
+    hermitian_seq_seq: Sequence[Sequence[Union[str, jax.Array]]],
     qubits_seq_seq: Sequence[Sequence[int]],
-    coefficients: Union[Sequence[float], jnp.ndarray],
-) -> Callable[[jnp.ndarray], float]:
+    coefficients: Union[Sequence[float], jax.Array],
+) -> Callable[[jax.Array], float]:
     """
     Takes strings (or arrays) representing Hermitian matrices, along with qubit indices and
     a list of coefficients and returns a function that converts a densitytensor into an
@@ -46,7 +47,7 @@ def get_densitytensor_to_expectation_func(
 
     Args:
         hermitian_seq_seq: Sequence of sequences of Hermitian matrices/tensors.
-            Each Hermitian matrix is either represented by a tensor (jnp.ndarray)
+            Each Hermitian matrix is either represented by a tensor (jax.Array)
             or by a list of 'X', 'Y' or 'Z' characters corresponding to the standard Pauli matrices.
             E.g. [['Z', 'Z'], ['X']]
         qubits_seq_seq: Sequence of sequences of integer qubit indices.
@@ -66,10 +67,10 @@ def get_densitytensor_to_expectation_func(
 
 
 def get_densitytensor_to_sampled_expectation_func(
-    hermitian_seq_seq: Sequence[Sequence[Union[str, jnp.ndarray]]],
+    hermitian_seq_seq: Sequence[Sequence[Union[str, jax.Array]]],
     qubits_seq_seq: Sequence[Sequence[int]],
-    coefficients: Union[Sequence[float], jnp.ndarray],
-) -> Callable[[jnp.ndarray, random.PRNGKeyArray, int], float]:
+    coefficients: Union[Sequence[float], jax.Array],
+) -> Callable[[jax.Array, random.PRNGKeyArray, int], float]:
     """
     Converts strings (or arrays) representing Hermitian matrices, qubit indices and
     coefficients into a function that converts a densitytensor into a sampled expected value.
@@ -85,7 +86,7 @@ def get_densitytensor_to_sampled_expectation_func(
 
     Args:
         hermitian_seq_seq: Sequence of sequences of Hermitian matrices/tensors.
-            Each Hermitian is either a tensor (jnp.ndarray) or a string in ('X', 'Y', 'Z').
+            Each Hermitian is either a tensor (jax.Array) or a string in ('X', 'Y', 'Z').
             E.g. [['Z', 'Z'], ['X']]
         qubits_seq_seq: Sequence of sequences of integer qubit indices.
             E.g. [[0,1], [2]]
@@ -104,7 +105,7 @@ def get_densitytensor_to_sampled_expectation_func(
             check_hermitian(h, check_z_commutes=True)
 
     def densitytensor_to_sampled_expectation_func(
-        densitytensor: jnp.ndarray, random_key: random.PRNGKeyArray, n_samps: int
+        densitytensor: jax.Array, random_key: random.PRNGKeyArray, n_samps: int
     ) -> float:
         """
         Maps densitytensor to sampled expected value.
@@ -131,8 +132,8 @@ def get_densitytensor_to_sampled_expectation_func(
 
 
 def densitytensor_to_measurement_probabilities(
-    densitytensor: jnp.ndarray, qubit_inds: Sequence[int]
-) -> jnp.ndarray:
+    densitytensor: jax.Array, qubit_inds: Sequence[int]
+) -> jax.Array:
     """
     Extract array of measurement probabilities given a densitytensor and some qubit indices to
     measure (in the computational basis).
@@ -157,10 +158,10 @@ def densitytensor_to_measurement_probabilities(
 
 
 def densitytensor_to_measured_densitytensor(
-    densitytensor: jnp.ndarray,
+    densitytensor: jax.Array,
     qubit_inds: Sequence[int],
-    measurement: Union[int, jnp.ndarray],
-) -> jnp.ndarray:
+    measurement: Union[int, jax.Array],
+) -> jax.Array:
     """
     Returns the post-measurement densitytensor assuming that qubit_inds are measured
     (in the computational basis) and the given measurement (integer or bitstring) is observed.

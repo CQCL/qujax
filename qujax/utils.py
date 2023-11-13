@@ -16,19 +16,19 @@ paulis = {"X": gates.X, "Y": gates.Y, "Z": gates.Z}
 
 class CallableArrayAndOptionalArray(Protocol):
     def __call__(
-        self, params: jnp.ndarray, statetensor_in: jnp.ndarray = None
-    ) -> jnp.ndarray:
+        self, params: jax.Array, statetensor_in: Optional[jax.Array] = None
+    ) -> jax.Array:
         ...
 
 
 class CallableOptionalArray(Protocol):
-    def __call__(self, statetensor_in: jnp.ndarray = None) -> jnp.ndarray:
+    def __call__(self, statetensor_in: Optional[jax.Array] = None) -> jax.Array:
         ...
 
 
 UnionCallableOptionalArray = Union[CallableArrayAndOptionalArray, CallableOptionalArray]
 Gate = Union[
-    str, jnp.ndarray, Callable[[jnp.ndarray], jnp.ndarray], Callable[[], jnp.ndarray]
+    str, jax.Array, Callable[[jax.Array], jax.Array], Callable[[], jax.Array]
 ]
 KrausOp = Union[Gate, Iterable[Gate]]
 
@@ -71,7 +71,7 @@ def check_unitary(gate: Gate):
         raise TypeError(f"Gate not unitary: {gate}")
 
 
-def check_hermitian(hermitian: Union[str, jnp.ndarray], check_z_commutes: bool = False):
+def check_hermitian(hermitian: Union[str, jax.Array], check_z_commutes: bool = False):
     """
     Checks whether a matrix or tensor is Hermitian.
 
@@ -110,7 +110,7 @@ def check_hermitian(hermitian: Union[str, jnp.ndarray], check_z_commutes: bool =
 
 def _arrayify_inds(
     param_inds_seq: Sequence[Union[None, Sequence[int]]]
-) -> Sequence[jnp.ndarray]:
+) -> Sequence[jax.Array]:
     """
     Ensure each element of param_inds_seq is an array (and therefore valid for jnp.take)
 
@@ -137,7 +137,7 @@ def check_circuit(
     gate_seq: Sequence[KrausOp],
     qubit_inds_seq: Sequence[Sequence[int]],
     param_inds_seq: Sequence[Sequence[int]],
-    n_qubits: int = None,
+    n_qubits: Optional[int] = None,
     check_unitaries: bool = True,
 ):
     """
@@ -392,8 +392,8 @@ def print_circuit(
 
 
 def integers_to_bitstrings(
-    integers: Union[int, jnp.ndarray], nbits: int = None
-) -> jnp.ndarray:
+    integers: Union[int, jax.Array], nbits: Optional[int] = None
+) -> jax.Array:
     """
     Convert integer or array of integers into their binary expansion(s).
 
@@ -414,7 +414,7 @@ def integers_to_bitstrings(
     )
 
 
-def bitstrings_to_integers(bitstrings: jnp.ndarray) -> Union[int, jnp.ndarray]:
+def bitstrings_to_integers(bitstrings: jax.Array) -> Union[int, jax.Array]:
     """
     Convert binary expansion(s) into integers.
 
@@ -431,9 +431,9 @@ def bitstrings_to_integers(bitstrings: jnp.ndarray) -> Union[int, jnp.ndarray]:
 
 def sample_integers(
     random_key: random.PRNGKeyArray,
-    statetensor: jnp.ndarray,
+    statetensor: jax.Array,
     n_samps: Optional[int] = 1,
-) -> jnp.ndarray:
+) -> jax.Array:
     """
     Generate random integer samples according to statetensor.
 
@@ -455,9 +455,9 @@ def sample_integers(
 
 def sample_bitstrings(
     random_key: random.PRNGKeyArray,
-    statetensor: jnp.ndarray,
+    statetensor: jax.Array,
     n_samps: Optional[int] = 1,
-) -> jnp.ndarray:
+) -> jax.Array:
     """
     Generate random bitstring samples according to statetensor.
 
@@ -474,7 +474,7 @@ def sample_bitstrings(
     )
 
 
-def statetensor_to_densitytensor(statetensor: jnp.ndarray) -> jnp.ndarray:
+def statetensor_to_densitytensor(statetensor: jax.Array) -> jax.Array:
     """
     Computes a densitytensor representation of a pure quantum state
     from its statetensor representaton

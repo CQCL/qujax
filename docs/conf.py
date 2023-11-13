@@ -40,7 +40,6 @@ html_theme = "sphinx_rtd_theme"
 autodoc_typehints = "description"
 
 autodoc_type_aliases = {
-    "jnp.ndarray": "ndarray",
     "random.PRNGKeyArray": "jax.random.PRNGKeyArray",
     "UnionCallableOptionalArray": "Union[Callable[[ndarray, Optional[ndarray]], ndarray], "
     "Callable[[Optional[ndarray]], ndarray]]",
