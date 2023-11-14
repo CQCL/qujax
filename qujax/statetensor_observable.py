@@ -13,7 +13,7 @@ from qujax.utils import check_hermitian, paulis
 
 def statetensor_to_single_expectation(
     statetensor: jax.Array, hermitian: jax.Array, qubit_inds: Sequence[int]
-) -> float:
+) -> jax.Array:
     """
     Evaluates expectation value of an observable represented by a Hermitian matrix (in tensor form).
 
@@ -34,9 +34,7 @@ def statetensor_to_single_expectation(
     ).real
 
 
-def get_hermitian_tensor(
-    hermitian_seq: Sequence[Union[str, jax.Array]]
-) -> jax.Array:
+def get_hermitian_tensor(hermitian_seq: Sequence[Union[str, jax.Array]]) -> jax.Array:
     """
     Convert a sequence of observables represented by Pauli strings or Hermitian matrices
     in tensor form into single array (in tensor form).

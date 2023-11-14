@@ -1,15 +1,18 @@
 from __future__ import annotations
 
 from functools import partial
-from typing import Callable, Sequence, Union, Optional
+from typing import Callable, Sequence, Optional
 
 import jax
 from jax import numpy as jnp
+from jax.typing import ArrayLike
 from jax._src.dtypes import canonicalize_dtype
 from jax._src.typing import DTypeLike
 
 from qujax import gates
-from qujax.utils import Gate, UnionCallableOptionalArray, _arrayify_inds, check_circuit
+from qujax.utils import _arrayify_inds, check_circuit
+
+from qujax.typing import Gate, PureCircuitFunction, GateFunction, GateParameterIndices
 
 
 def apply_gate(
@@ -36,7 +39,9 @@ def apply_gate(
     return statetensor
 
 
-def _to_gate_func(gate: Gate) -> Callable[[jax.Array], jax.Array]:
+def _to_gate_func(
+    gate: Gate,
+) -> GateFunction:
     """
     Ensures a gate_seq element is a function that map (possibly empty) parameters
     to a unitary tensor.
@@ -69,7 +74,7 @@ def _to_gate_func(gate: Gate) -> Callable[[jax.Array], jax.Array]:
 
 
 def _gate_func_to_unitary(
-    gate_func: Callable[[jax.Array], jax.Array],
+    gate_func: GateFunction,
     qubit_inds: Sequence[int],
     param_inds: jax.Array,
     params: jax.Array,
@@ -114,9 +119,9 @@ def all_zeros_statetensor(n_qubits: int, dtype: DTypeLike = complex) -> jax.Arra
 def get_params_to_statetensor_func(
     gate_seq: Sequence[Gate],
     qubit_inds_seq: Sequence[Sequence[int]],
-    param_inds_seq: Sequence[Union[None, Sequence[int]]],
+    param_inds_seq: Sequence[GateParameterIndices],
     n_qubits: Optional[int] = None,
-) -> UnionCallableOptionalArray:
+) -> PureCircuitFunction:
     """
     Creates a function that maps circuit parameters to a statetensor.
 
@@ -151,7 +156,7 @@ def get_params_to_statetensor_func(
     param_inds_array_seq = _arrayify_inds(param_inds_seq)
 
     def params_to_statetensor_func(
-        params: jax.Array, statetensor_in: Optional[jax.Array] = None
+        params: ArrayLike, statetensor_in: Optional[jax.Array] = None
     ) -> jax.Array:
         """
         Applies parameterised circuit (series of gates) to a statetensor_in (default is |0>^N).
@@ -169,7 +174,12 @@ def get_params_to_statetensor_func(
             statetensor = all_zeros_statetensor(n_qubits)
         else:
             statetensor = statetensor_in
+
         params = jnp.atleast_1d(params)
+        # Guarantee `params` has the right type for type-checking purposes
+        if not isinstance(params, jax.Array):
+            raise ValueError("This should not happen. Please open an issue on GitHub.")
+
         for gate_func, qubit_inds, param_inds in zip(
             gate_seq_callable, qubit_inds_seq, param_inds_array_seq
         ):
@@ -208,9 +218,9 @@ def get_params_to_statetensor_func(
 def get_params_to_unitarytensor_func(
     gate_seq: Sequence[Gate],
     qubit_inds_seq: Sequence[Sequence[int]],
-    param_inds_seq: Sequence[Union[None, Sequence[int]]],
+    param_inds_seq: Sequence[GateParameterIndices],
     n_qubits: Optional[int] = None,
-) -> Union[Callable[[], jax.Array], Callable[[jax.Array], jax.Array]]:
+) -> PureCircuitFunction:
     """
     Creates a function that maps circuit parameters to a unitarytensor.
     The unitarytensor is an array with shape (2,) * 2 * n_qubits

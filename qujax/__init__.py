@@ -28,7 +28,6 @@ from qujax.densitytensor_observable import get_densitytensor_to_sampled_expectat
 from qujax.densitytensor_observable import densitytensor_to_measurement_probabilities
 from qujax.densitytensor_observable import densitytensor_to_measured_densitytensor
 
-from qujax.utils import UnionCallableOptionalArray
 from qujax.utils import check_unitary
 from qujax.utils import check_hermitian
 from qujax.utils import check_circuit
@@ -39,6 +38,8 @@ from qujax.utils import repeat_circuit
 from qujax.utils import sample_integers
 from qujax.utils import sample_bitstrings
 from qujax.utils import statetensor_to_densitytensor
+
+import qujax.typing
 
 # pylint: disable=undefined-variable
 del version

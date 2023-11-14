@@ -1,20 +1,26 @@
 from __future__ import annotations
 
-from typing import Callable, Iterable, Sequence, Tuple, Union, Optional
+from typing import Iterable, Sequence, Tuple, Union, Optional
 
 import jax
 from jax import numpy as jnp
+from jax.typing import ArrayLike
 from jax.lax import scan
 from jax._src.dtypes import canonicalize_dtype
 from jax._src.typing import DTypeLike
 from qujax.statetensor import (
-    UnionCallableOptionalArray,
     _arrayify_inds,
     _gate_func_to_unitary,
     _to_gate_func,
     apply_gate,
 )
-from qujax.utils import KrausOp, check_circuit
+from qujax.utils import check_circuit
+from qujax.typing import (
+    MixedCircuitFunction,
+    KrausOp,
+    GateFunction,
+    GateParameterIndices,
+)
 
 
 def _kraus_single(
@@ -78,8 +84,9 @@ def kraus(
 
 
 def _to_kraus_operator_seq_funcs(
-    kraus_op: KrausOp, param_inds: Union[None, Sequence[int], Sequence[Sequence[int]]]
-) -> Tuple[Sequence[Callable[[jax.Array], jax.Array]], Sequence[jax.Array]]:
+    kraus_op: KrausOp,
+    param_inds: Optional[Union[GateParameterIndices, Sequence[GateParameterIndices]]],
+) -> Tuple[Sequence[GateFunction], Sequence[jax.Array]]:
     """
     Ensures Kraus operators are a sequence of functions that map (possibly empty) parameters to
     tensors and that each element of param_inds_seq is a sequence of arrays that correspond to the
@@ -96,14 +103,15 @@ def _to_kraus_operator_seq_funcs(
         and sequence of arrays with parameter indices
 
     """
-    if param_inds is None:
-        param_inds = [None for _ in kraus_op]
-
     if isinstance(kraus_op, (list, tuple)):
         kraus_op_funcs = [_to_gate_func(ko) for ko in kraus_op]
-    else:
+        if param_inds is None:
+            param_inds = [None for _ in kraus_op]
+    elif isinstance(kraus_op, (str, jax.Array)) or callable(kraus_op):
         kraus_op_funcs = [_to_gate_func(kraus_op)]
         param_inds = [param_inds]
+    else:
+        raise ValueError(f"Invalid Kraus operator specification: {kraus_op}")
     return kraus_op_funcs, _arrayify_inds(param_inds)
 
 
@@ -149,9 +157,11 @@ def all_zeros_densitytensor(n_qubits: int, dtype: DTypeLike = complex) -> jax.Ar
 def get_params_to_densitytensor_func(
     kraus_ops_seq: Sequence[KrausOp],
     qubit_inds_seq: Sequence[Sequence[int]],
-    param_inds_seq: Sequence[Union[None, Sequence[int], Sequence[Sequence[int]]]],
+    param_inds_seq: Sequence[
+        Union[GateParameterIndices, Sequence[GateParameterIndices]]
+    ],
     n_qubits: Optional[int] = None,
-) -> UnionCallableOptionalArray:
+) -> MixedCircuitFunction:
     """
     Creates a function that maps circuit parameters to a density tensor (a density matrix in
     tensor form).
@@ -195,7 +205,7 @@ def get_params_to_densitytensor_func(
     param_inds_array_seq = [ko_pi[1] for ko_pi in kraus_ops_seq_callable_and_param_inds]
 
     def params_to_densitytensor_func(
-        params: jax.Array, densitytensor_in: Optional[jax.Array] = None
+        params: ArrayLike, densitytensor_in: Optional[jax.Array] = None
     ) -> jax.Array:
         """
         Applies parameterised circuit (series of gates) to a densitytensor_in
@@ -216,6 +226,9 @@ def get_params_to_densitytensor_func(
         else:
             densitytensor = densitytensor_in
         params = jnp.atleast_1d(params)
+        # Guarantee `params` has the right type for type-checking purposes
+        if not isinstance(params, jax.Array):
+            raise ValueError("This should not happen. Please open an issue on GitHub.")
         for gate_func_single_seq, qubit_inds, param_inds_single_seq in zip(
             kraus_ops_seq_callable, qubit_inds_seq, param_inds_array_seq
         ):

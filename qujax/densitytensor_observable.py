@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import Callable, Sequence, Union
 
 import jax
+from jax.typing import ArrayLike
 from jax import numpy as jnp
 from jax import random
 
@@ -13,7 +14,7 @@ from qujax.utils import bitstrings_to_integers, check_hermitian
 
 def densitytensor_to_single_expectation(
     densitytensor: jax.Array, hermitian: jax.Array, qubit_inds: Sequence[int]
-) -> float:
+) -> jax.Array:
     """
     Evaluates expectation value of an observable represented by a Hermitian matrix (in tensor form).
 
@@ -160,7 +161,7 @@ def densitytensor_to_measurement_probabilities(
 def densitytensor_to_measured_densitytensor(
     densitytensor: jax.Array,
     qubit_inds: Sequence[int],
-    measurement: Union[int, jax.Array],
+    measurement: ArrayLike,
 ) -> jax.Array:
     """
     Returns the post-measurement densitytensor assuming that qubit_inds are measured
