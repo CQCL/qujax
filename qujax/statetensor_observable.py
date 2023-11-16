@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import Callable, Sequence, Union
 
+import jax
 from jax import numpy as jnp
 from jax import random
 from jax.lax import fori_loop
@@ -11,8 +12,8 @@ from qujax.utils import check_hermitian, paulis
 
 
 def statetensor_to_single_expectation(
-    statetensor: jnp.ndarray, hermitian: jnp.ndarray, qubit_inds: Sequence[int]
-) -> float:
+    statetensor: jax.Array, hermitian: jax.Array, qubit_inds: Sequence[int]
+) -> jax.Array:
     """
     Evaluates expectation value of an observable represented by a Hermitian matrix (in tensor form).
 
@@ -33,9 +34,7 @@ def statetensor_to_single_expectation(
     ).real
 
 
-def get_hermitian_tensor(
-    hermitian_seq: Sequence[Union[str, jnp.ndarray]]
-) -> jnp.ndarray:
+def get_hermitian_tensor(hermitian_seq: Sequence[Union[str, jax.Array]]) -> jax.Array:
     """
     Convert a sequence of observables represented by Pauli strings or Hermitian matrices
     in tensor form into single array (in tensor form).
@@ -62,11 +61,11 @@ def get_hermitian_tensor(
 
 
 def _get_tensor_to_expectation_func(
-    hermitian_seq_seq: Sequence[Sequence[Union[str, jnp.ndarray]]],
+    hermitian_seq_seq: Sequence[Sequence[Union[str, jax.Array]]],
     qubits_seq_seq: Sequence[Sequence[int]],
-    coefficients: Union[Sequence[float], jnp.ndarray],
+    coefficients: Union[Sequence[float], jax.Array],
     contraction_function: Callable,
-) -> Callable[[jnp.ndarray], float]:
+) -> Callable[[jax.Array], float]:
     """
     Takes strings (or arrays) representing Hermitian matrices, along with qubit indices and
     a list of coefficients and returns a function that converts a tensor into an expected value.
@@ -75,7 +74,7 @@ def _get_tensor_to_expectation_func(
 
     Args:
         hermitian_seq_seq: Sequence of sequences of Hermitian matrices/tensors.
-            Each Hermitian matrix is either represented by a tensor (jnp.ndarray) or by a
+            Each Hermitian matrix is either represented by a tensor (jax.Array) or by a
             list of 'X', 'Y' or 'Z' characters corresponding to the standard Pauli matrices.
             E.g. [['Z', 'Z'], ['X']]
         qubits_seq_seq: Sequence of sequences of integer qubit indices.
@@ -89,7 +88,7 @@ def _get_tensor_to_expectation_func(
 
     hermitian_tensors = [get_hermitian_tensor(h_seq) for h_seq in hermitian_seq_seq]
 
-    def tensor_to_expectation_func(tensor: jnp.ndarray) -> float:
+    def tensor_to_expectation_func(tensor: jax.Array) -> float:
         """
         Maps tensor to expected value.
 
@@ -110,10 +109,10 @@ def _get_tensor_to_expectation_func(
 
 
 def get_statetensor_to_expectation_func(
-    hermitian_seq_seq: Sequence[Sequence[Union[str, jnp.ndarray]]],
+    hermitian_seq_seq: Sequence[Sequence[Union[str, jax.Array]]],
     qubits_seq_seq: Sequence[Sequence[int]],
-    coefficients: Union[Sequence[float], jnp.ndarray],
-) -> Callable[[jnp.ndarray], float]:
+    coefficients: Union[Sequence[float], jax.Array],
+) -> Callable[[jax.Array], float]:
     """
     Takes strings (or arrays) representing Hermitian matrices, along with qubit indices and
     a list of coefficients and returns a function that converts a statetensor into an expected
@@ -121,7 +120,7 @@ def get_statetensor_to_expectation_func(
 
     Args:
         hermitian_seq_seq: Sequence of sequences of Hermitian matrices/tensors.
-            Each Hermitian matrix is either represented by a tensor (jnp.ndarray)
+            Each Hermitian matrix is either represented by a tensor (jax.Array)
             or by a list of 'X', 'Y' or 'Z' characters corresponding to the standard Pauli matrices.
             E.g. [['Z', 'Z'], ['X']]
         qubits_seq_seq: Sequence of sequences of integer qubit indices.
@@ -141,10 +140,10 @@ def get_statetensor_to_expectation_func(
 
 
 def get_statetensor_to_sampled_expectation_func(
-    hermitian_seq_seq: Sequence[Sequence[Union[str, jnp.ndarray]]],
+    hermitian_seq_seq: Sequence[Sequence[Union[str, jax.Array]]],
     qubits_seq_seq: Sequence[Sequence[int]],
-    coefficients: Union[Sequence[float], jnp.ndarray],
-) -> Callable[[jnp.ndarray, random.PRNGKeyArray, int], float]:
+    coefficients: Union[Sequence[float], jax.Array],
+) -> Callable[[jax.Array, random.PRNGKeyArray, int], float]:
     """
     Converts strings (or arrays) representing Hermitian matrices, qubit indices and
     coefficients into a function that converts a statetensor into a sampled expected value.
@@ -160,7 +159,7 @@ def get_statetensor_to_sampled_expectation_func(
 
     Args:
         hermitian_seq_seq: Sequence of sequences of Hermitian matrices/tensors.
-            Each Hermitian is either a tensor (jnp.ndarray) or a string in ('X', 'Y', 'Z').
+            Each Hermitian is either a tensor (jax.Array) or a string in ('X', 'Y', 'Z').
             E.g. [['Z', 'Z'], ['X']]
         qubits_seq_seq: Sequence of sequences of integer qubit indices.
             E.g. [[0,1], [2]]
@@ -179,7 +178,7 @@ def get_statetensor_to_sampled_expectation_func(
             check_hermitian(h, check_z_commutes=True)
 
     def statetensor_to_sampled_expectation_func(
-        statetensor: jnp.ndarray, random_key: random.PRNGKeyArray, n_samps: int
+        statetensor: jax.Array, random_key: random.PRNGKeyArray, n_samps: int
     ) -> float:
         """
         Maps statetensor to sampled expected value.
@@ -201,7 +200,7 @@ def get_statetensor_to_sampled_expectation_func(
 
 
 def sample_probs(
-    measure_probs: jnp.ndarray, random_key: random.PRNGKeyArray, n_samps: int
+    measure_probs: jax.Array, random_key: random.PRNGKeyArray, n_samps: int
 ):
     """
     Generate an empirical distribution from a probability distribution.
@@ -212,7 +211,7 @@ def sample_probs(
         n_samps: Number of samples contributing to empirical distribution.
 
     Returns:
-        Empirical distribution (jnp.ndarray).
+        Empirical distribution (jax.Array).
     """
     measure_probs_flat = measure_probs.flatten()
     sampled_integers = random.choice(

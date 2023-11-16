@@ -2,40 +2,31 @@ from __future__ import annotations
 
 import collections.abc
 from inspect import signature
-from typing import Callable, Iterable, List, Optional, Protocol, Sequence, Tuple, Union
+from typing import Callable, List, Optional, Sequence, Tuple, Union
 from warnings import warn
 
 import jax
+from jax.typing import ArrayLike
 from jax import numpy as jnp
 from jax import random
 
 from qujax import gates
 
+from qujax.typing import (
+    Gate,
+    KrausOp,
+    GateParameterIndices,
+    PureParameterizedCircuit,
+    MixedParameterizedCircuit,
+)
+
 paulis = {"X": gates.X, "Y": gates.Y, "Z": gates.Z}
 
 
-class CallableArrayAndOptionalArray(Protocol):
-    def __call__(
-        self, params: jnp.ndarray, statetensor_in: jnp.ndarray = None
-    ) -> jnp.ndarray:
-        ...
-
-
-class CallableOptionalArray(Protocol):
-    def __call__(self, statetensor_in: jnp.ndarray = None) -> jnp.ndarray:
-        ...
-
-
-UnionCallableOptionalArray = Union[CallableArrayAndOptionalArray, CallableOptionalArray]
-Gate = Union[
-    str, jnp.ndarray, Callable[[jnp.ndarray], jnp.ndarray], Callable[[], jnp.ndarray]
-]
-KrausOp = Union[Gate, Iterable[Gate]]
-
-
-def check_unitary(gate: Gate):
+def check_unitary(gate: Gate) -> None:
     """
-    Checks whether a matrix or tensor is unitary.
+    Checks whether a qujax Gate is unitary.
+    Throws a TypeError if this is found not to be the case.
 
     Args:
         gate: array containing potentially unitary string, array
@@ -54,7 +45,7 @@ def check_unitary(gate: Gate):
     if callable(gate):
         num_args = len(signature(gate).parameters)
         gate_arr = gate(*jnp.ones(num_args) * 0.1)
-    elif hasattr(gate, "__array__"):
+    elif isinstance(gate, jax.Array):
         gate_arr = gate
     else:
         raise TypeError(
@@ -71,7 +62,7 @@ def check_unitary(gate: Gate):
         raise TypeError(f"Gate not unitary: {gate}")
 
 
-def check_hermitian(hermitian: Union[str, jnp.ndarray], check_z_commutes: bool = False):
+def check_hermitian(hermitian: Union[str, jax.Array], check_z_commutes: bool = False):
     """
     Checks whether a matrix or tensor is Hermitian.
 
@@ -109,8 +100,8 @@ def check_hermitian(hermitian: Union[str, jnp.ndarray], check_z_commutes: bool =
 
 
 def _arrayify_inds(
-    param_inds_seq: Sequence[Union[None, Sequence[int]]]
-) -> Sequence[jnp.ndarray]:
+    param_inds_seq: Optional[Sequence[GateParameterIndices]],
+) -> Sequence[jax.Array]:
     """
     Ensure each element of param_inds_seq is an array (and therefore valid for jnp.take)
 
@@ -125,19 +116,21 @@ def _arrayify_inds(
     """
     if param_inds_seq is None:
         param_inds_seq = [None]
-    param_inds_seq = [jnp.array(p) for p in param_inds_seq]
-    param_inds_seq = [
+    array_param_inds = [jnp.array(p) for p in param_inds_seq]
+    array_param_inds = [
         jnp.array([]) if jnp.any(jnp.isnan(p)) else p.astype(int)
-        for p in param_inds_seq
+        for p in array_param_inds
     ]
-    return param_inds_seq
+    return array_param_inds
 
 
 def check_circuit(
     gate_seq: Sequence[KrausOp],
     qubit_inds_seq: Sequence[Sequence[int]],
-    param_inds_seq: Sequence[Sequence[int]],
-    n_qubits: int = None,
+    param_inds_seq: Sequence[
+        Union[GateParameterIndices, Sequence[GateParameterIndices]]
+    ],
+    n_qubits: Optional[int] = None,
     check_unitaries: bool = True,
 ):
     """
@@ -208,7 +201,8 @@ def check_circuit(
 
 
 def _get_gate_str(
-    gate_obj: KrausOp, param_inds: Union[None, Sequence[int], Sequence[Sequence[int]]]
+    gate_obj: KrausOp,
+    param_inds: Union[GateParameterIndices, Sequence[GateParameterIndices]],
 ) -> str:
     """
     Maps single gate object to a four character string representation
@@ -303,13 +297,15 @@ def _pad_rows(rows: List[str]) -> Tuple[List[str], List[bool]]:
 def print_circuit(
     gate_seq: Sequence[KrausOp],
     qubit_inds_seq: Sequence[Sequence[int]],
-    param_inds_seq: Sequence[Sequence[int]],
+    param_inds_seq: Sequence[
+        Union[GateParameterIndices, Sequence[GateParameterIndices]]
+    ],
     n_qubits: Optional[int] = None,
-    qubit_min: Optional[int] = 0,
-    qubit_max: Optional[int] = jnp.inf,
-    gate_ind_min: Optional[int] = 0,
-    gate_ind_max: Optional[int] = jnp.inf,
-    sep_length: Optional[int] = 1,
+    qubit_min: int = 0,
+    qubit_max: Optional[int] = None,
+    gate_ind_min: int = 0,
+    gate_ind_max: Optional[int] = None,
+    sep_length: int = 1,
 ) -> List[str]:
     """
     Returns and prints basic string representation of circuit.
@@ -338,13 +334,21 @@ def print_circuit(
     """
     check_circuit(gate_seq, qubit_inds_seq, param_inds_seq, n_qubits, False)
 
-    gate_ind_max = min(len(gate_seq) - 1, gate_ind_max)
+    if gate_ind_max is None:
+        gate_ind_max = len(gate_seq) - 1
+    else:
+        gate_ind_max = min(len(gate_seq) - 1, gate_ind_max)
+
     if gate_ind_min > gate_ind_max:
         raise TypeError("gate_ind_max must be larger or equal to gate_ind_min")
 
     if n_qubits is None:
         n_qubits = max([max(qi) for qi in qubit_inds_seq]) + 1
-    qubit_max = min(n_qubits - 1, qubit_max)
+
+    if qubit_max is None:
+        qubit_max = n_qubits - 1
+    else:
+        qubit_max = min(n_qubits - 1, qubit_max)
 
     if qubit_min > qubit_max:
         raise TypeError("qubit_max must be larger or equal to qubit_min")
@@ -392,8 +396,8 @@ def print_circuit(
 
 
 def integers_to_bitstrings(
-    integers: Union[int, jnp.ndarray], nbits: int = None
-) -> jnp.ndarray:
+    integers: Union[int, jax.Array], nbits: Optional[int] = None
+) -> jax.Array:
     """
     Convert integer or array of integers into their binary expansion(s).
 
@@ -406,15 +410,19 @@ def integers_to_bitstrings(
         Array of binary expansion(s).
     """
     integers = jnp.atleast_1d(integers)
+    # Guarantee `bitstrings` has the right type for type-checking purposes
+    if not isinstance(integers, jax.Array):
+        raise ValueError("This should not happen. Please open an issue on GitHub.")
+
     if nbits is None:
-        nbits = (jnp.ceil(jnp.log2(jnp.maximum(integers.max(), 1)) + 1e-5)).astype(int)
+        nbits = int(jnp.ceil(jnp.log2(jnp.maximum(integers.max(), 1)) + 1e-5).item())
 
     return jnp.squeeze(
         ((integers[:, None] & (1 << jnp.arange(nbits - 1, -1, -1))) > 0).astype(int)
     )
 
 
-def bitstrings_to_integers(bitstrings: jnp.ndarray) -> Union[int, jnp.ndarray]:
+def bitstrings_to_integers(bitstrings: ArrayLike) -> jax.Array:
     """
     Convert binary expansion(s) into integers.
 
@@ -425,15 +433,20 @@ def bitstrings_to_integers(bitstrings: jnp.ndarray) -> Union[int, jnp.ndarray]:
         Array of integers.
     """
     bitstrings = jnp.atleast_2d(bitstrings)
+
+    # Guarantee `bitstrings` has the right type for type-checking purposes
+    if not isinstance(bitstrings, jax.Array):
+        raise ValueError("This should not happen. Please open an issue on GitHub.")
+
     convarr = 2 ** jnp.arange(bitstrings.shape[-1] - 1, -1, -1)
     return jnp.squeeze(bitstrings.dot(convarr)).astype(int)
 
 
 def sample_integers(
     random_key: random.PRNGKeyArray,
-    statetensor: jnp.ndarray,
-    n_samps: Optional[int] = 1,
-) -> jnp.ndarray:
+    statetensor: jax.Array,
+    n_samps: int = 1,
+) -> jax.Array:
     """
     Generate random integer samples according to statetensor.
 
@@ -455,9 +468,9 @@ def sample_integers(
 
 def sample_bitstrings(
     random_key: random.PRNGKeyArray,
-    statetensor: jnp.ndarray,
-    n_samps: Optional[int] = 1,
-) -> jnp.ndarray:
+    statetensor: jax.Array,
+    n_samps: int = 1,
+) -> jax.Array:
     """
     Generate random bitstring samples according to statetensor.
 
@@ -474,7 +487,7 @@ def sample_bitstrings(
     )
 
 
-def statetensor_to_densitytensor(statetensor: jnp.ndarray) -> jnp.ndarray:
+def statetensor_to_densitytensor(statetensor: jax.Array) -> jax.Array:
     """
     Computes a densitytensor representation of a pure quantum state
     from its statetensor representaton
@@ -494,7 +507,8 @@ def statetensor_to_densitytensor(statetensor: jnp.ndarray) -> jnp.ndarray:
 
 
 def repeat_circuit(
-    circuit: Callable[[jax.Array, jax.Array], jax.Array], nr_of_parameters: int
+    circuit: Union[PureParameterizedCircuit, MixedParameterizedCircuit],
+    nr_of_parameters: int,
 ) -> Callable[[jax.Array, jax.Array], jax.Array]:
     """
     Repeats circuit encoded by `circuit` an arbitrary number of times.

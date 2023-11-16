@@ -13,7 +13,7 @@ setup(
     license="Apache 2",
     packages=find_packages(),
     python_requires=">=3.8",
-    install_requires=["jax", "jaxlib"],
+    install_requires=["jax>=0.4.1", "jaxlib", "typing_extensions"],
     classifiers=[
         "Programming Language :: Python",
         "Intended Audience :: Developers",

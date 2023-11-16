@@ -1,3 +1,4 @@
+import jax
 from jax import numpy as jnp
 
 I = jnp.eye(2)
@@ -64,42 +65,42 @@ CSWAP = jnp.block([[jnp.eye(4), jnp.zeros((4, 4))], [jnp.zeros((4, 4)), SWAP]]).
 )
 
 
-def Rx(param: float) -> jnp.ndarray:
+def Rx(param: float) -> jax.Array:
     param_pi_2 = param * jnp.pi / 2
     return jnp.cos(param_pi_2) * I - jnp.sin(param_pi_2) * X * 1.0j
 
 
-def Ry(param: float) -> jnp.ndarray:
+def Ry(param: float) -> jax.Array:
     param_pi_2 = param * jnp.pi / 2
     return jnp.cos(param_pi_2) * I - jnp.sin(param_pi_2) * Y * 1.0j
 
 
-def Rz(param: float) -> jnp.ndarray:
+def Rz(param: float) -> jax.Array:
     param_pi_2 = param * jnp.pi / 2
     return jnp.cos(param_pi_2) * I - jnp.sin(param_pi_2) * Z * 1.0j
 
 
-def CRx(param: float) -> jnp.ndarray:
+def CRx(param: float) -> jax.Array:
     return jnp.block([[I, _0], [_0, Rx(param)]]).reshape((2,) * 4)
 
 
-def CRy(param: float) -> jnp.ndarray:
+def CRy(param: float) -> jax.Array:
     return jnp.block([[I, _0], [_0, Ry(param)]]).reshape((2,) * 4)
 
 
-def CRz(param: float) -> jnp.ndarray:
+def CRz(param: float) -> jax.Array:
     return jnp.block([[I, _0], [_0, Rz(param)]]).reshape((2,) * 4)
 
 
-def U1(param: float) -> jnp.ndarray:
+def U1(param: float) -> jax.Array:
     return U3(0, 0, param)
 
 
-def U2(param0: float, param1: float) -> jnp.ndarray:
+def U2(param0: float, param1: float) -> jax.Array:
     return U3(0.5, param0, param1)
 
 
-def U3(param0: float, param1: float, param2: float) -> jnp.ndarray:
+def U3(param0: float, param1: float, param2: float) -> jax.Array:
     return (
         jnp.exp((param1 + param2) * jnp.pi * 1.0j / 2)
         * Rz(param1)
@@ -108,19 +109,19 @@ def U3(param0: float, param1: float, param2: float) -> jnp.ndarray:
     )
 
 
-def CU1(param: float) -> jnp.ndarray:
+def CU1(param: float) -> jax.Array:
     return jnp.block([[I, _0], [_0, U1(param)]]).reshape((2,) * 4)
 
 
-def CU2(param0: float, param1: float) -> jnp.ndarray:
+def CU2(param0: float, param1: float) -> jax.Array:
     return jnp.block([[I, _0], [_0, U2(param0, param1)]]).reshape((2,) * 4)
 
 
-def CU3(param0: float, param1: float, param2: float) -> jnp.ndarray:
+def CU3(param0: float, param1: float, param2: float) -> jax.Array:
     return jnp.block([[I, _0], [_0, U3(param0, param1, param2)]]).reshape((2,) * 4)
 
 
-def ISWAP(param: float) -> jnp.ndarray:
+def ISWAP(param: float) -> jax.Array:
     param_pi_2 = param * jnp.pi / 2
     c = jnp.cos(param_pi_2)
     i_s = 1.0j * jnp.sin(param_pi_2)
@@ -134,7 +135,7 @@ def ISWAP(param: float) -> jnp.ndarray:
     ).reshape((2,) * 4)
 
 
-def PhasedISWAP(param0: float, param1: float) -> jnp.ndarray:
+def PhasedISWAP(param0: float, param1: float) -> jax.Array:
     param1_pi_2 = param1 * jnp.pi / 2
     c = jnp.cos(param1_pi_2)
     i_s = 1.0j * jnp.sin(param1_pi_2)
@@ -148,7 +149,7 @@ def PhasedISWAP(param0: float, param1: float) -> jnp.ndarray:
     ).reshape((2,) * 4)
 
 
-def XXPhase(param: float) -> jnp.ndarray:
+def XXPhase(param: float) -> jax.Array:
     param_pi_2 = param * jnp.pi / 2
     c = jnp.cos(param_pi_2)
     i_s = 1.0j * jnp.sin(param_pi_2)
@@ -162,7 +163,7 @@ def XXPhase(param: float) -> jnp.ndarray:
     ).reshape((2,) * 4)
 
 
-def YYPhase(param: float) -> jnp.ndarray:
+def YYPhase(param: float) -> jax.Array:
     param_pi_2 = param * jnp.pi / 2
     c = jnp.cos(param_pi_2)
     i_s = 1.0j * jnp.sin(param_pi_2)
@@ -176,7 +177,7 @@ def YYPhase(param: float) -> jnp.ndarray:
     ).reshape((2,) * 4)
 
 
-def ZZPhase(param: float) -> jnp.ndarray:
+def ZZPhase(param: float) -> jax.Array:
     param_pi_2 = param * jnp.pi / 2
     e_m = jnp.exp(-1.0j * param_pi_2)
     e_p = jnp.exp(1.0j * param_pi_2)
@@ -186,5 +187,5 @@ def ZZPhase(param: float) -> jnp.ndarray:
 ZZMax = ZZPhase(0.5)
 
 
-def PhasedX(param0: float, param1: float) -> jnp.ndarray:
+def PhasedX(param0: float, param1: float) -> jax.Array:
     return Rz(param1) @ Rx(param0) @ Rz(-param1)

@@ -289,7 +289,7 @@ def test_measure():
 
     measured_dt = qujax.densitytensor_to_measured_densitytensor(dt, qubit_inds, 0)
     measured_dt_bits = qujax.densitytensor_to_measured_densitytensor(
-        dt, qubit_inds, (0,) * n_qubits
+        dt, qubit_inds, jnp.zeros(n_qubits)
     )
     assert jnp.allclose(measured_dt_true, measured_dt)
     assert jnp.allclose(measured_dt_true, measured_dt_bits)
