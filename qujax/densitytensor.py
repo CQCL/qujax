@@ -18,7 +18,7 @@ from qujax.utils import check_circuit
 from qujax.typing import (
     MixedCircuitFunction,
     KrausOp,
-    GateFunction,
+    ParameterizedGateFunction,
     GateParameterIndices,
 )
 
@@ -86,7 +86,7 @@ def kraus(
 def _to_kraus_operator_seq_funcs(
     kraus_op: KrausOp,
     param_inds: Optional[Union[GateParameterIndices, Sequence[GateParameterIndices]]],
-) -> Tuple[Sequence[GateFunction], Sequence[jax.Array]]:
+) -> Tuple[Sequence[ParameterizedGateFunction], Sequence[jax.Array]]:
     """
     Ensures Kraus operators are a sequence of functions that map (possibly empty) parameters to
     tensors and that each element of param_inds_seq is a sequence of arrays that correspond to the

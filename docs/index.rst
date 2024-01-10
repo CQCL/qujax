@@ -59,6 +59,7 @@ Contents
     Pure state simulation <statetensor>
     Mixed state simulation <densitytensor>
     Utility functions <utils>
+    Experimental <experimental>
 
 .. toctree::
     :caption: Links:

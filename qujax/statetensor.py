@@ -12,7 +12,12 @@ from jax._src.typing import DTypeLike
 from qujax import gates
 from qujax.utils import _arrayify_inds, check_circuit
 
-from qujax.typing import Gate, PureCircuitFunction, GateFunction, GateParameterIndices
+from qujax.typing import (
+    Gate,
+    PureCircuitFunction,
+    ParameterizedGateFunction,
+    GateParameterIndices,
+)
 
 
 def apply_gate(
@@ -41,7 +46,7 @@ def apply_gate(
 
 def _to_gate_func(
     gate: Gate,
-) -> GateFunction:
+) -> ParameterizedGateFunction:
     """
     Ensures a gate_seq element is a function that map (possibly empty) parameters
     to a unitary tensor.
@@ -74,7 +79,7 @@ def _to_gate_func(
 
 
 def _gate_func_to_unitary(
-    gate_func: GateFunction,
+    gate_func: ParameterizedGateFunction,
     qubit_inds: Sequence[int],
     param_inds: jax.Array,
     params: jax.Array,

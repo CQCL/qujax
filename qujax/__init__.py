@@ -41,6 +41,9 @@ from qujax.utils import statetensor_to_densitytensor
 
 import qujax.typing
 
+import qujax.experimental
+import qujax.experimental.statetensor
+
 # pylint: disable=undefined-variable
 del version
 del statetensor
