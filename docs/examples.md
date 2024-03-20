@@ -12,6 +12,10 @@ Below are some use-case notebooks. These both illustrate the flexibility of quja
 - [classification.ipynb](https://github.com/CQCL/qujax/blob/develop/examples/classification.ipynb) - train a quantum circuit for binary classification using data re-uploading.
 - [generative_modelling.ipynb](https://github.com/CQCL/qujax/blob/develop/examples/generative_modelling.ipynb) - uses a parameterised quantum circuit as a generative model for a real life dataset. Trains via stochastic gradient Langevin dynamics on the maximum mean discrepancy between statetensor and dataset.
 
+Experimental (i.e. uses an unstable API which might change in future versions):
+
+- [noise_channel_monte_carlo.ipynb](https://github.com/CQCL/qujax/blob/develop/examples/experimental/noise_channel_monte_carlo.ipynb) - statevector simulation of circuit noise using the Monte-Carlo/quantum trajectories approach.
+
 The [pytket](https://github.com/CQCL/pytket) repository also contains `tk_to_qujax` implementations for some of the above at [pytket-qujax_classification.ipynb](https://github.com/CQCL/pytket/blob/main/examples/pytket-qujax-classification.ipynb), 
 [pytket-qujax_heisenberg_vqe.ipynb](https://github.com/CQCL/pytket/blob/main/examples/pytket-qujax_heisenberg_vqe.ipynb) 
 and [pytket-qujax_qaoa.ipynb](https://github.com/CQCL/pytket/blob/main/examples/pytket-qujax_qaoa.ipynb).
